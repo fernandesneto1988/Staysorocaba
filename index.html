@@ -43,10 +43,32 @@
     .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px;margin-bottom:18px}
     .section-title{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
     .section-title h2{margin:0;font-size:20px}
+
+    /* ── TABS DESKTOP ── */
     .tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px;border-bottom:2px solid var(--border);padding-bottom:0}
     .tab-btn{width:auto;padding:10px 20px;border-radius:10px 10px 0 0;border:1px solid var(--border);border-bottom:none;background:#f8fafc;color:var(--muted);font-weight:bold;font-size:14px;cursor:pointer;transition:.2s;margin-bottom:-2px}
     .tab-btn.active{background:white;color:var(--primary);border-color:var(--border);border-bottom:2px solid white}
     .tab-btn:hover:not(.active){background:#eef2ff;color:var(--primary)}
+
+    /* ── HAMBURGUER (mobile < 768px) ── */
+    .hamburger-btn{display:none;align-items:center;gap:10px;width:100%;padding:12px 16px;border-radius:12px;border:1px solid var(--border);background:white;color:var(--text);font-weight:bold;font-size:15px;cursor:pointer;margin-bottom:0;box-shadow:var(--shadow);justify-content:space-between}
+    .hamburger-btn .ham-icon{font-size:22px;line-height:1}
+    .hamburger-btn .ham-label{flex:1;text-align:left}
+    .hamburger-btn .ham-arrow{font-size:14px;transition:transform .25s;color:var(--muted)}
+    .hamburger-btn.open .ham-arrow{transform:rotate(180deg)}
+    .mobile-menu{display:none;flex-direction:column;gap:4px;background:white;border:1px solid var(--border);border-radius:12px;padding:8px;margin-bottom:18px;box-shadow:var(--shadow)}
+    .mobile-menu.open{display:flex}
+    .mobile-menu .tab-btn{width:100%;border-radius:10px;border:1px solid transparent;border-bottom:1px solid transparent;margin-bottom:0;text-align:left;padding:12px 16px;font-size:15px}
+    .mobile-menu .tab-btn.active{background:#eef2ff;color:var(--primary);border-color:#c7d2fe;border-bottom-color:#c7d2fe}
+    @media(max-width:767px){
+      .tabs{display:none}
+      .hamburger-btn{display:flex;margin-bottom:8px}
+    }
+    @media(min-width:768px){
+      .hamburger-btn{display:none !important}
+      .mobile-menu{display:none !important}
+    }
+
     .tab-panel{display:none}
     .tab-panel.active{display:block}
     .summary{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:16px}
@@ -307,12 +329,29 @@
     </div>
   </div>
 
+  <!-- HAMBURGUER (só aparece no mobile) -->
+  <button class="hamburger-btn" id="hamburgerBtn">
+    <span class="ham-icon">☰</span>
+    <span class="ham-label" id="hamburgerLabel">📊 Dashboard</span>
+    <span class="ham-arrow">▼</span>
+  </button>
+
+  <!-- MENU MOBILE (dropdown) -->
+  <div class="mobile-menu" id="mobileMenu">
+    <button class="tab-btn active" onclick="switchTab('dashboard');closeMobileMenu()">📊 Dashboard</button>
+    <button class="tab-btn"        onclick="switchTab('mapamensal');closeMobileMenu()">🗓️ Mapa Mensal</button>
+    <button class="tab-btn"        onclick="switchTab('reservas');closeMobileMenu()">📋 Reservas</button>
+    <button class="tab-btn"        onclick="switchTab('limpeza');closeMobileMenu()">🧹 Limpeza</button>
+    <button class="tab-btn"        onclick="switchTab('relatorio');closeMobileMenu()">📈 Relatório</button>
+  </div>
+
+  <!-- TABS DESKTOP (só aparecem no PC/iPad) -->
   <div class="tabs">
     <button class="tab-btn active" onclick="switchTab('dashboard')">📊 Dashboard</button>
-    <button class="tab-btn" onclick="switchTab('mapamensal')">🗓️ Mapa Mensal</button>
-    <button class="tab-btn" onclick="switchTab('reservas')">📋 Reservas</button>
-    <button class="tab-btn" onclick="switchTab('limpeza')">🧹 Limpeza</button>
-    <button class="tab-btn" onclick="switchTab('relatorio')">📈 Relatório</button>
+    <button class="tab-btn"        onclick="switchTab('mapamensal')">🗓️ Mapa Mensal</button>
+    <button class="tab-btn"        onclick="switchTab('reservas')">📋 Reservas</button>
+    <button class="tab-btn"        onclick="switchTab('limpeza')">🧹 Limpeza</button>
+    <button class="tab-btn"        onclick="switchTab('relatorio')">📈 Relatório</button>
   </div>
 
   <!-- TAB: DASHBOARD -->
@@ -1184,14 +1223,58 @@
 
   function switchTab(name){
     document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
-    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
     document.getElementById(`tab-${name}`).classList.add('active');
-    document.querySelectorAll('.tab-btn').forEach(b=>{if(b.getAttribute('onclick')===`switchTab('${name}')`)b.classList.add('active');});
+
+    // Atualiza tabs desktop
+    document.querySelectorAll('.tabs .tab-btn').forEach(b=>{
+      b.classList.toggle('active', b.getAttribute('onclick')===`switchTab('${name}')`);
+    });
+
+    // Atualiza tabs mobile
+    document.querySelectorAll('.mobile-menu .tab-btn').forEach(b=>{
+      const match=b.getAttribute('onclick')?.includes(`switchTab('${name}')`);
+      b.classList.toggle('active',!!match);
+    });
+
+    // Atualiza label do hamburguer
+    const labels={
+      dashboard:'📊 Dashboard',
+      mapamensal:'🗓️ Mapa Mensal',
+      reservas:'📋 Reservas',
+      limpeza:'🧹 Limpeza',
+      relatorio:'📈 Relatório',
+    };
+    const labelEl=document.getElementById('hamburgerLabel');
+    if(labelEl) labelEl.textContent=labels[name]||'';
+
     if(name==='limpeza')    renderCleaningTab();
     if(name==='relatorio')  renderReport();
     if(name==='mapamensal') renderMonthlyMap();
   }
   window.switchTab=switchTab;
+
+  // ── HAMBURGUER MOBILE ──
+  function closeMobileMenu(){
+    document.getElementById('mobileMenu')?.classList.remove('open');
+    document.getElementById('hamburgerBtn')?.classList.remove('open');
+  }
+  window.closeMobileMenu=closeMobileMenu;
+
+  document.getElementById('hamburgerBtn')?.addEventListener('click',()=>{
+    const menu=document.getElementById('mobileMenu');
+    const btn=document.getElementById('hamburgerBtn');
+    const isOpen=menu.classList.contains('open');
+    menu.classList.toggle('open',!isOpen);
+    btn.classList.toggle('open',!isOpen);
+  });
+
+  document.addEventListener('click',e=>{
+    const btn=document.getElementById('hamburgerBtn');
+    const menu=document.getElementById('mobileMenu');
+    if(btn&&menu&&!btn.contains(e.target)&&!menu.contains(e.target)){
+      closeMobileMenu();
+    }
+  });
 
   function renderAlerts(){
     const today=todayStr();
@@ -1722,27 +1805,20 @@
     updateApartmentOptions();updateGarageOptions();
   }
 
-  // ══════════════════════════════════════════════════════════════════
-  // SINCRONIZAÇÃO DE SENHA DA PORTARIA — mesmo check-out = mesma senha
-  // ══════════════════════════════════════════════════════════════════
   async function sincronizarSenhaPortaria(bookingSalvo) {
     const senha = bookingSalvo.senhaPortaria;
     if (!senha) return;
-
     const compartilham = bookings.filter(b =>
       b.id !== bookingSalvo.id &&
       !b.cancelled &&
       b.checkout === bookingSalvo.checkout &&
       b.senhaPortaria !== senha
     );
-
     if (!compartilham.length) return;
-
     for (const b of compartilham) {
       b.senhaPortaria = senha;
       await saveBookingToFirebase(b);
     }
-
     const checkoutFormatado = formatDateBR(bookingSalvo.checkout);
     setTimeout(() => {
       alert(`🔑 Senha "${senha}" sincronizada automaticamente!\n\nCheck-out em ${checkoutFormatado}:\n• ${compartilham.map(b => `Apto ${b.apartment} — ${b.guestName}`).join('\n• ')}`);
@@ -1779,7 +1855,7 @@
     if(idx>=0) bookings[idx]={...bookings[idx],...item,cancelled:bookings[idx].cancelled||false};
     else bookings.push(item);
     await saveBookingToFirebase(item);
-    await sincronizarSenhaPortaria(item); // 🔑 sincroniza senha com mesmo check-out
+    await sincronizarSenhaPortaria(item);
     clearForm();closeBookingFormModal();renderAll();
   });
 
