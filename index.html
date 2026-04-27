@@ -191,7 +191,6 @@
     .clean-type-checkout{border-left:4px solid var(--danger)}
     .clean-type-weekly{border-left:4px solid var(--teal)}
     .clean-empty{text-align:center;color:var(--muted);padding:24px;font-size:14px}
-    /* ── MODAL ATRIBUIÇÃO ── */
     .atrib-modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,.6);display:none;align-items:center;justify-content:center;z-index:99997;padding:20px}
     .atrib-modal-overlay.show{display:flex}
     .atrib-modal{background:white;border-radius:16px;padding:28px;width:min(400px,100%);box-shadow:0 20px 60px rgba(0,0,0,.3);border:1px solid var(--border)}
@@ -199,7 +198,6 @@
     .atrib-modal p{color:var(--muted);font-size:13px;margin:0 0 18px 0}
     .atrib-btns{display:flex;gap:10px;margin-top:16px}
     .atrib-btns button{flex:1;padding:14px;font-size:15px;border-radius:12px}
-    /* ── FINANCEIRO TAB ── */
     .fin-config-box{background:#f0fdf4;border:1px solid #86efac;border-radius:14px;padding:18px;margin-bottom:18px}
     .fin-config-box h3{margin:0 0 14px 0;font-size:16px;color:#166534}
     .fin-config-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:end}
@@ -364,14 +362,12 @@
     </div>
   </div>
 
-  <!-- HAMBURGUER -->
   <button class="hamburger-btn" id="hamburgerBtn">
     <span class="ham-icon">☰</span>
     <span class="ham-label" id="hamburgerLabel">📊 Dashboard</span>
     <span class="ham-arrow">▼</span>
   </button>
 
-  <!-- MENU MOBILE -->
   <div class="mobile-menu" id="mobileMenu">
     <button class="tab-btn active" onclick="switchTab('dashboard');closeMobileMenu()">📊 Dashboard</button>
     <button class="tab-btn" onclick="switchTab('mapamensal');closeMobileMenu()">🗓️ Mapa Mensal</button>
@@ -381,7 +377,6 @@
     <button class="tab-btn" onclick="switchTab('relatorio');closeMobileMenu()">📈 Relatório</button>
   </div>
 
-  <!-- TABS DESKTOP -->
   <div class="tabs">
     <button class="tab-btn active" onclick="switchTab('dashboard')">📊 Dashboard</button>
     <button class="tab-btn" onclick="switchTab('mapamensal')">🗓️ Mapa Mensal</button>
@@ -534,7 +529,7 @@
     </div>
   </div>
 
-  <!-- TAB: FINANCEIRO (NOVO) -->
+  <!-- TAB: FINANCEIRO -->
   <div id="tab-financeiro" class="tab-panel">
     <div class="card">
       <div class="fin-nav">
@@ -543,8 +538,6 @@
         <button type="button" class="btn-secondary" onclick="changeFinMonth(1)">Próximo →</button>
         <button type="button" class="btn-primary" onclick="changeFinMonth(0)">Mês atual</button>
       </div>
-
-      <!-- CONFIGURAÇÕES -->
       <div class="fin-config-box">
         <h3>⚙️ Configurações de Pagamento</h3>
         <div class="fin-config-row">
@@ -560,8 +553,6 @@
         <button type="button" class="btn-success" id="finSaveConfigBtn" style="width:auto;padding:10px 18px;margin-top:8px;">💾 Salvar configurações</button>
         <span id="finConfigSavedMsg" style="margin-left:12px;font-size:13px;color:#166534;display:none;">✅ Salvo!</span>
       </div>
-
-      <!-- RESUMO DO MÊS -->
       <div class="fin-summary-grid">
         <div class="fin-box">
           <small>👩 Faxineira — Salário fixo</small>
@@ -579,8 +570,6 @@
           <span id="finResumoOpenCount">0 limpezas sem atribuição</span>
         </div>
       </div>
-
-      <!-- LISTA DE LIMPEZAS DO MÊS -->
       <h3 style="margin-bottom:12px;">📋 Limpezas do mês</h3>
       <div class="table-wrap" style="min-width:0;">
         <table class="fin-history-table" style="min-width:600px;">
@@ -802,10 +791,8 @@
   let aptMapDate      = todayStr();
   let senhaAdminCallback  = null;
   let weeklyDayUnlocked   = false;
-  // Atribuição modal state
-  let atribPending = null; // {bId, type, date}
+  let atribPending = null;
 
-  // ── HELPERS DE DATA ──
   function todayStr(){
     const d=new Date();
     return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
@@ -817,29 +804,22 @@
   function formatDateBR(s){ if(!s)return'-';const[y,m,d]=s.split('-');return`${d}/${m}/${y}`; }
   function formatCurrency(v){ return Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}); }
 
-  // ── LÓGICA DE ATRIBUIÇÃO AUTOMÁTICA ──
-  // Seg(1)–Sex(5): sempre faxineira
-  // Sáb(6) até 13:00: faxineira | Sáb após 13:00: aberto
-  // Dom(0): aberto
   function getAutoResponsavel(dateStr) {
     const d = new Date(dateStr + 'T00:00:00');
-    const dow = d.getDay(); // 0=Dom, 6=Sáb
-    if (dow >= 1 && dow <= 5) return 'faxineira'; // Seg–Sex
+    const dow = d.getDay();
+    if (dow >= 1 && dow <= 5) return 'faxineira';
     if (dow === 6) {
-      // Sábado: verifica hora atual se for hoje, senão assume faxineira até 13h
       const now = new Date();
       const isToday = dateStr === todayStr();
       if (isToday) {
         const hora = now.getHours() + now.getMinutes() / 60;
         return hora < 13 ? 'faxineira' : 'aberto';
       }
-      // Se for um sábado passado ou futuro, assume faxineira (pode ser corrigido depois)
       return 'faxineira';
     }
-    return 'aberto'; // Domingo
+    return 'aberto';
   }
 
-  // ── FINANCEIRO CONFIG (localStorage) ──
   function getFinConfig() {
     return {
       salario: parseFloat(localStorage.getItem('fin_salario') || '0'),
@@ -851,7 +831,6 @@
     localStorage.setItem('fin_valorFreela', valorFreela);
   }
 
-  // ── MODAL ATRIBUIÇÃO ──
   function abrirAtribModal(bId, type, date, descricao) {
     atribPending = { bId, type, date };
     document.getElementById('atribModalDesc').textContent = descricao;
@@ -874,7 +853,6 @@
   });
   document.getElementById('atribCancelBtn').addEventListener('click', fecharAtribModal);
 
-  // ── FIREBASE HELPERS ──
   function setSyncStatus(state, msg) {
     const el = document.getElementById('syncStatus');
     el.className = state; el.textContent = msg;
@@ -914,7 +892,6 @@
     } catch(e){ console.error(e); setSyncStatus('error','❌ Erro na importação'); }
   }
 
-  // ── FUNÇÕES UTILITÁRIAS ──
   function normalizePhone(v){ return String(v||'').replace(/\D/g,''); }
   function formatPhone(v){
     const d=normalizePhone(v).slice(0,11);
@@ -979,7 +956,6 @@
     return bookings.some(b=>!b.cancelled&&b.apartment===aptName&&b.checkin===checkoutDate);
   }
 
-  // ── SENHA ADMIN ──
   function pedirSenhaAdmin(callback){
     senhaAdminCallback=callback;
     document.getElementById('senhaAdminInput').value='';
@@ -1024,7 +1000,6 @@
     renderApartmentsMap();
   };
 
-  // ── FINANCEIRO ──
   window.changeFinMonth=(delta)=>{
     if(delta===0){finMonth=new Date().getMonth();finYear=new Date().getFullYear();}
     else{finMonth+=delta;if(finMonth>11){finMonth=0;finYear++;}if(finMonth<0){finMonth=11;finYear--;}}
@@ -1046,48 +1021,35 @@
     document.getElementById('finSalario').value=cfg.salario||'';
     document.getElementById('finValorFreela').value=cfg.valorFreela||'';
     document.getElementById('finMonthTitle').textContent=`${MONTH_NAMES[finMonth]} / ${finYear}`;
-
     const ms=`${finYear}-${String(finMonth+1).padStart(2,'0')}-01`;
     const me=`${finYear}-${String(finMonth+1).padStart(2,'0')}-${String(new Date(finYear,finMonth+1,0).getDate()).padStart(2,'0')}`;
-
-    // Filtra limpezas concluídas no mês
     const recs = cleaningRecords.filter(r => r.done && r.date >= ms && r.date <= me);
-
     let cntFax = 0, cntFreela = 0, cntAberto = 0;
     const rows = [];
-
     recs.forEach(r => {
       const b = bookings.find(x => x.id === r.bookingId);
       const apt = b ? b.apartment : '—';
       const guest = b ? b.guestName : '—';
       const tipoLabel = r.type === 'checkout' ? 'Saída' : 'Semanal';
       const resp = r.responsavel || 'aberto';
-
       if (resp === 'faxineira') cntFax++;
       else if (resp === 'freela') cntFreela++;
       else cntAberto++;
-
-      const valor = resp === 'freela' ? cfg.valorFreela : (resp === 'faxineira' ? 0 : 0);
-      rows.push({ date: r.date, apt, guest, tipoLabel, resp, valor, key: r.key, bId: r.bookingId, type: r.type });
+      rows.push({ date: r.date, apt, guest, tipoLabel, resp, key: r.key, bId: r.bookingId, type: r.type });
     });
-
     rows.sort((a,b) => a.date.localeCompare(b.date));
-
     const totalFreela = cntFreela * cfg.valorFreela;
     const totalGeral = cfg.salario + totalFreela;
-
     document.getElementById('finResumoSalario').textContent = formatCurrency(cfg.salario);
     document.getElementById('finResumoFaxineiraCount').textContent = `${cntFax} limpeza(s) registradas`;
     document.getElementById('finResumoFreela').textContent = formatCurrency(totalFreela);
     document.getElementById('finResumoFreelaCount').textContent = `${cntFreela} limpeza(s) × ${formatCurrency(cfg.valorFreela)}`;
     document.getElementById('finResumoTotal').textContent = formatCurrency(totalGeral);
     document.getElementById('finResumoOpenCount').textContent = cntAberto > 0 ? `⚠️ ${cntAberto} sem atribuição` : '✅ Todas atribuídas';
-
     if (!rows.length) {
       document.getElementById('finHistoryTable').innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px;">Nenhuma limpeza concluída neste mês.</td></tr>`;
       return;
     }
-
     document.getElementById('finHistoryTable').innerHTML = rows.map(r => {
       const respBadge = r.resp === 'faxineira'
         ? `<span class="badge badge-faxineira">👩 Faxineira</span>`
@@ -1110,24 +1072,19 @@
     abrirAtribModal(bId, type, date, desc);
   };
 
-  // ── MARK CLEANING (atualizado com responsavel) ──
   async function markCleaning(bId, type, date, done, responsavel) {
     const key = getCleaningKey(bId, type, date);
-
-    // Se done=true e responsavel não definido, verificar se precisa perguntar
     if (done && !responsavel) {
       const auto = getAutoResponsavel(date);
       if (auto === 'aberto') {
-        // Sáb tarde ou Dom → abre modal para escolher
         const b = bookings.find(x => x.id === bId);
         const desc = `Apto ${b ? b.apartment : ''} — ${type === 'checkout' ? 'Limpeza de saída' : 'Faxina semanal'}`;
         abrirAtribModal(bId, type, date, desc);
-        return; // espera a escolha no modal
+        return;
       } else {
-        responsavel = auto; // faxineira automático
+        responsavel = auto;
       }
     }
-
     const record = { key, bookingId: bId, type, date, done, responsavel: responsavel || null, updatedAt: new Date().toISOString() };
     const idx = cleaningRecords.findIndex(r => r.key === key);
     if (idx >= 0) cleaningRecords[idx] = record; else cleaningRecords.push(record);
@@ -1159,7 +1116,6 @@
     });
   };
 
-  // ── TABS ──
   function switchTab(name){
     document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
     document.getElementById(`tab-${name}`).classList.add('active');
@@ -1199,7 +1155,6 @@
     if(btn&&menu&&!btn.contains(e.target)&&!menu.contains(e.target)) closeMobileMenu();
   });
 
-  // ── WA ──
   async function enviarParaTodos(msg){
     const enc=encodeURIComponent(msg);
     await Promise.all(WA_RECIPIENTS.map(r=>fetch(`https://api.callmebot.com/whatsapp.php?phone=${r.phone}&text=${enc}&apikey=${r.apikey}`,{mode:'no-cors'}).catch(e=>console.error(e))));
@@ -1310,7 +1265,6 @@
     setTimeout(()=>{btn.textContent='📊 Testar relatório mensal';btn.style.background='#7c3aed';btn.disabled=false;},3500);
   });
 
-  // ── ALERTS ──
   function renderAlerts(){
     const today=todayStr();
     const days=[0,1,2,3],names=['Hoje','Amanhã','Em 2 dias','Em 3 dias'];
@@ -1331,10 +1285,15 @@
     document.getElementById('alertPanel').style.display=hasAny?'block':'none';
   }
 
-  // ── CLEANING TAB ──
+  // ══════════════════════════════════════════════════════
+  // ✅ CORREÇÃO APLICADA AQUI — buildCleaningItems
+  // Faxinas atrasadas agora aparecem em QUALQUER data,
+  // não apenas quando refDate === today
+  // ══════════════════════════════════════════════════════
   function buildCleaningItems(refDate){
-    const today=todayStr();
     const items=[];
+
+    // 1. Limpezas do próprio dia (checkout ou semanal)
     bookings.forEach(b=>{
       if(b.cancelled) return;
       if(b.checkout===refDate){
@@ -1353,32 +1312,41 @@
         }
       });
     });
-    if(refDate===today){
-      bookings.forEach(b=>{
-        if(b.cancelled) return;
-        if(b.checkout<today&&b.checkout>=BLOQUEIO_CUTOFF){
-          const key=getCleaningKey(b.id,'checkout',b.checkout);
+
+    // 2. ✅ CORRIGIDO: Limpezas atrasadas para QUALQUER refDate (não só today)
+    bookings.forEach(b=>{
+      if(b.cancelled) return;
+
+      // Saídas atrasadas (checkout < refDate e não concluídas)
+      if(b.checkout < refDate && b.checkout >= BLOQUEIO_CUTOFF){
+        const key=getCleaningKey(b.id,'checkout',b.checkout);
+        const rec=cleaningRecords.find(r=>r.key===key);
+        if(!rec||!rec.done){
+          const already=items.some(i=>i.booking.id===b.id&&i.type==='checkout'&&i.date===b.checkout);
+          if(!already){
+            const priority=hasPriority(b.apartment,b.checkout);
+            items.push({booking:b,type:'checkout',date:b.checkout,label:'Limpeza de saída',
+              done:false,overdue:true,overdueFrom:b.checkout,priority,responsavel:null});
+          }
+        }
+      }
+
+      // Faxinas semanais atrasadas (data < refDate e não concluídas)
+      getWeeklyCleaningDates(b).forEach(d=>{
+        if(d < refDate){
+          const key=getCleaningKey(b.id,'weekly',d);
           const rec=cleaningRecords.find(r=>r.key===key);
-          if(!rec||!rec.done){
-            const already=items.some(i=>i.booking.id===b.id&&i.type==='checkout'&&i.date===b.checkout);
+          if(!rec||(!rec.done&&!rec.rescheduledTo)){
+            const already=items.some(i=>i.booking.id===b.id&&i.type==='weekly'&&i.date===d);
             if(!already){
-              const priority=hasPriority(b.apartment,b.checkout);
-              items.push({booking:b,type:'checkout',date:b.checkout,label:'Limpeza de saída',done:false,overdue:true,overdueFrom:b.checkout,priority,responsavel:null});
+              items.push({booking:b,type:'weekly',date:d,label:'Faxina semanal',
+                done:false,overdue:true,overdueFrom:d,priority:false,responsavel:null});
             }
           }
         }
-        getWeeklyCleaningDates(b).forEach(d=>{
-          if(d<today){
-            const key=getCleaningKey(b.id,'weekly',d);
-            const rec=cleaningRecords.find(r=>r.key===key);
-            if(!rec||(!rec.done&&!rec.rescheduledTo)){
-              const already=items.some(i=>i.booking.id===b.id&&i.type==='weekly'&&i.date===d);
-              if(!already) items.push({booking:b,type:'weekly',date:d,label:'Faxina semanal',done:false,overdue:true,overdueFrom:d,priority:false,responsavel:null});
-            }
-          }
-        });
       });
-    }
+    });
+
     items.sort((a,b)=>{
       if(a.priority&&!b.priority) return -1;
       if(!a.priority&&b.priority) return 1;
@@ -1448,7 +1416,6 @@
     renderCleaningTab();
   };
 
-  // ── MAPA MENSAL ──
   window.changeMonthlyMap=(delta)=>{
     if(delta===0){monthlyMapMonth=new Date().getMonth();monthlyMapYear=new Date().getFullYear();}
     else{monthlyMapMonth+=delta;if(monthlyMapMonth>11){monthlyMapMonth=0;monthlyMapYear++;}if(monthlyMapMonth<0){monthlyMapMonth=11;monthlyMapYear--;}}
@@ -1498,7 +1465,6 @@
     document.getElementById('monthlyMapTable').innerHTML=thead+tbody;
   }
 
-  // ── RELATÓRIO ──
   window.changeReportMonth=(delta)=>{
     if(delta===0){reportMonth=new Date().getMonth();reportYear=new Date().getFullYear();}
     else{reportMonth+=delta;if(reportMonth>11){reportMonth=0;reportYear++;}if(reportMonth<0){reportMonth=11;reportYear--;}}
@@ -1546,7 +1512,6 @@
       </tr>`).join('');
   }
 
-  // ── DASHBOARD ──
   function renderSummary(){
     const now=new Date(),m=now.getMonth(),y=now.getFullYear();
     let mr=0,mp=0,tp=0,mn=0;
@@ -1744,7 +1709,6 @@
     }).join('');
   }
 
-  // ── FORMULÁRIO RESERVA ──
   const form=document.getElementById('bookingForm');
   const bookingModalOverlay=document.getElementById('bookingModalOverlay');
   const apartmentModalOverlay=document.getElementById('apartmentModalOverlay');
@@ -1976,163 +1940,3 @@
   };
   window.toggleCancelled=async(id)=>{
     const b=bookings.find(x=>x.id===id); if(!b) return;
-    b.cancelled=!b.cancelled;await saveBookingToFirebase(b);renderAll();
-  };
-  window.setQuickFilter=(f)=>{quickFilter=f;renderTable();};
-
-  // ── MODAL APARTAMENTO ──
-  window.openApartmentModal=(name)=>{
-    currentModalApt=name;
-    const ab=bookings.filter(b=>b.apartment===name).sort((a,b)=>a.checkin.localeCompare(b.checkin));
-    const ac=ab.filter(b=>!b.cancelled);
-    const today=todayStr();
-    const cur=ac.find(b=>b.checkin<=today&&b.checkout>today);
-    const nxt=ac.find(b=>b.checkin>today);
-    const wc=isWaitingClean(name,today);
-    const statusLabel=wc.waiting&&!cur?'Aguardando limpeza':(cur?'Ocupado':'Livre');
-    document.getElementById('modalApartmentTitle').textContent=`Apto ${name}`;
-    document.getElementById('modalApartmentSubtitle').textContent='Histórico e reservas futuras';
-    document.getElementById('modalStatusToday').textContent=statusLabel;
-    document.getElementById('modalCurrentOrNext').textContent=cur?`${cur.guestName} (${formatDateBR(cur.checkin)} a ${formatDateBR(cur.checkout)})`:nxt?`${nxt.guestName} (${formatDateBR(nxt.checkin)} a ${formatDateBR(nxt.checkout)})`:'Sem reserva';
-    document.getElementById('modalTotalBookings').textContent=ab.length;
-    document.getElementById('modalRevenue').textContent=formatCurrency(ab.reduce((s,b)=>s+Number(b.totalValue||0),0));
-    document.getElementById('modalSenhaApto').value=apartmentData[name]?.senhaApto||'';
-    document.getElementById('modalTimeline').innerHTML=ab.length?ab.map(b=>{
-      const ss=getStayStatus(b),ps=getPaymentStatus(b);
-      const wd=getWeeklyCleaningDates(b);
-      const wdl=(b.weeklyDayOfWeek!==null&&b.weeklyDayOfWeek!==undefined)?` (toda ${DAY_NAMES_FULL[Number(b.weeklyDayOfWeek)]})` :'';
-      const pdI=b.paymentDate?`<br>📅 Pgto: ${formatDateBR(b.paymentDate)}`:'';
-      return `<div class="timeline-item">
-        <div class="timeline-top">
-          <div><div class="timeline-title">${b.guestName}</div><div class="muted">${formatDateBR(b.checkin)} até ${formatDateBR(b.checkout)} • ${b.nights||calculateNights(b.checkin,b.checkout)} noite(s)</div></div>
-          <div><span class="badge ${ss.className}">${ss.label}</span><span class="badge ${ps.className}" style="margin-left:6px;">${ps.label}</span></div>
-        </div>
-        <div class="timeline-grid">
-          <div><strong>Reserva</strong><br>Origem: ${b.source||'-'}<br>Hóspedes: ${b.guests||1}<br>Telefone: ${b.phone||'-'}<br>Garagem: ${b.garageSpot&&b.garageSpot!=='Sem vaga'?b.garageSpot:'Sem vaga'}</div>
-          <div><strong>Financeiro</strong><br>Diária: ${formatCurrency(b.dailyRate||0)}<br>Total: ${formatCurrency(b.totalValue)}<br>Pago: ${formatCurrency(b.paidValue)}${pdI}<br>Saldo: ${formatCurrency(getBalance(b))}</div>
-          <div><strong>Operação</strong><br>🔐 Portaria: <strong>${b.senhaPortaria||'-'}</strong><br>Faxinas${wdl}: ${wd.length?wd.map(formatDateBR).join(', '):'Sem faxina'}<br>Obs: ${b.notes||'-'}</div>
-        </div>
-      </div>`;
-    }).join(''):`<div class="timeline-empty">Nenhuma reserva encontrada.</div>`;
-    apartmentModalOverlay.classList.add('show');document.body.style.overflow='hidden';
-  };
-  function closeApartmentDetailsModal(){
-    apartmentModalOverlay.classList.remove('show');currentModalApt=null;
-    if(!bookingModalOverlay.classList.contains('show')) document.body.style.overflow='';
-  }
-  document.getElementById('saveSenhaAptoBtn').addEventListener('click',async()=>{
-    if(!currentModalApt) return;
-    await saveApartmentSenha(currentModalApt,document.getElementById('modalSenhaApto').value.trim());
-    renderTable();
-    const btn=document.getElementById('saveSenhaAptoBtn');
-    btn.textContent='✅ Salvo!';setTimeout(()=>{btn.textContent='💾 Salvar senha';},2000);
-  });
-
-  function renderAll(){
-    renderFiltersOptions();renderSummary();renderTodayPanels();
-    renderAlerts();renderApartmentsMap();renderParkingMap();renderTable();
-    if(document.getElementById('tab-mapamensal').classList.contains('active')) renderMonthlyMap();
-    if(document.getElementById('tab-financeiro').classList.contains('active')) renderFinanceiro();
-  }
-
-  // ── EVENTOS ──
-  document.getElementById('phone').addEventListener('input',function(){this.value=formatPhone(this.value);});
-  document.getElementById('source').addEventListener('change',atualizarBoxPagamentoAutomatico);
-  ['checkin','checkout'].forEach(id=>{
-    document.getElementById(id).addEventListener('input',()=>{
-      recalculateFinancials();updateApartmentOptions();updateGarageOptions();
-      findConflict(document.getElementById('bookingId').value||null);atualizarBoxPagamentoAutomatico();
-    });
-  });
-  document.getElementById('totalValue').addEventListener('input',atualizarBoxPagamentoAutomatico);
-  document.getElementById('autoAptBtn').addEventListener('click',autoSelectApartment);
-  document.getElementById('dailyRate').addEventListener('input',()=>{document.getElementById('lastEditedField').value='dailyRate';recalculateFinancials();});
-  document.getElementById('totalValue').addEventListener('input',()=>{document.getElementById('lastEditedField').value='totalValue';recalculateFinancials();});
-  document.getElementById('apartment').addEventListener('change',()=>findConflict(document.getElementById('bookingId').value||null));
-  document.getElementById('recalculateBtn').addEventListener('click',()=>{document.getElementById('lastEditedField').value='dailyRate';recalculateFinancials();});
-  document.getElementById('cancelEditBtn').addEventListener('click',clearForm);
-  document.getElementById('clearFiltersBtn').addEventListener('click',()=>{
-    document.getElementById('searchInput').value='';document.getElementById('filterStart').value='';
-    document.getElementById('filterEnd').value='';document.getElementById('apartmentFilter').value='';
-    document.getElementById('sourceFilter').value='';quickFilter='all';renderTable();
-  });
-  ['searchInput','filterStart','filterEnd','apartmentFilter','sourceFilter'].forEach(id=>{
-    const el=document.getElementById(id);el.addEventListener('input',renderTable);el.addEventListener('change',renderTable);
-  });
-  document.getElementById('cleanDateFilter').addEventListener('change',renderCleaningTab);
-  document.getElementById('cleanTypeFilter').addEventListener('change',renderCleaningTab);
-  document.getElementById('cleanStatusFilter').addEventListener('change',renderCleaningTab);
-  document.getElementById('openNewBookingModalBtn').addEventListener('click',()=>{clearForm();openBookingModal(false);});
-  document.getElementById('closeBookingModal').addEventListener('click',closeBookingFormModal);
-  document.getElementById('closeApartmentModal').addEventListener('click',closeApartmentDetailsModal);
-  bookingModalOverlay.addEventListener('click',e=>{if(e.target===bookingModalOverlay)closeBookingFormModal();});
-  apartmentModalOverlay.addEventListener('click',e=>{if(e.target===apartmentModalOverlay)closeApartmentDetailsModal();});
-  document.addEventListener('keydown',e=>{
-    if(e.key==='Escape'){
-      if(document.getElementById('senhaAdminOverlay').classList.contains('show')){document.getElementById('senhaAdminOverlay').classList.remove('show');senhaAdminCallback=null;return;}
-      if(document.getElementById('atribModalOverlay').classList.contains('show')){fecharAtribModal();return;}
-      if(bookingModalOverlay.classList.contains('show'))closeBookingFormModal();
-      if(apartmentModalOverlay.classList.contains('show'))closeApartmentDetailsModal();
-    }
-  });
-  document.getElementById('exportBtn').addEventListener('click',()=>{
-    const blob=new Blob([JSON.stringify({version:'4.3',apartments:FIXED_APARTMENTS,garageSpots:GARAGE_SPOTS,bookings,cleaningRecords,apartmentData},null,2)],{type:'application/json'});
-    const a=Object.assign(document.createElement('a'),{href:URL.createObjectURL(blob),download:'reservas-backup-v43.json'});
-    a.click();URL.revokeObjectURL(a.href);
-  });
-  document.getElementById('importFile').addEventListener('change',async e=>{
-    const file=e.target.files[0]; if(!file) return;
-    const reader=new FileReader();
-    reader.onload=async ev=>{
-      try{
-        const data=JSON.parse(ev.target.result);
-        const imported=Array.isArray(data)?data:(Array.isArray(data.bookings)?data.bookings:[]);
-        const norm=imported.map(b=>({
-          id:b.id||crypto.randomUUID(),guestName:b.guestName||'',phone:b.phone?formatPhone(b.phone):'',
-          source:b.source||'',apartment:String(b.apartment||''),checkin:b.checkin||'',checkout:b.checkout||'',
-          nights:b.nights||calculateNights(b.checkin||'',b.checkout||''),dailyRate:Number(b.dailyRate||0),
-          guests:Number(b.guests||1),totalValue:Number(b.totalValue||0),paidValue:Number(b.paidValue||0),
-          paymentDate:b.paymentDate||null,garageSpot:b.garageSpot||'Sem vaga',senhaPortaria:b.senhaPortaria||'',
-          notes:b.notes||'',cancelled:!!b.cancelled,
-          weeklyDayOfWeek:(b.weeklyDayOfWeek!==null&&b.weeklyDayOfWeek!==undefined)?Number(b.weeklyDayOfWeek):null
-        })).filter(b=>FIXED_APARTMENTS.includes(b.apartment));
-        const nc=data.cleaningRecords||[];
-        if(!confirm('Importar e substituir as reservas atuais no Firebase?')) return;
-        bookings=norm;if(nc.length)cleaningRecords=nc;
-        await importBatchToFirebase(norm,nc);clearForm();renderAll();
-      }catch{alert('Erro ao importar arquivo.');}
-    };
-    reader.readAsText(file);e.target.value='';
-  });
-
-  // ── FIREBASE REALTIME ──
-  function initRealtimeListeners(){
-    onSnapshot(BOOKINGS_COL,snap=>{bookings=snap.docs.map(d=>d.data());if(isReady)renderAll();},e=>{console.error(e);setSyncStatus('error','❌ Erro de conexão');});
-    onSnapshot(CLEANINGS_COL,snap=>{cleaningRecords=snap.docs.map(d=>d.data());if(isReady)renderAll();},e=>console.error(e));
-    onSnapshot(APTS_COL,snap=>{snap.docs.forEach(d=>{apartmentData[d.id]=d.data();});if(isReady)renderAll();},e=>console.error(e));
-  }
-
-  async function init(){
-    try{
-      const [bS,cS,aS]=await Promise.all([getDocs(BOOKINGS_COL),getDocs(CLEANINGS_COL),getDocs(APTS_COL)]);
-      bookings=bS.docs.map(d=>d.data());
-      cleaningRecords=cS.docs.map(d=>d.data());
-      aS.docs.forEach(d=>{apartmentData[d.id]=d.data();});
-      document.getElementById('cleanDateFilter').value=todayStr();
-      aptMapDate=todayStr();
-      clearForm();renderAll();
-      isReady=true;
-      initRealtimeListeners();
-      agendarProximoEnvio();
-      document.getElementById('loadingOverlay').style.display='none';
-      setSyncStatus('saved','✅ Dados sincronizados');
-    }catch(err){
-      console.error(err);
-      document.getElementById('loadingOverlay').innerHTML=`<div style="text-align:center;padding:20px;"><p style="color:#dc2626;font-size:18px;">❌ Erro ao conectar ao Firebase</p><p style="color:#6b7280;">${err.message}</p></div>`;
-    }
-  }
-
-  init();
-</script>
-</body>
-</html>
