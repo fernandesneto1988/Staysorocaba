@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Controle de Reservas - V4.1</title>
+  <title>Controle de Reservas - V4.3</title>
   <style>
     :root{
       --bg:#f4f7fb;
@@ -43,14 +43,10 @@
     .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px;margin-bottom:18px}
     .section-title{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
     .section-title h2{margin:0;font-size:20px}
-
-    /* ── TABS DESKTOP ── */
     .tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px;border-bottom:2px solid var(--border);padding-bottom:0}
     .tab-btn{width:auto;padding:10px 20px;border-radius:10px 10px 0 0;border:1px solid var(--border);border-bottom:none;background:#f8fafc;color:var(--muted);font-weight:bold;font-size:14px;cursor:pointer;transition:.2s;margin-bottom:-2px}
     .tab-btn.active{background:white;color:var(--primary);border-color:var(--border);border-bottom:2px solid white}
     .tab-btn:hover:not(.active){background:#eef2ff;color:var(--primary)}
-
-    /* ── HAMBURGUER (mobile < 768px) ── */
     .hamburger-btn{display:none;align-items:center;gap:10px;width:100%;padding:12px 16px;border-radius:12px;border:1px solid var(--border);background:white;color:var(--text);font-weight:bold;font-size:15px;cursor:pointer;margin-bottom:0;box-shadow:var(--shadow);justify-content:space-between}
     .hamburger-btn .ham-icon{font-size:22px;line-height:1}
     .hamburger-btn .ham-label{flex:1;text-align:left}
@@ -68,7 +64,6 @@
       .hamburger-btn{display:none !important}
       .mobile-menu{display:none !important}
     }
-
     .tab-panel{display:none}
     .tab-panel.active{display:block}
     .summary{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:16px}
@@ -144,6 +139,9 @@
     .badge-warning{background:#fff7ed;color:#9a3412;border:1px solid #fed7aa}
     .badge-overdue{background:#fee2e2;color:#991b1b;border:1px solid #fca5a5}
     .badge-priority{background:#fef08a;color:#713f12;border:1px solid #fde047;}
+    .badge-faxineira{background:#dbeafe;color:#1d4ed8;border:1px solid #93c5fd;}
+    .badge-freela{background:#f3e8ff;color:#7e22ce;border:1px solid #d8b4fe;}
+    .badge-open{background:#fff7ed;color:#c2410c;border:1px solid #fed7aa;}
     .small-actions{display:flex;gap:8px;flex-wrap:wrap}
     .small-actions button,.small-actions a{width:auto;padding:7px 10px;font-size:12px;border-radius:8px;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;font-weight:bold}
     .wa-btn{background:#25D366;color:white;gap:6px}
@@ -193,6 +191,33 @@
     .clean-type-checkout{border-left:4px solid var(--danger)}
     .clean-type-weekly{border-left:4px solid var(--teal)}
     .clean-empty{text-align:center;color:var(--muted);padding:24px;font-size:14px}
+    /* ── MODAL ATRIBUIÇÃO ── */
+    .atrib-modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,.6);display:none;align-items:center;justify-content:center;z-index:99997;padding:20px}
+    .atrib-modal-overlay.show{display:flex}
+    .atrib-modal{background:white;border-radius:16px;padding:28px;width:min(400px,100%);box-shadow:0 20px 60px rgba(0,0,0,.3);border:1px solid var(--border)}
+    .atrib-modal h3{margin:0 0 6px 0;font-size:18px}
+    .atrib-modal p{color:var(--muted);font-size:13px;margin:0 0 18px 0}
+    .atrib-btns{display:flex;gap:10px;margin-top:16px}
+    .atrib-btns button{flex:1;padding:14px;font-size:15px;border-radius:12px}
+    /* ── FINANCEIRO TAB ── */
+    .fin-config-box{background:#f0fdf4;border:1px solid #86efac;border-radius:14px;padding:18px;margin-bottom:18px}
+    .fin-config-box h3{margin:0 0 14px 0;font-size:16px;color:#166534}
+    .fin-config-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;align-items:end}
+    .fin-config-row .form-group{margin-bottom:0}
+    .fin-summary-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px}
+    .fin-box{background:#f8fafc;border:1px solid var(--border);border-radius:14px;padding:16px;text-align:center}
+    .fin-box small{display:block;color:var(--muted);margin-bottom:6px;font-size:13px}
+    .fin-box strong{font-size:22px;display:block;margin-bottom:4px}
+    .fin-box span{font-size:12px;color:var(--muted)}
+    .fin-box.highlight{background:#eff6ff;border-color:#bfdbfe}
+    .fin-box.highlight strong{color:var(--primary)}
+    .fin-history-table{width:100%;border-collapse:collapse;background:white;border-radius:14px;overflow:hidden;border:1px solid var(--border)}
+    .fin-history-table th,.fin-history-table td{padding:10px 14px;border-bottom:1px solid #eef2f7;text-align:left;font-size:13px}
+    .fin-history-table th{background:#f8fafc;font-weight:bold}
+    .fin-history-table tr:last-child td{border-bottom:none}
+    .fin-nav{display:flex;align-items:center;gap:12px;margin-bottom:18px;flex-wrap:wrap}
+    .fin-nav button{width:auto;padding:8px 16px}
+    .fin-nav h3{margin:0;font-size:18px}
     .modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,.55);display:none;align-items:center;justify-content:center;z-index:9999;padding:20px}
     .modal-overlay.show{display:flex}
     .modal{width:min(980px,100%);max-height:90vh;overflow:auto;background:white;border-radius:20px;box-shadow:0 30px 80px rgba(0,0,0,.28);border:1px solid #dbe3ee}
@@ -273,6 +298,8 @@
       .report-grid{grid-template-columns:1fr 1fr}
       .alert-grid{grid-template-columns:1fr}
       .clean-grid{grid-template-columns:1fr 1fr}
+      .fin-summary-grid{grid-template-columns:1fr}
+      .fin-config-row{grid-template-columns:1fr}
       table{min-width:980px}
     }
     @media(max-width:760px){
@@ -295,7 +322,6 @@
   <div class="spinner"></div>
   <p>Conectando ao Firebase...</p>
 </div>
-
 <div id="syncStatus" class="saved">✅ Dados sincronizados</div>
 
 <!-- MODAL SENHA ADMIN -->
@@ -312,46 +338,57 @@
   </div>
 </div>
 
+<!-- MODAL ATRIBUIÇÃO DE LIMPEZA (Faxineira / Freela) -->
+<div id="atribModalOverlay" class="atrib-modal-overlay">
+  <div class="atrib-modal">
+    <h3>🧹 Quem realizou a limpeza?</h3>
+    <p id="atribModalDesc">Apto — Limpeza de saída</p>
+    <div class="atrib-btns">
+      <button type="button" class="btn-primary" id="atribFaxineiraBtn">👩 Faxineira</button>
+      <button type="button" class="btn-purple" id="atribFreelaBtn">🧹 Freela</button>
+    </div>
+    <button type="button" class="btn-secondary" id="atribCancelBtn" style="margin-top:10px;">Cancelar</button>
+  </div>
+</div>
+
 <div class="container">
   <div class="topbar">
     <div>
       <h1>🏨 Controle de Reservas</h1>
-      <div class="subtitle">V4.2 — Bloqueio de limpeza apenas para check-ins no dia atual</div>
+      <div class="subtitle">V4.3 — Controle de faxineira e freelas</div>
     </div>
     <div style="display:flex;gap:10px;flex-wrap:wrap;">
-      <button type="button" id="sendWABtn" style="width:auto;padding:11px 16px;border-radius:10px;background:#25D366;color:white;border:none;font-weight:bold;font-size:14px;cursor:pointer;">
-        📲 Enviar resumo WhatsApp
-      </button>
-      <button type="button" id="sendMonthlyReportBtn" style="width:auto;padding:11px 16px;border-radius:10px;background:#7c3aed;color:white;border:none;font-weight:bold;font-size:14px;cursor:pointer;">
-        📊 Testar relatório mensal
-      </button>
+      <button type="button" id="sendWABtn" style="width:auto;padding:11px 16px;border-radius:10px;background:#25D366;color:white;border:none;font-weight:bold;font-size:14px;cursor:pointer;">📲 Enviar resumo WhatsApp</button>
+      <button type="button" id="sendMonthlyReportBtn" style="width:auto;padding:11px 16px;border-radius:10px;background:#7c3aed;color:white;border:none;font-weight:bold;font-size:14px;cursor:pointer;">📊 Testar relatório mensal</button>
       <button type="button" class="btn-primary" id="openNewBookingModalBtn" style="width:auto;">+ Nova Reserva</button>
     </div>
   </div>
 
-  <!-- HAMBURGUER (só aparece no mobile) -->
+  <!-- HAMBURGUER -->
   <button class="hamburger-btn" id="hamburgerBtn">
     <span class="ham-icon">☰</span>
     <span class="ham-label" id="hamburgerLabel">📊 Dashboard</span>
     <span class="ham-arrow">▼</span>
   </button>
 
-  <!-- MENU MOBILE (dropdown) -->
+  <!-- MENU MOBILE -->
   <div class="mobile-menu" id="mobileMenu">
     <button class="tab-btn active" onclick="switchTab('dashboard');closeMobileMenu()">📊 Dashboard</button>
-    <button class="tab-btn"        onclick="switchTab('mapamensal');closeMobileMenu()">🗓️ Mapa Mensal</button>
-    <button class="tab-btn"        onclick="switchTab('reservas');closeMobileMenu()">📋 Reservas</button>
-    <button class="tab-btn"        onclick="switchTab('limpeza');closeMobileMenu()">🧹 Limpeza</button>
-    <button class="tab-btn"        onclick="switchTab('relatorio');closeMobileMenu()">📈 Relatório</button>
+    <button class="tab-btn" onclick="switchTab('mapamensal');closeMobileMenu()">🗓️ Mapa Mensal</button>
+    <button class="tab-btn" onclick="switchTab('reservas');closeMobileMenu()">📋 Reservas</button>
+    <button class="tab-btn" onclick="switchTab('limpeza');closeMobileMenu()">🧹 Limpeza</button>
+    <button class="tab-btn" onclick="switchTab('financeiro');closeMobileMenu()">💰 Financeiro</button>
+    <button class="tab-btn" onclick="switchTab('relatorio');closeMobileMenu()">📈 Relatório</button>
   </div>
 
-  <!-- TABS DESKTOP (só aparecem no PC/iPad) -->
+  <!-- TABS DESKTOP -->
   <div class="tabs">
     <button class="tab-btn active" onclick="switchTab('dashboard')">📊 Dashboard</button>
-    <button class="tab-btn"        onclick="switchTab('mapamensal')">🗓️ Mapa Mensal</button>
-    <button class="tab-btn"        onclick="switchTab('reservas')">📋 Reservas</button>
-    <button class="tab-btn"        onclick="switchTab('limpeza')">🧹 Limpeza</button>
-    <button class="tab-btn"        onclick="switchTab('relatorio')">📈 Relatório</button>
+    <button class="tab-btn" onclick="switchTab('mapamensal')">🗓️ Mapa Mensal</button>
+    <button class="tab-btn" onclick="switchTab('reservas')">📋 Reservas</button>
+    <button class="tab-btn" onclick="switchTab('limpeza')">🧹 Limpeza</button>
+    <button class="tab-btn" onclick="switchTab('financeiro')">💰 Financeiro</button>
+    <button class="tab-btn" onclick="switchTab('relatorio')">📈 Relatório</button>
   </div>
 
   <!-- TAB: DASHBOARD -->
@@ -373,7 +410,6 @@
         <div class="mini"><h3>🚪 Check-outs de hoje</h3><ul id="todayCheckouts" class="cleaning-list"><li class="muted">Nenhum check-out hoje.</li></ul></div>
         <div class="mini"><h3>🧹 Faxinas semanais de hoje</h3><ul id="todayWeeklyCleanings" class="cleaning-list"><li class="muted">Nenhuma faxina semanal hoje.</li></ul></div>
       </div>
-
       <div class="map-wrapper">
         <div class="map-header">
           <div class="apt-map-nav">
@@ -394,7 +430,6 @@
         </div>
         <div id="apartmentsMap" class="apt-grid"></div>
       </div>
-
       <div class="map-wrapper">
         <div class="map-header">
           <h2 style="margin:0;">Mapa da Garagem</h2>
@@ -477,7 +512,8 @@
       </div>
       <div class="info-box">
         Registre a conclusão das limpezas. <strong>Saída</strong> = limpeza após check-out (libera o apto). <strong>Semanal</strong> = faxina durante a estadia.<br>
-        ⚡ Cards com <strong>PRIORIDADE</strong> indicam check-out + check-in no mesmo dia — limpe antes das 15h!
+        ⚡ Cards com <strong>PRIORIDADE</strong> indicam check-out + check-in no mesmo dia — limpe antes das 15h!<br>
+        👩 <strong>Seg–Sex e Sáb até 13h</strong>: atribuído automaticamente à Faxineira. &nbsp;|&nbsp; 🧹 <strong>Sáb após 13h e Dom</strong>: você define se foi Freela.
       </div>
       <div class="clean-filters">
         <input type="date" id="cleanDateFilter" />
@@ -495,6 +531,67 @@
       </div>
       <div id="cleanSummaryBar" style="display:flex;gap:12px;margin-bottom:14px;flex-wrap:wrap;"></div>
       <div id="cleanGrid" class="clean-grid"></div>
+    </div>
+  </div>
+
+  <!-- TAB: FINANCEIRO (NOVO) -->
+  <div id="tab-financeiro" class="tab-panel">
+    <div class="card">
+      <div class="fin-nav">
+        <button type="button" class="btn-secondary" onclick="changeFinMonth(-1)">← Anterior</button>
+        <h3 id="finMonthTitle"></h3>
+        <button type="button" class="btn-secondary" onclick="changeFinMonth(1)">Próximo →</button>
+        <button type="button" class="btn-primary" onclick="changeFinMonth(0)">Mês atual</button>
+      </div>
+
+      <!-- CONFIGURAÇÕES -->
+      <div class="fin-config-box">
+        <h3>⚙️ Configurações de Pagamento</h3>
+        <div class="fin-config-row">
+          <div class="form-group">
+            <label>💰 Salário mensal da faxineira (R$)</label>
+            <input type="number" id="finSalario" min="0" step="0.01" placeholder="Ex: 1800.00" />
+          </div>
+          <div class="form-group">
+            <label>🧹 Valor por limpeza — Freela (R$)</label>
+            <input type="number" id="finValorFreela" min="0" step="0.01" placeholder="Ex: 50.00" />
+          </div>
+        </div>
+        <button type="button" class="btn-success" id="finSaveConfigBtn" style="width:auto;padding:10px 18px;margin-top:8px;">💾 Salvar configurações</button>
+        <span id="finConfigSavedMsg" style="margin-left:12px;font-size:13px;color:#166534;display:none;">✅ Salvo!</span>
+      </div>
+
+      <!-- RESUMO DO MÊS -->
+      <div class="fin-summary-grid">
+        <div class="fin-box">
+          <small>👩 Faxineira — Salário fixo</small>
+          <strong id="finResumoSalario">R$ 0,00</strong>
+          <span id="finResumoFaxineiraCount">0 limpezas registradas</span>
+        </div>
+        <div class="fin-box">
+          <small>🧹 Freelas — Total a pagar</small>
+          <strong id="finResumoFreela">R$ 0,00</strong>
+          <span id="finResumoFreelaCount">0 limpezas × R$ 0,00</span>
+        </div>
+        <div class="fin-box highlight">
+          <small>💰 Total a pagar no mês</small>
+          <strong id="finResumoTotal">R$ 0,00</strong>
+          <span id="finResumoOpenCount">0 limpezas sem atribuição</span>
+        </div>
+      </div>
+
+      <!-- LISTA DE LIMPEZAS DO MÊS -->
+      <h3 style="margin-bottom:12px;">📋 Limpezas do mês</h3>
+      <div class="table-wrap" style="min-width:0;">
+        <table class="fin-history-table" style="min-width:600px;">
+          <thead>
+            <tr>
+              <th>Data</th><th>Apto</th><th>Tipo</th><th>Hóspede</th><th>Realizada por</th><th>Valor</th>
+            </tr>
+          </thead>
+          <tbody id="finHistoryTable"></tbody>
+        </table>
+      </div>
     </div>
   </div>
 
@@ -697,91 +794,91 @@
   let reportYear      = new Date().getFullYear();
   let monthlyMapMonth = new Date().getMonth();
   let monthlyMapYear  = new Date().getFullYear();
+  let finMonth        = new Date().getMonth();
+  let finYear         = new Date().getFullYear();
   let isReady         = false;
   let currentModalApt = null;
   let waSchedulerTimer= null;
   let aptMapDate      = todayStr();
-  let senhaAdminCallback = null;
-  let weeklyDayUnlocked  = false;
+  let senhaAdminCallback  = null;
+  let weeklyDayUnlocked   = false;
+  // Atribuição modal state
+  let atribPending = null; // {bId, type, date}
 
-  function isWaitingClean(aptName, refDate) {
-    const pastCheckouts = bookings.filter(b =>
-      !b.cancelled &&
-      b.apartment === aptName &&
-      b.checkout <= refDate &&
-      b.checkout >= BLOQUEIO_CUTOFF
-    );
-    if (!pastCheckouts.length) return { waiting: false };
-    pastCheckouts.sort((a, b) => b.checkout.localeCompare(a.checkout));
-    const last = pastCheckouts[0];
-    const done = isCleaningDone(last.id, 'checkout', last.checkout);
-    if (done) return { waiting: false };
-    return { waiting: true, booking: last };
+  // ── HELPERS DE DATA ──
+  function todayStr(){
+    const d=new Date();
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
   }
+  function addDays(s,n){
+    const d=new Date(s+'T00:00:00');d.setDate(d.getDate()+n);
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  }
+  function formatDateBR(s){ if(!s)return'-';const[y,m,d]=s.split('-');return`${d}/${m}/${y}`; }
+  function formatCurrency(v){ return Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}); }
 
-  function hasPriority(aptName, checkoutDate) {
-    return bookings.some(b =>
-      !b.cancelled &&
-      b.apartment === aptName &&
-      b.checkin === checkoutDate
-    );
-  }
-
-  function pedirSenhaAdmin(callback) {
-    senhaAdminCallback = callback;
-    document.getElementById('senhaAdminInput').value = '';
-    document.getElementById('senhaAdminError').style.display = 'none';
-    document.getElementById('senhaAdminOverlay').classList.add('show');
-    setTimeout(() => document.getElementById('senhaAdminInput').focus(), 100);
-  }
-  document.getElementById('senhaAdminConfirm').addEventListener('click', () => {
-    const val = document.getElementById('senhaAdminInput').value.trim();
-    if (val === ADMIN_SENHA) {
-      document.getElementById('senhaAdminOverlay').classList.remove('show');
-      if (senhaAdminCallback) { senhaAdminCallback(); senhaAdminCallback = null; }
-    } else {
-      document.getElementById('senhaAdminError').style.display = 'block';
-      document.getElementById('senhaAdminInput').value = '';
-      document.getElementById('senhaAdminInput').focus();
+  // ── LÓGICA DE ATRIBUIÇÃO AUTOMÁTICA ──
+  // Seg(1)–Sex(5): sempre faxineira
+  // Sáb(6) até 13:00: faxineira | Sáb após 13:00: aberto
+  // Dom(0): aberto
+  function getAutoResponsavel(dateStr) {
+    const d = new Date(dateStr + 'T00:00:00');
+    const dow = d.getDay(); // 0=Dom, 6=Sáb
+    if (dow >= 1 && dow <= 5) return 'faxineira'; // Seg–Sex
+    if (dow === 6) {
+      // Sábado: verifica hora atual se for hoje, senão assume faxineira até 13h
+      const now = new Date();
+      const isToday = dateStr === todayStr();
+      if (isToday) {
+        const hora = now.getHours() + now.getMinutes() / 60;
+        return hora < 13 ? 'faxineira' : 'aberto';
+      }
+      // Se for um sábado passado ou futuro, assume faxineira (pode ser corrigido depois)
+      return 'faxineira';
     }
-  });
-  document.getElementById('senhaAdminInput').addEventListener('keydown', e => {
-    if (e.key === 'Enter') document.getElementById('senhaAdminConfirm').click();
-  });
-  document.getElementById('senhaAdminCancel').addEventListener('click', () => {
-    document.getElementById('senhaAdminOverlay').classList.remove('show');
-    senhaAdminCallback = null;
-  });
-  document.getElementById('weeklyDayLockBtn').addEventListener('click', () => {
-    if (weeklyDayUnlocked) {
-      weeklyDayUnlocked = false;
-      document.getElementById('weeklyDayOfWeek').disabled = true;
-      document.getElementById('weeklyDayLockBtn').textContent = '🔐 Desbloquear';
-      document.getElementById('weeklyDayLockBtn').className = 'btn-warning';
-      document.getElementById('weeklyDayMsg').style.display = 'none';
-    } else {
-      pedirSenhaAdmin(() => {
-        weeklyDayUnlocked = true;
-        document.getElementById('weeklyDayOfWeek').disabled = false;
-        document.getElementById('weeklyDayLockBtn').textContent = '🔓 Bloquear';
-        document.getElementById('weeklyDayLockBtn').className = 'btn-success';
-        document.getElementById('weeklyDayMsg').style.display = 'block';
-        document.getElementById('weeklyDayMsg').textContent = '✅ Campo desbloqueado.';
-      });
-    }
-  });
+    return 'aberto'; // Domingo
+  }
 
-  window.changeAptMapDate = (delta) => {
-    if (delta === 0) aptMapDate = todayStr();
-    else aptMapDate = addDays(aptMapDate, delta);
-    renderApartmentsMap();
-  };
+  // ── FINANCEIRO CONFIG (localStorage) ──
+  function getFinConfig() {
+    return {
+      salario: parseFloat(localStorage.getItem('fin_salario') || '0'),
+      valorFreela: parseFloat(localStorage.getItem('fin_valorFreela') || '0'),
+    };
+  }
+  function saveFinConfig(salario, valorFreela) {
+    localStorage.setItem('fin_salario', salario);
+    localStorage.setItem('fin_valorFreela', valorFreela);
+  }
 
+  // ── MODAL ATRIBUIÇÃO ──
+  function abrirAtribModal(bId, type, date, descricao) {
+    atribPending = { bId, type, date };
+    document.getElementById('atribModalDesc').textContent = descricao;
+    document.getElementById('atribModalOverlay').classList.add('show');
+  }
+  function fecharAtribModal() {
+    document.getElementById('atribModalOverlay').classList.remove('show');
+    atribPending = null;
+  }
+
+  document.getElementById('atribFaxineiraBtn').addEventListener('click', async () => {
+    if (!atribPending) return;
+    await markCleaning(atribPending.bId, atribPending.type, atribPending.date, true, 'faxineira');
+    fecharAtribModal();
+  });
+  document.getElementById('atribFreelaBtn').addEventListener('click', async () => {
+    if (!atribPending) return;
+    await markCleaning(atribPending.bId, atribPending.type, atribPending.date, true, 'freela');
+    fecharAtribModal();
+  });
+  document.getElementById('atribCancelBtn').addEventListener('click', fecharAtribModal);
+
+  // ── FIREBASE HELPERS ──
   function setSyncStatus(state, msg) {
     const el = document.getElementById('syncStatus');
     el.className = state; el.textContent = msg;
   }
-
   async function saveBookingToFirebase(item) {
     setSyncStatus('syncing','🔄 Sincronizando...');
     try { await setDoc(doc(db,'reservas',item.id),item); setSyncStatus('saved','✅ Dados sincronizados'); }
@@ -810,38 +907,14 @@
     setSyncStatus('syncing','🔄 Importando dados...');
     try {
       const oldSnap = await getDocs(BOOKINGS_COL);
-      const b1 = writeBatch(db);
-      oldSnap.forEach(d => b1.delete(d.ref));
-      await b1.commit();
-      for (let i=0;i<newBookings.length;i+=400){
-        const chunk=newBookings.slice(i,i+400);
-        const b=writeBatch(db);
-        chunk.forEach(item=>b.set(doc(db,'reservas',item.id),item));
-        await b.commit();
-      }
-      if(newCleanings.length){
-        for(let i=0;i<newCleanings.length;i+=400){
-          const chunk=newCleanings.slice(i,i+400);
-          const b=writeBatch(db);
-          chunk.forEach(r=>b.set(doc(db,'limpezas',r.key),r));
-          await b.commit();
-        }
-      }
+      const b1 = writeBatch(db); oldSnap.forEach(d=>b1.delete(d.ref)); await b1.commit();
+      for(let i=0;i<newBookings.length;i+=400){const chunk=newBookings.slice(i,i+400);const b=writeBatch(db);chunk.forEach(item=>b.set(doc(db,'reservas',item.id),item));await b.commit();}
+      if(newCleanings.length){for(let i=0;i<newCleanings.length;i+=400){const chunk=newCleanings.slice(i,i+400);const b=writeBatch(db);chunk.forEach(r=>b.set(doc(db,'limpezas',r.key),r));await b.commit();}}
       setSyncStatus('saved','✅ Importação concluída');
     } catch(e){ console.error(e); setSyncStatus('error','❌ Erro na importação'); }
   }
 
-  function formatCurrency(v){ return Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}); }
-  function formatDateBR(s){ if(!s) return '-'; const [y,m,d]=s.split('-'); return `${d}/${m}/${y}`; }
-  function todayStr(){
-    const d=new Date();
-    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-  }
-  function addDays(s,n){
-    const d=new Date(s+'T00:00:00');
-    d.setDate(d.getDate()+n);
-    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-  }
+  // ── FUNÇÕES UTILITÁRIAS ──
   function normalizePhone(v){ return String(v||'').replace(/\D/g,''); }
   function formatPhone(v){
     const d=normalizePhone(v).slice(0,11);
@@ -850,45 +923,37 @@
     return d.replace(/^(\d{2})(\d{0,5})(\d{0,4}).*/,'($1) $2-$3').replace(/-$/,'');
   }
   function getWhatsAppLink(v){
-    const d=normalizePhone(v);
-    if(!d) return '';
+    const d=normalizePhone(v); if(!d) return '';
     if(d.length===13&&d.startsWith('55')) return `https://wa.me/${d}`;
     if(d.length===11||d.length===10) return `https://wa.me/55${d}`;
     return '';
   }
-  function calculateNights(s,e){
-    if(!s||!e) return 0;
-    const n=(new Date(e+'T00:00:00')-new Date(s+'T00:00:00'))/86400000;
-    return n>0?n:0;
-  }
+  function calculateNights(s,e){ if(!s||!e)return 0;const n=(new Date(e+'T00:00:00')-new Date(s+'T00:00:00'))/86400000;return n>0?n:0; }
   function overlaps(aS,aE,bS,bE){ return aS<bE&&bS<aE; }
   function getStayStatus(item){
     const t=todayStr();
-    if(item.cancelled)      return {label:'Cancelada',   className:'badge-cancelled'};
-    if(item.checkin>t)      return {label:'Futura',      className:'badge-future'   };
-    if(item.checkout<=t)    return {label:'Finalizada',  className:'badge-finished' };
-    return                         {label:'Em andamento',className:'badge-active'   };
+    if(item.cancelled)   return{label:'Cancelada',  className:'badge-cancelled'};
+    if(item.checkin>t)   return{label:'Futura',     className:'badge-future'   };
+    if(item.checkout<=t) return{label:'Finalizada', className:'badge-finished' };
+    return                     {label:'Em andamento',className:'badge-active'  };
   }
   function getPaymentStatus(item){
-    const total=Number(item.totalValue||0), paid=Number(item.paidValue||0);
-    if(paid>=total&&total>0) return {label:'Pago',    className:'badge-paid'   };
-    if(paid>0&&paid<total)   return {label:'Parcial', className:'badge-partial'};
-    return                          {label:'Pendente',className:'badge-pending'};
+    const total=Number(item.totalValue||0),paid=Number(item.paidValue||0);
+    if(paid>=total&&total>0) return{label:'Pago',   className:'badge-paid'   };
+    if(paid>0&&paid<total)   return{label:'Parcial',className:'badge-partial'};
+    return                         {label:'Pendente',className:'badge-pending'};
   }
   function getBalance(item){ return Math.max(0,Number(item.totalValue||0)-Number(item.paidValue||0)); }
 
   function getWeeklyCleaningDates(item){
     if(item.cancelled||!item.checkin||!item.checkout) return [];
     if(item.weeklyDayOfWeek!==undefined&&item.weeklyDayOfWeek!==null&&item.weeklyDayOfWeek!==''){
-      const target=Number(item.weeklyDayOfWeek), result=[];
-      let c=new Date(item.checkin+'T00:00:00');
-      c.setDate(c.getDate()+1);
+      const target=Number(item.weeklyDayOfWeek),result=[];
+      let c=new Date(item.checkin+'T00:00:00'); c.setDate(c.getDate()+1);
       while(c.getDay()!==target) c.setDate(c.getDate()+1);
       while(true){
         const ds=`${c.getFullYear()}-${String(c.getMonth()+1).padStart(2,'0')}-${String(c.getDate()).padStart(2,'0')}`;
-        if(ds>=item.checkout) break;
-        result.push(ds);
-        c.setDate(c.getDate()+7);
+        if(ds>=item.checkout) break; result.push(ds); c.setDate(c.getDate()+7);
       }
       return result;
     }
@@ -896,222 +961,252 @@
     while(next<item.checkout){result.push(next);next=addDays(next,7);}
     return result;
   }
-  function hasWeeklyCleaningToday(item,refDate=todayStr()){
-    return getWeeklyCleaningDates(item).includes(refDate);
-  }
-
+  function hasWeeklyCleaningToday(item,refDate=todayStr()){ return getWeeklyCleaningDates(item).includes(refDate); }
   function getCleaningKey(bId,type,date){ return `${bId}__${type}__${date}`; }
-  function isCleaningDone(bId,type,date){
-    return cleaningRecords.some(r=>r.key===getCleaningKey(bId,type,date)&&r.done);
+  function isCleaningDone(bId,type,date){ return cleaningRecords.some(r=>r.key===getCleaningKey(bId,type,date)&&r.done); }
+  function getCleaningRecord(bId,type,date){ return cleaningRecords.find(r=>r.key===getCleaningKey(bId,type,date)); }
+
+  function isWaitingClean(aptName,refDate){
+    const pastCheckouts=bookings.filter(b=>!b.cancelled&&b.apartment===aptName&&b.checkout<=refDate&&b.checkout>=BLOQUEIO_CUTOFF);
+    if(!pastCheckouts.length) return{waiting:false};
+    pastCheckouts.sort((a,b)=>b.checkout.localeCompare(a.checkout));
+    const last=pastCheckouts[0];
+    const done=isCleaningDone(last.id,'checkout',last.checkout);
+    if(done) return{waiting:false};
+    return{waiting:true,booking:last};
+  }
+  function hasPriority(aptName,checkoutDate){
+    return bookings.some(b=>!b.cancelled&&b.apartment===aptName&&b.checkin===checkoutDate);
   }
 
-  function isAptAvailable(aptName, start, end, currentId=null) {
-    const hasConflict = bookings.some(b =>
-      b.id !== currentId && !b.cancelled &&
-      b.apartment === aptName &&
-      overlaps(start, end, b.checkin, b.checkout)
-    );
-    if (hasConflict) return false;
-    const today = todayStr();
-    if (start === today && start >= BLOQUEIO_CUTOFF) {
-      const wc = isWaitingClean(aptName, start);
-      if (wc.waiting) return false;
+  // ── SENHA ADMIN ──
+  function pedirSenhaAdmin(callback){
+    senhaAdminCallback=callback;
+    document.getElementById('senhaAdminInput').value='';
+    document.getElementById('senhaAdminError').style.display='none';
+    document.getElementById('senhaAdminOverlay').classList.add('show');
+    setTimeout(()=>document.getElementById('senhaAdminInput').focus(),100);
+  }
+  document.getElementById('senhaAdminConfirm').addEventListener('click',()=>{
+    const val=document.getElementById('senhaAdminInput').value.trim();
+    if(val===ADMIN_SENHA){
+      document.getElementById('senhaAdminOverlay').classList.remove('show');
+      if(senhaAdminCallback){senhaAdminCallback();senhaAdminCallback=null;}
+    } else {
+      document.getElementById('senhaAdminError').style.display='block';
+      document.getElementById('senhaAdminInput').value='';
+      document.getElementById('senhaAdminInput').focus();
     }
-    return true;
-  }
-
-  function getAvailableApartments(start, end, currentId=null) {
-    if (!start||!end||start>=end) return [];
-    return FIXED_APARTMENTS
-      .filter(apt => isAptAvailable(apt, start, end, currentId))
-      .map(apt => {
-        const lastCheckout = bookings
-          .filter(b=>!b.cancelled&&b.apartment===apt&&b.checkout<=start)
-          .map(b=>b.checkout).sort().pop();
-        const vagoDias = lastCheckout
-          ? Math.floor((new Date(start+'T00:00:00')-new Date(lastCheckout+'T00:00:00'))/86400000)
-          : 9999;
-        return {apt, vagoDias};
-      })
-      .sort((a,b)=>a.vagoDias!==b.vagoDias?a.vagoDias-b.vagoDias:a.apt.localeCompare(b.apt,undefined,{numeric:true}))
-      .map(x=>x.apt);
-  }
-
-  function updateApartmentOptions() {
-    const currentId    = document.getElementById('bookingId').value||null;
-    const start        = document.getElementById('checkin').value;
-    const end          = document.getElementById('checkout').value;
-    const currentValue = document.getElementById('apartment').value;
-    const sel          = document.getElementById('apartment');
-    const msg          = document.getElementById('autoAptMsg');
-
-    if (!start||!end||start>=end) {
-      sel.innerHTML = '<option value="">Selecione o apartamento</option>'+
-        FIXED_APARTMENTS.map(a=>`<option value="${a}">Apto ${a}</option>`).join('');
-      if(currentValue) sel.value=currentValue;
-      msg.style.display='none'; return;
+  });
+  document.getElementById('senhaAdminInput').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('senhaAdminConfirm').click();});
+  document.getElementById('senhaAdminCancel').addEventListener('click',()=>{document.getElementById('senhaAdminOverlay').classList.remove('show');senhaAdminCallback=null;});
+  document.getElementById('weeklyDayLockBtn').addEventListener('click',()=>{
+    if(weeklyDayUnlocked){
+      weeklyDayUnlocked=false;
+      document.getElementById('weeklyDayOfWeek').disabled=true;
+      document.getElementById('weeklyDayLockBtn').textContent='🔐 Desbloquear';
+      document.getElementById('weeklyDayLockBtn').className='btn-warning';
+      document.getElementById('weeklyDayMsg').style.display='none';
+    } else {
+      pedirSenhaAdmin(()=>{
+        weeklyDayUnlocked=true;
+        document.getElementById('weeklyDayOfWeek').disabled=false;
+        document.getElementById('weeklyDayLockBtn').textContent='🔓 Bloquear';
+        document.getElementById('weeklyDayLockBtn').className='btn-success';
+        document.getElementById('weeklyDayMsg').style.display='block';
+        document.getElementById('weeklyDayMsg').textContent='✅ Campo desbloqueado.';
+      });
     }
+  });
 
-    const available   = getAvailableApartments(start, end, currentId);
-    const unavailable = FIXED_APARTMENTS.filter(a=>!available.includes(a));
-    const editing     = bookings.find(b=>b.id===currentId);
-    const today       = todayStr();
-
-    sel.innerHTML =
-      '<option value="">Selecione o apartamento</option>'+
-      available.map(a=>`<option value="${a}">✅ Apto ${a}</option>`).join('')+
-      (unavailable.length
-        ? `<optgroup label="── Indisponíveis ──">`+
-          unavailable.map(a=>{
-            const wc = (start === today) ? isWaitingClean(a, start) : { waiting: false };
-            const reason = wc.waiting ? '🧹 Aguardando limpeza' : '🚫 Ocupado';
-            return `<option value="${a}" disabled>${reason} — Apto ${a}</option>`;
-          }).join('')+`</optgroup>`
-        : '');
-
-    if(currentValue&&available.includes(currentValue)) sel.value=currentValue;
-    else if(editing?.apartment&&available.includes(editing.apartment)) sel.value=editing.apartment;
-    else sel.value='';
-
-    msg.style.display='block';
-    msg.innerHTML = available.length===0
-      ? `<span style="color:#dc2626;">❌ Nenhum apartamento disponível neste período.</span>`
-      : `<span style="color:#16a34a;">✅ ${available.length} disponível(is) &nbsp;·&nbsp; 🚫 ${unavailable.length} indisponível(is)</span>`;
-  }
-
-  function autoSelectApartment() {
-    const start=document.getElementById('checkin').value;
-    const end  =document.getElementById('checkout').value;
-    const msg  =document.getElementById('autoAptMsg');
-    if(!start||!end||start>=end){alert('Informe o check-in e check-out primeiro!');return;}
-    const currentId=document.getElementById('bookingId').value||null;
-    const available=getAvailableApartments(start,end,currentId);
-    if(!available.length){
-      msg.style.display='block';
-      msg.innerHTML=`<span style="color:#dc2626;">❌ Nenhum apartamento disponível neste período.</span>`;
-      return;
-    }
-    document.getElementById('apartment').value=available[0];
-    msg.style.display='block';
-    msg.innerHTML=`<span style="color:#2563eb;">🤖 Apto <strong>${available[0]}</strong> selecionado! (${available.length} disponível(is))</span>`;
-    findConflict(currentId);
-    updateGarageOptions();
-  }
-
-  function calcularPagamentoAutomatico(source, checkin, totalValue) {
-    const total=Number(totalValue||0);
-    if(source==='Direto'||source==='WhatsApp')
-      return {paidValue:total, paymentDate:todayStr(), paymentDesc:`Pago hoje (${formatDateBR(todayStr())}) via PIX ou Dinheiro`};
-    if(source==='Airbnb'){
-      const pd=addDays(checkin,1);
-      return {paidValue:total, paymentDate:pd, paymentDesc:`Repasse Airbnb em ${formatDateBR(pd)} (check-in + 1 dia)`};
-    }
-    if(source==='Booking'){
-      const d=new Date(checkin+'T00:00:00');
-      const pd=`${d.getMonth()===11?d.getFullYear()+1:d.getFullYear()}-${String((d.getMonth()+2>12?1:d.getMonth()+2)).padStart(2,'0')}-05`;
-      return {paidValue:total, paymentDate:pd, paymentDesc:`Repasse Booking em ${formatDateBR(pd)} (dia 5 do mês seguinte)`};
-    }
-    return {paidValue:0, paymentDate:null, paymentDesc:null};
-  }
-  function atualizarBoxPagamentoAutomatico(){
-    const source=document.getElementById('source').value;
-    const checkin=document.getElementById('checkin').value;
-    const totalValue=document.getElementById('totalValue').value;
-    const box=document.getElementById('paymentAutoBox');
-    if(!source||!checkin||!totalValue||Number(totalValue)<=0){box.style.display='none';return;}
-    const r=calcularPagamentoAutomatico(source,checkin,totalValue);
-    if(r.paymentDesc){document.getElementById('paymentAutoDesc').textContent=' '+r.paymentDesc;box.style.display='block';}
-    else box.style.display='none';
-  }
-
-  window.changeMonthlyMap = (delta) => {
-    if(delta===0){monthlyMapMonth=new Date().getMonth();monthlyMapYear=new Date().getFullYear();}
-    else{
-      monthlyMapMonth+=delta;
-      if(monthlyMapMonth>11){monthlyMapMonth=0;monthlyMapYear++;}
-      if(monthlyMapMonth<0){monthlyMapMonth=11;monthlyMapYear--;}
-    }
-    renderMonthlyMap();
+  window.changeAptMapDate=(delta)=>{
+    if(delta===0) aptMapDate=todayStr(); else aptMapDate=addDays(aptMapDate,delta);
+    renderApartmentsMap();
   };
 
-  function renderMonthlyMap(){
-    document.getElementById('monthlyMapTitle').textContent=`${MONTH_NAMES[monthlyMapMonth]} / ${monthlyMapYear}`;
-    const daysInMonth=new Date(monthlyMapYear,monthlyMapMonth+1,0).getDate();
-    const today=todayStr();
-    const dates=[];
-    for(let d=1;d<=daysInMonth;d++){
-      const ds=`${monthlyMapYear}-${String(monthlyMapMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-      const dow=new Date(ds+'T00:00:00').getDay();
-      dates.push({ds,d,dow});
+  // ── FINANCEIRO ──
+  window.changeFinMonth=(delta)=>{
+    if(delta===0){finMonth=new Date().getMonth();finYear=new Date().getFullYear();}
+    else{finMonth+=delta;if(finMonth>11){finMonth=0;finYear++;}if(finMonth<0){finMonth=11;finYear--;}}
+    renderFinanceiro();
+  };
+
+  document.getElementById('finSaveConfigBtn').addEventListener('click',()=>{
+    const sal=parseFloat(document.getElementById('finSalario').value||'0');
+    const vf=parseFloat(document.getElementById('finValorFreela').value||'0');
+    saveFinConfig(sal,vf);
+    const msg=document.getElementById('finConfigSavedMsg');
+    msg.style.display='inline';
+    setTimeout(()=>{msg.style.display='none';},2000);
+    renderFinanceiro();
+  });
+
+  function renderFinanceiro(){
+    const cfg=getFinConfig();
+    document.getElementById('finSalario').value=cfg.salario||'';
+    document.getElementById('finValorFreela').value=cfg.valorFreela||'';
+    document.getElementById('finMonthTitle').textContent=`${MONTH_NAMES[finMonth]} / ${finYear}`;
+
+    const ms=`${finYear}-${String(finMonth+1).padStart(2,'0')}-01`;
+    const me=`${finYear}-${String(finMonth+1).padStart(2,'0')}-${String(new Date(finYear,finMonth+1,0).getDate()).padStart(2,'0')}`;
+
+    // Filtra limpezas concluídas no mês
+    const recs = cleaningRecords.filter(r => r.done && r.date >= ms && r.date <= me);
+
+    let cntFax = 0, cntFreela = 0, cntAberto = 0;
+    const rows = [];
+
+    recs.forEach(r => {
+      const b = bookings.find(x => x.id === r.bookingId);
+      const apt = b ? b.apartment : '—';
+      const guest = b ? b.guestName : '—';
+      const tipoLabel = r.type === 'checkout' ? 'Saída' : 'Semanal';
+      const resp = r.responsavel || 'aberto';
+
+      if (resp === 'faxineira') cntFax++;
+      else if (resp === 'freela') cntFreela++;
+      else cntAberto++;
+
+      const valor = resp === 'freela' ? cfg.valorFreela : (resp === 'faxineira' ? 0 : 0);
+      rows.push({ date: r.date, apt, guest, tipoLabel, resp, valor, key: r.key, bId: r.bookingId, type: r.type });
+    });
+
+    rows.sort((a,b) => a.date.localeCompare(b.date));
+
+    const totalFreela = cntFreela * cfg.valorFreela;
+    const totalGeral = cfg.salario + totalFreela;
+
+    document.getElementById('finResumoSalario').textContent = formatCurrency(cfg.salario);
+    document.getElementById('finResumoFaxineiraCount').textContent = `${cntFax} limpeza(s) registradas`;
+    document.getElementById('finResumoFreela').textContent = formatCurrency(totalFreela);
+    document.getElementById('finResumoFreelaCount').textContent = `${cntFreela} limpeza(s) × ${formatCurrency(cfg.valorFreela)}`;
+    document.getElementById('finResumoTotal').textContent = formatCurrency(totalGeral);
+    document.getElementById('finResumoOpenCount').textContent = cntAberto > 0 ? `⚠️ ${cntAberto} sem atribuição` : '✅ Todas atribuídas';
+
+    if (!rows.length) {
+      document.getElementById('finHistoryTable').innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px;">Nenhuma limpeza concluída neste mês.</td></tr>`;
+      return;
     }
-    let thead='<thead><tr><th class="apt-col">Apto</th>';
-    dates.forEach(({ds,d,dow})=>{
-      const isToday=ds===today?' today-col':'';
-      const isWeekend=(dow===0||dow===6)?' weekend':'';
-      thead+=`<th class="${isToday}${isWeekend}">${d}<br><span style="font-size:10px;font-weight:normal;">${DAY_NAMES_SHORT[dow]}</span></th>`;
-    });
-    thead+='</tr></thead>';
 
-    const monthStart=`${monthlyMapYear}-${String(monthlyMapMonth+1).padStart(2,'0')}-01`;
-    const monthEnd=dates[dates.length-1].ds;
-
-    let tbody='<tbody>';
-    FIXED_APARTMENTS.forEach(apt=>{
-      const aptBooks=bookings.filter(b=>b.apartment===apt&&!b.cancelled&&b.checkin<=monthEnd&&b.checkout>monthStart);
-      tbody+=`<tr><td class="apt-col">Apto ${apt}</td>`;
-      dates.forEach(({ds})=>{
-        const checkinBooks =aptBooks.filter(b=>b.checkin ===ds);
-        const checkoutBooks=aptBooks.filter(b=>b.checkout===ds);
-        const stayBooks    =aptBooks.filter(b=>b.checkin<ds&&b.checkout>ds);
-        const isToday=ds===today?' today-col':'';
-        const wc = isWaitingClean(apt, ds);
-
-        let cellClass='mc-free',cellText='',cellTitle='';
-
-        if(checkoutBooks.length&&checkinBooks.length){
-          cellClass='mc-checkin-checkout';
-          cellText=`${checkoutBooks[0].guestName.split(' ')[0]}↗${checkinBooks[0].guestName.split(' ')[0]}`;
-          cellTitle=`Check-out: ${checkoutBooks[0].guestName} | Check-in: ${checkinBooks[0].guestName}`;
-        } else if(checkinBooks.length){
-          cellClass='mc-checkin';
-          cellText=checkinBooks[0].guestName.split(' ')[0];
-          cellTitle=`Check-in: ${checkinBooks[0].guestName}`;
-        } else if(checkoutBooks.length){
-          cellClass='mc-checkout';
-          cellText=checkoutBooks[0].guestName.split(' ')[0];
-          cellTitle=`Check-out: ${checkoutBooks[0].guestName}`;
-        } else if(stayBooks.length){
-          cellClass='mc-stay';
-          cellText=stayBooks[0].guestName.split(' ')[0];
-          cellTitle=`Hóspede: ${stayBooks[0].guestName}`;
-        } else if(wc.waiting){
-          cellClass='mc-waiting';
-          cellText='🧹';
-          cellTitle=`Aguardando limpeza (saída de ${wc.booking.guestName} em ${formatDateBR(wc.booking.checkout)})`;
-        } else {
-          cellClass='mc-vacant';
-          cellTitle='Disponível';
-        }
-
-        tbody+=`<td class="${isToday}" title="${cellTitle}"><div class="map-cell ${cellClass}">${cellText}</div></td>`;
-      });
-      tbody+='</tr>';
-    });
-    tbody+='</tbody>';
-    document.getElementById('monthlyMapTable').innerHTML=thead+tbody;
+    document.getElementById('finHistoryTable').innerHTML = rows.map(r => {
+      const respBadge = r.resp === 'faxineira'
+        ? `<span class="badge badge-faxineira">👩 Faxineira</span>`
+        : r.resp === 'freela'
+          ? `<span class="badge badge-freela">🧹 Freela</span>`
+          : `<span class="badge badge-open" onclick="abrirAtribModalDireto('${r.bId}','${r.type}','${r.date}','Apto ${r.apt} — ${r.tipoLabel}')" style="cursor:pointer;">⚠️ Definir</span>`;
+      const valorStr = r.resp === 'freela' ? formatCurrency(cfg.valorFreela) : r.resp === 'faxineira' ? '<span class="muted">Salário fixo</span>' : '—';
+      return `<tr>
+        <td>${formatDateBR(r.date)}</td>
+        <td><strong>Apto ${r.apt}</strong></td>
+        <td>${r.tipoLabel}</td>
+        <td>${r.guest}</td>
+        <td>${respBadge}</td>
+        <td>${valorStr}</td>
+      </tr>`;
+    }).join('');
   }
 
-  async function enviarParaTodos(msg) {
+  window.abrirAtribModalDireto = (bId, type, date, desc) => {
+    abrirAtribModal(bId, type, date, desc);
+  };
+
+  // ── MARK CLEANING (atualizado com responsavel) ──
+  async function markCleaning(bId, type, date, done, responsavel) {
+    const key = getCleaningKey(bId, type, date);
+
+    // Se done=true e responsavel não definido, verificar se precisa perguntar
+    if (done && !responsavel) {
+      const auto = getAutoResponsavel(date);
+      if (auto === 'aberto') {
+        // Sáb tarde ou Dom → abre modal para escolher
+        const b = bookings.find(x => x.id === bId);
+        const desc = `Apto ${b ? b.apartment : ''} — ${type === 'checkout' ? 'Limpeza de saída' : 'Faxina semanal'}`;
+        abrirAtribModal(bId, type, date, desc);
+        return; // espera a escolha no modal
+      } else {
+        responsavel = auto; // faxineira automático
+      }
+    }
+
+    const record = { key, bookingId: bId, type, date, done, responsavel: responsavel || null, updatedAt: new Date().toISOString() };
+    const idx = cleaningRecords.findIndex(r => r.key === key);
+    if (idx >= 0) cleaningRecords[idx] = record; else cleaningRecords.push(record);
+    await saveCleaningToFirebase(record);
+    renderAll();
+    if (document.getElementById('tab-financeiro').classList.contains('active')) renderFinanceiro();
+  }
+  window.markCleaning = markCleaning;
+
+  window.reagendarFaxina=(bId,currentDate,type)=>{
+    pedirSenhaAdmin(()=>{
+      const b=bookings.find(x=>x.id===bId); if(!b) return;
+      const nd=prompt(`Reagendar faxina do Apto ${b.apartment}\nData atual: ${formatDateBR(currentDate)}\n\nDigite a nova data (AAAA-MM-DD):`,currentDate);
+      if(!nd||nd===currentDate) return;
+      if(!/^\d{4}-\d{2}-\d{2}$/.test(nd)){alert('Formato inválido.');return;}
+      if(nd<=b.checkin||nd>=b.checkout){alert(`Data deve estar entre ${formatDateBR(b.checkin)} e ${formatDateBR(b.checkout)}.`);return;}
+      const ok=getCleaningKey(bId,type,currentDate);
+      const nk=getCleaningKey(bId,type,nd);
+      const or={key:ok,bookingId:bId,type,date:currentDate,done:true,rescheduledTo:nd,updatedAt:new Date().toISOString()};
+      const oi=cleaningRecords.findIndex(r=>r.key===ok);
+      if(oi>=0) cleaningRecords[oi]=or; else cleaningRecords.push(or);
+      if(!cleaningRecords.find(r=>r.key===nk)){
+        const nr={key:nk,bookingId:bId,type,date:nd,done:false,rescheduledFrom:currentDate,updatedAt:new Date().toISOString()};
+        cleaningRecords.push(nr); saveCleaningToFirebase(nr);
+      }
+      saveCleaningToFirebase(or);
+      alert(`✅ Faxina reagendada para ${formatDateBR(nd)}!`);
+      renderCleaningTab();
+    });
+  };
+
+  // ── TABS ──
+  function switchTab(name){
+    document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+    document.getElementById(`tab-${name}`).classList.add('active');
+    document.querySelectorAll('.tabs .tab-btn').forEach(b=>{
+      b.classList.toggle('active',b.getAttribute('onclick')===`switchTab('${name}')`);
+    });
+    document.querySelectorAll('.mobile-menu .tab-btn').forEach(b=>{
+      const match=b.getAttribute('onclick')?.includes(`switchTab('${name}')`);
+      b.classList.toggle('active',!!match);
+    });
+    const labels={dashboard:'📊 Dashboard',mapamensal:'🗓️ Mapa Mensal',reservas:'📋 Reservas',limpeza:'🧹 Limpeza',financeiro:'💰 Financeiro',relatorio:'📈 Relatório'};
+    const labelEl=document.getElementById('hamburgerLabel');
+    if(labelEl) labelEl.textContent=labels[name]||'';
+    if(name==='limpeza')    renderCleaningTab();
+    if(name==='relatorio')  renderReport();
+    if(name==='mapamensal') renderMonthlyMap();
+    if(name==='financeiro') renderFinanceiro();
+  }
+  window.switchTab=switchTab;
+
+  function closeMobileMenu(){
+    document.getElementById('mobileMenu')?.classList.remove('open');
+    document.getElementById('hamburgerBtn')?.classList.remove('open');
+  }
+  window.closeMobileMenu=closeMobileMenu;
+
+  document.getElementById('hamburgerBtn')?.addEventListener('click',()=>{
+    const menu=document.getElementById('mobileMenu');
+    const btn=document.getElementById('hamburgerBtn');
+    const isOpen=menu.classList.contains('open');
+    menu.classList.toggle('open',!isOpen);
+    btn.classList.toggle('open',!isOpen);
+  });
+  document.addEventListener('click',e=>{
+    const btn=document.getElementById('hamburgerBtn');
+    const menu=document.getElementById('mobileMenu');
+    if(btn&&menu&&!btn.contains(e.target)&&!menu.contains(e.target)) closeMobileMenu();
+  });
+
+  // ── WA ──
+  async function enviarParaTodos(msg){
     const enc=encodeURIComponent(msg);
-    await Promise.all(WA_RECIPIENTS.map(r=>
-      fetch(`https://api.callmebot.com/whatsapp.php?phone=${r.phone}&text=${enc}&apikey=${r.apikey}`,{mode:'no-cors'})
-        .catch(e=>console.error(e))
-    ));
+    await Promise.all(WA_RECIPIENTS.map(r=>fetch(`https://api.callmebot.com/whatsapp.php?phone=${r.phone}&text=${enc}&apikey=${r.apikey}`,{mode:'no-cors'}).catch(e=>console.error(e))));
   }
-
   async function enviarResumoWhatsApp(){
-    const today=todayStr(), ontem=addDays(today,-1);
-    const agora=new Date(), mes=agora.getMonth(), ano=agora.getFullYear();
+    const today=todayStr(),ontem=addDays(today,-1);
+    const agora=new Date(),mes=agora.getMonth(),ano=agora.getFullYear();
     const dim=new Date(ano,mes+1,0).getDate();
     const ms=`${ano}-${String(mes+1).padStart(2,'0')}-01`;
     const me=`${ano}-${String(mes+1).padStart(2,'0')}-${String(dim).padStart(2,'0')}`;
@@ -1122,13 +1217,13 @@
     const ra=bookings.filter(b=>!b.cancelled&&b.checkin<=me&&b.checkout>ms);
     let dOc=0;
     ra.forEach(b=>{const i=b.checkin>ms?b.checkin:ms,f=b.checkout<addDays(me,1)?b.checkout:addDays(me,1);dOc+=calculateNights(i,f);});
-    const tp=18*dim, taxa=tp>0?((dOc/tp)*100).toFixed(1):'0.0';
+    const tp=18*dim,taxa=tp>0?((dOc/tp)*100).toFixed(1):'0.0';
     const co=bookings.filter(b=>!b.cancelled&&b.checkin===ontem);
     const eo=co.reduce((s,b)=>s+Number(b.totalValue||0),0);
     const ci=bookings.filter(b=>b.checkin===today&&!b.cancelled);
     const cx=bookings.filter(b=>b.checkout===today&&!b.cancelled);
     const wk=bookings.filter(b=>hasWeeklyCleaningToday(b,today)&&!b.cancelled);
-    const am=addDays(today,1), em2=addDays(today,2);
+    const am=addDays(today,1),em2=addDays(today,2);
     const cia=bookings.filter(b=>b.checkin===am&&!b.cancelled);
     const cxa=bookings.filter(b=>b.checkout===am&&!b.cancelled);
     const ci2=bookings.filter(b=>b.checkin===em2&&!b.cancelled);
@@ -1155,7 +1250,6 @@
     msg+=`\n_Enviado automaticamente às 07:30_ 🤖`;
     try{await enviarParaTodos(msg);return true;}catch(e){console.error(e);return false;}
   }
-
   async function enviarRelatorioMensal(){
     const ag=new Date();
     const mr=ag.getMonth()===0?11:ag.getMonth()-1;
@@ -1169,14 +1263,15 @@
     const tp=cb.reduce((s,b)=>s+Number(b.paidValue||0),0);
     const tn=cb.reduce((s,b)=>s+Number(b.nights||calculateNights(b.checkin,b.checkout)),0);
     const ad=tn>0?tv/tn:0;
-    let od=0; const oa=new Set();
+    let od=0;const oa=new Set();
     mb.forEach(b=>{oa.add(b.apartment);const st=b.checkin>ms?b.checkin:ms,en=b.checkout<addDays(me,1)?b.checkout:addDays(me,1);od+=calculateNights(st,en);});
-    const tpo=18*dim, or=tpo>0?((od/tpo)*100).toFixed(1):'0.0';
+    const tpo=18*dim,or=tpo>0?((od/tpo)*100).toFixed(1):'0.0';
     const cdc=cleaningRecords.filter(r=>r.done&&r.type==='checkout'&&r.date>=ms&&r.date<=me).length;
     const cdw=cleaningRecords.filter(r=>r.done&&r.type==='weekly'&&r.date>=ms&&r.date<=me).length;
     const ct=cdc+cdw;
-    const sal=parseFloat(localStorage.getItem('cleanSalary')||'0');
-    const cpc=sal>0&&ct>0?sal/ct:0;
+    const cfg=getFinConfig();
+    const cntFreela=cleaningRecords.filter(r=>r.done&&r.responsavel==='freela'&&r.date>=ms&&r.date<=me).length;
+    const totalFreela=cntFreela*cfg.valorFreela;
     const as=FIXED_APARTMENTS.map(apt=>{const ab=cb.filter(b=>b.apartment===apt);return{apt,rev:ab.reduce((s,b)=>s+Number(b.totalValue||0),0),nights:ab.reduce((s,b)=>s+Number(b.nights||calculateNights(b.checkin,b.checkout)),0)};}).filter(x=>x.rev>0).sort((a,b)=>b.rev-a.rev);
     const medals=['🥇','🥈','🥉'];
     const top3=as.slice(0,3).map((x,i)=>`  ${medals[i]} Apto ${x.apt} — ${formatCurrency(x.rev)} (${x.nights} noite${x.nights!==1?'s':''})`).join('\n')||'  Nenhuma reserva no mês.';
@@ -1184,11 +1279,11 @@
     msg+=`💰 *Financeiro*\n  📈 Faturamento: *${formatCurrency(tv)}*\n  ✅ Recebido: *${formatCurrency(tp)}*\n  ⏳ Pendente: *${formatCurrency(tv-tp)}*\n  🛏️ Diária média: *${formatCurrency(ad)}*\n  📋 Reservas: *${cb.length}*\n\n`;
     msg+=`🏠 *Ocupação*\n  📊 Taxa geral: *${or}%*\n  🗓️ Diárias: *${Math.round(od)} de ${tpo}*\n  🏠 Aptos: *${oa.size} de 18*\n\n`;
     msg+=`🧹 *Faxinas*\n  🚪 Saída: *${cdc}*\n  🔄 Semanais: *${cdw}*\n  📋 Total: *${ct}*\n`;
-    if(sal>0) msg+=`  💰 Salário: *${formatCurrency(sal)}*\n  💡 Custo/faxina: *${formatCurrency(cpc)}*\n`;
+    if(cfg.salario>0) msg+=`  👩 Faxineira: *${formatCurrency(cfg.salario)}*\n`;
+    if(cntFreela>0)   msg+=`  🧹 Freelas: *${cntFreela} × ${formatCurrency(cfg.valorFreela)} = ${formatCurrency(totalFreela)}*\n`;
     msg+=`\n🏆 *Top 3 Apartamentos*\n${top3}\n\n_Relatório gerado em ${formatDateBR(todayStr())}_ 🤖`;
     try{await enviarParaTodos(msg);return true;}catch(e){console.error(e);return false;}
   }
-
   function agendarProximoEnvio(){
     if(waSchedulerTimer) clearTimeout(waSchedulerTimer);
     const ag=new Date(),al=new Date(ag);
@@ -1198,87 +1293,27 @@
       const ch=`wa_enviado_${todayStr()}`;
       if(!localStorage.getItem(ch)){const ok=await enviarResumoWhatsApp();if(ok)localStorage.setItem(ch,'1');}
       const ag2=new Date(),is1=ag2.getDate()===1,cr=`wa_relatorio_${ag2.getFullYear()}_${ag2.getMonth()}`;
-      if(is1&&!localStorage.getItem(cr)){
-        await new Promise(r=>setTimeout(r,5*60*1000));
-        const ok=await enviarRelatorioMensal();if(ok)localStorage.setItem(cr,'1');
-      }
+      if(is1&&!localStorage.getItem(cr)){await new Promise(r=>setTimeout(r,5*60*1000));const ok=await enviarRelatorioMensal();if(ok)localStorage.setItem(cr,'1');}
       agendarProximoEnvio();
     },al-ag);
   }
-
   document.getElementById('sendWABtn').addEventListener('click',async()=>{
-    const btn=document.getElementById('sendWABtn');
-    btn.textContent='⏳ Enviando...';btn.disabled=true;
+    const btn=document.getElementById('sendWABtn');btn.textContent='⏳ Enviando...';btn.disabled=true;
     const ok=await enviarResumoWhatsApp();
     btn.textContent=ok?'✅ Enviado!':'❌ Erro';btn.style.background=ok?'#16a34a':'#dc2626';
     setTimeout(()=>{btn.textContent='📲 Enviar resumo WhatsApp';btn.style.background='#25D366';btn.disabled=false;},3500);
   });
   document.getElementById('sendMonthlyReportBtn').addEventListener('click',async()=>{
-    const btn=document.getElementById('sendMonthlyReportBtn');
-    btn.textContent='⏳ Enviando...';btn.disabled=true;
+    const btn=document.getElementById('sendMonthlyReportBtn');btn.textContent='⏳ Enviando...';btn.disabled=true;
     const ok=await enviarRelatorioMensal();
     btn.textContent=ok?'✅ Enviado!':'❌ Erro';btn.style.background=ok?'#16a34a':'#dc2626';
     setTimeout(()=>{btn.textContent='📊 Testar relatório mensal';btn.style.background='#7c3aed';btn.disabled=false;},3500);
   });
 
-  function switchTab(name){
-    document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
-    document.getElementById(`tab-${name}`).classList.add('active');
-
-    // Atualiza tabs desktop
-    document.querySelectorAll('.tabs .tab-btn').forEach(b=>{
-      b.classList.toggle('active', b.getAttribute('onclick')===`switchTab('${name}')`);
-    });
-
-    // Atualiza tabs mobile
-    document.querySelectorAll('.mobile-menu .tab-btn').forEach(b=>{
-      const match=b.getAttribute('onclick')?.includes(`switchTab('${name}')`);
-      b.classList.toggle('active',!!match);
-    });
-
-    // Atualiza label do hamburguer
-    const labels={
-      dashboard:'📊 Dashboard',
-      mapamensal:'🗓️ Mapa Mensal',
-      reservas:'📋 Reservas',
-      limpeza:'🧹 Limpeza',
-      relatorio:'📈 Relatório',
-    };
-    const labelEl=document.getElementById('hamburgerLabel');
-    if(labelEl) labelEl.textContent=labels[name]||'';
-
-    if(name==='limpeza')    renderCleaningTab();
-    if(name==='relatorio')  renderReport();
-    if(name==='mapamensal') renderMonthlyMap();
-  }
-  window.switchTab=switchTab;
-
-  // ── HAMBURGUER MOBILE ──
-  function closeMobileMenu(){
-    document.getElementById('mobileMenu')?.classList.remove('open');
-    document.getElementById('hamburgerBtn')?.classList.remove('open');
-  }
-  window.closeMobileMenu=closeMobileMenu;
-
-  document.getElementById('hamburgerBtn')?.addEventListener('click',()=>{
-    const menu=document.getElementById('mobileMenu');
-    const btn=document.getElementById('hamburgerBtn');
-    const isOpen=menu.classList.contains('open');
-    menu.classList.toggle('open',!isOpen);
-    btn.classList.toggle('open',!isOpen);
-  });
-
-  document.addEventListener('click',e=>{
-    const btn=document.getElementById('hamburgerBtn');
-    const menu=document.getElementById('mobileMenu');
-    if(btn&&menu&&!btn.contains(e.target)&&!menu.contains(e.target)){
-      closeMobileMenu();
-    }
-  });
-
+  // ── ALERTS ──
   function renderAlerts(){
     const today=todayStr();
-    const days=[0,1,2,3], names=['Hoje','Amanhã','Em 2 dias','Em 3 dias'];
+    const days=[0,1,2,3],names=['Hoje','Amanhã','Em 2 dias','Em 3 dias'];
     let html='',hasAny=false;
     days.forEach((off,i)=>{
       const d=addDays(today,off);
@@ -1296,56 +1331,25 @@
     document.getElementById('alertPanel').style.display=hasAny?'block':'none';
   }
 
-  async function markCleaning(bId,type,date,done){
-    const key=getCleaningKey(bId,type,date);
-    const record={key,bookingId:bId,type,date,done,updatedAt:new Date().toISOString()};
-    const idx=cleaningRecords.findIndex(r=>r.key===key);
-    if(idx>=0) cleaningRecords[idx]=record; else cleaningRecords.push(record);
-    await saveCleaningToFirebase(record);
-    renderAll();
-  }
-  window.markCleaning=markCleaning;
-
-  window.reagendarFaxina=(bId,currentDate,type)=>{
-    pedirSenhaAdmin(()=>{
-      const b=bookings.find(x=>x.id===bId);
-      if(!b) return;
-      const nd=prompt(`Reagendar faxina do Apto ${b.apartment}\nData atual: ${formatDateBR(currentDate)}\n\nDigite a nova data (AAAA-MM-DD):`,currentDate);
-      if(!nd||nd===currentDate) return;
-      if(!/^\d{4}-\d{2}-\d{2}$/.test(nd)){alert('Formato inválido.');return;}
-      if(nd<=b.checkin||nd>=b.checkout){alert(`Data deve estar entre ${formatDateBR(b.checkin)} e ${formatDateBR(b.checkout)}.`);return;}
-      const ok=getCleaningKey(bId,type,currentDate);
-      const nk=getCleaningKey(bId,type,nd);
-      const or={key:ok,bookingId:bId,type,date:currentDate,done:true,rescheduledTo:nd,updatedAt:new Date().toISOString()};
-      const oi=cleaningRecords.findIndex(r=>r.key===ok);
-      if(oi>=0) cleaningRecords[oi]=or; else cleaningRecords.push(or);
-      if(!cleaningRecords.find(r=>r.key===nk)){
-        const nr={key:nk,bookingId:bId,type,date:nd,done:false,rescheduledFrom:currentDate,updatedAt:new Date().toISOString()};
-        cleaningRecords.push(nr);
-        saveCleaningToFirebase(nr);
-      }
-      saveCleaningToFirebase(or);
-      alert(`✅ Faxina reagendada para ${formatDateBR(nd)}!`);
-      renderCleaningTab();
-    });
-  };
-
+  // ── CLEANING TAB ──
   function buildCleaningItems(refDate){
     const today=todayStr();
     const items=[];
     bookings.forEach(b=>{
       if(b.cancelled) return;
       if(b.checkout===refDate){
-        const priority=hasPriority(b.apartment, b.checkout);
+        const priority=hasPriority(b.apartment,b.checkout);
+        const rec=getCleaningRecord(b.id,'checkout',refDate);
         items.push({booking:b,type:'checkout',date:refDate,label:'Limpeza de saída',
-          done:isCleaningDone(b.id,'checkout',refDate),overdue:false,priority});
+          done:isCleaningDone(b.id,'checkout',refDate),overdue:false,priority,
+          responsavel:rec?.responsavel||null});
       }
       getWeeklyCleaningDates(b).forEach(d=>{
         if(d===refDate){
           const rec=cleaningRecords.find(r=>r.key===getCleaningKey(b.id,'weekly',d));
           items.push({booking:b,type:'weekly',date:d,label:'Faxina semanal',
             done:isCleaningDone(b.id,'weekly',d),overdue:false,priority:false,
-            rescheduledFrom:rec?.rescheduledFrom||null});
+            rescheduledFrom:rec?.rescheduledFrom||null,responsavel:rec?.responsavel||null});
         }
       });
     });
@@ -1359,8 +1363,7 @@
             const already=items.some(i=>i.booking.id===b.id&&i.type==='checkout'&&i.date===b.checkout);
             if(!already){
               const priority=hasPriority(b.apartment,b.checkout);
-              items.push({booking:b,type:'checkout',date:b.checkout,label:'Limpeza de saída',
-                done:false,overdue:true,overdueFrom:b.checkout,priority});
+              items.push({booking:b,type:'checkout',date:b.checkout,label:'Limpeza de saída',done:false,overdue:true,overdueFrom:b.checkout,priority,responsavel:null});
             }
           }
         }
@@ -1370,7 +1373,7 @@
             const rec=cleaningRecords.find(r=>r.key===key);
             if(!rec||(!rec.done&&!rec.rescheduledTo)){
               const already=items.some(i=>i.booking.id===b.id&&i.type==='weekly'&&i.date===d);
-              if(!already) items.push({booking:b,type:'weekly',date:d,label:'Faxina semanal',done:false,overdue:true,overdueFrom:d,priority:false});
+              if(!already) items.push({booking:b,type:'weekly',date:d,label:'Faxina semanal',done:false,overdue:true,overdueFrom:d,priority:false,responsavel:null});
             }
           }
         });
@@ -1416,10 +1419,11 @@
       const overdueTag=item.overdue&&!item.done?`<span class="badge badge-overdue" style="margin-bottom:8px;display:inline-block;">⚠️ Atrasada — era ${formatDateBR(item.overdueFrom)}</span><br>`:'';
       const priorityTag=item.priority&&!item.done?`<span class="badge badge-priority" style="margin-bottom:8px;display:inline-block;">⚡ PRIORIDADE — Check-in em seguida!</span><br>`:'';
       const reschedTag=item.rescheduledFrom?`<span class="badge badge-warning" style="margin-bottom:8px;display:inline-block;">📅 Reagendada de ${formatDateBR(item.rescheduledFrom)}</span><br>`:'';
+      const respTag=item.done?(item.responsavel==='faxineira'?`<span class="badge badge-faxineira" style="margin-bottom:8px;display:inline-block;">👩 Faxineira</span><br>`:item.responsavel==='freela'?`<span class="badge badge-freela" style="margin-bottom:8px;display:inline-block;">🧹 Freela</span><br>`:`<span class="badge badge-open" style="margin-bottom:8px;display:inline-block;">⚠️ Sem atribuição</span><br>`):'';
       return `
         <div class="clean-card ${doneClass} ${typeClass}">
           <h4>${item.done?'✅':'⏳'} Apto ${b.apartment} — ${item.label}</h4>
-          ${priorityTag}${overdueTag}${reschedTag}
+          ${priorityTag}${overdueTag}${reschedTag}${respTag}
           <div class="clean-meta">
             👤 Hóspede: <strong>${b.guestName}</strong><br>
             📅 Período: ${formatDateBR(b.checkin)} até ${formatDateBR(b.checkout)}<br>
@@ -1428,14 +1432,11 @@
           </div>
           <div class="clean-actions">
             ${item.done
-              ?`<button class="btn-secondary" onclick="markCleaning('${b.id}','${item.type}','${item.date}',false)">Desfazer</button>`
-              :`<button class="btn-success" onclick="markCleaning('${b.id}','${item.type}','${item.date}',true)">✅ Marcar como feita</button>`
+              ?`<button class="btn-secondary" onclick="markCleaning('${b.id}','${item.type}','${item.date}',false,null)">Desfazer</button>`
+              :`<button class="btn-success" onclick="markCleaning('${b.id}','${item.type}','${item.date}',true,null)">✅ Marcar como feita</button>`
             }
             ${item.type==='weekly'&&!item.done?`<button class="btn-warning" style="font-size:12px;" onclick="reagendarFaxina('${b.id}','${item.date}','${item.type}')">📅 Reagendar</button>`:''}
-            ${waLink?`<a class="wa-btn" href="${waLink}" target="_blank" rel="noopener">
-              <svg viewBox="0 0 32 32" width="13" height="13" fill="currentColor"><path d="M19.11 17.23c-.29-.15-1.69-.83-1.95-.92-.26-.1-.45-.15-.64.15-.19.29-.74.92-.91 1.11-.17.19-.34.22-.63.08-.29-.15-1.21-.45-2.31-1.43-.86-.77-1.43-1.72-1.6-2.01-.17-.29-.02-.45.13-.6.13-.13.29-.34.43-.51.14-.17.19-.29.29-.48.1-.19.05-.36-.02-.51-.08-.15-.64-1.54-.88-2.11-.23-.56-.47-.48-.64-.49h-.55c-.19 0-.48.07-.74.36-.26.29-1 1-.99 2.43 0 1.43 1.03 2.81 1.18 3 .14.19 2.02 3.08 4.89 4.32.68.29 1.21.46 1.62.59.68.22 1.29.19 1.77.12.54-.08 1.69-.69 1.93-1.36.24-.67.24-1.24.17-1.36-.07-.12-.26-.19-.55-.34z"></path><path d="M16.03 3.2c-7.07 0-12.8 5.73-12.8 12.8 0 2.26.59 4.47 1.72 6.41L3.2 28.8l6.56-1.72a12.74 12.74 0 0 0 6.27 1.6h.01c7.06 0 12.79-5.73 12.79-12.8S23.1 3.2 16.03 3.2zm0 23.33h-.01a10.5 10.5 0 0 1-5.35-1.47l-.38-.22-3.89 1.02 1.04-3.79-.25-.39a10.54 10.54 0 1 1 8.84 4.85z"></path></svg>
-              WhatsApp
-            </a>`:''}
+            ${waLink?`<a class="wa-btn" href="${waLink}" target="_blank" rel="noopener"><svg viewBox="0 0 32 32" width="13" height="13" fill="currentColor"><path d="M19.11 17.23c-.29-.15-1.69-.83-1.95-.92-.26-.1-.45-.15-.64.15-.19.29-.74.92-.91 1.11-.17.19-.34.22-.63.08-.29-.15-1.21-.45-2.31-1.43-.86-.77-1.43-1.72-1.6-2.01-.17-.29-.02-.45.13-.6.13-.13.29-.34.43-.51.14-.17.19-.29.29-.48.1-.19.05-.36-.02-.51-.08-.15-.64-1.54-.88-2.11-.23-.56-.47-.48-.64-.49h-.55c-.19 0-.48.07-.74.36-.26.29-1 1-.99 2.43 0 1.43 1.03 2.81 1.18 3 .14.19 2.02 3.08 4.89 4.32.68.29 1.21.46 1.62.59.68.22 1.29.19 1.77.12.54-.08 1.69-.69 1.93-1.36.24-.67.24-1.24.17-1.36-.07-.12-.26-.19-.55-.34z"></path><path d="M16.03 3.2c-7.07 0-12.8 5.73-12.8 12.8 0 2.26.59 4.47 1.72 6.41L3.2 28.8l6.56-1.72a12.74 12.74 0 0 0 6.27 1.6h.01c7.06 0 12.79-5.73 12.79-12.8S23.1 3.2 16.03 3.2zm0 23.33h-.01a10.5 10.5 0 0 1-5.35-1.47l-.38-.22-3.89 1.02 1.04-3.79-.25-.39a10.54 10.54 0 1 1 8.84 4.85z"></path></svg>WhatsApp</a>`:''}
           </div>
         </div>`;
     }).join('');
@@ -1447,12 +1448,62 @@
     renderCleaningTab();
   };
 
+  // ── MAPA MENSAL ──
+  window.changeMonthlyMap=(delta)=>{
+    if(delta===0){monthlyMapMonth=new Date().getMonth();monthlyMapYear=new Date().getFullYear();}
+    else{monthlyMapMonth+=delta;if(monthlyMapMonth>11){monthlyMapMonth=0;monthlyMapYear++;}if(monthlyMapMonth<0){monthlyMapMonth=11;monthlyMapYear--;}}
+    renderMonthlyMap();
+  };
+  function renderMonthlyMap(){
+    document.getElementById('monthlyMapTitle').textContent=`${MONTH_NAMES[monthlyMapMonth]} / ${monthlyMapYear}`;
+    const daysInMonth=new Date(monthlyMapYear,monthlyMapMonth+1,0).getDate();
+    const today=todayStr();
+    const dates=[];
+    for(let d=1;d<=daysInMonth;d++){
+      const ds=`${monthlyMapYear}-${String(monthlyMapMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+      const dow=new Date(ds+'T00:00:00').getDay();
+      dates.push({ds,d,dow});
+    }
+    let thead='<thead><tr><th class="apt-col">Apto</th>';
+    dates.forEach(({ds,d,dow})=>{
+      const isToday=ds===today?' today-col':'';
+      const isWeekend=(dow===0||dow===6)?' weekend':'';
+      thead+=`<th class="${isToday}${isWeekend}">${d}<br><span style="font-size:10px;font-weight:normal;">${DAY_NAMES_SHORT[dow]}</span></th>`;
+    });
+    thead+='</tr></thead>';
+    const monthStart=`${monthlyMapYear}-${String(monthlyMapMonth+1).padStart(2,'0')}-01`;
+    const monthEnd=dates[dates.length-1].ds;
+    let tbody='<tbody>';
+    FIXED_APARTMENTS.forEach(apt=>{
+      const aptBooks=bookings.filter(b=>b.apartment===apt&&!b.cancelled&&b.checkin<=monthEnd&&b.checkout>monthStart);
+      tbody+=`<tr><td class="apt-col">Apto ${apt}</td>`;
+      dates.forEach(({ds})=>{
+        const checkinBooks=aptBooks.filter(b=>b.checkin===ds);
+        const checkoutBooks=aptBooks.filter(b=>b.checkout===ds);
+        const stayBooks=aptBooks.filter(b=>b.checkin<ds&&b.checkout>ds);
+        const isToday=ds===today?' today-col':'';
+        const wc=isWaitingClean(apt,ds);
+        let cellClass='mc-free',cellText='',cellTitle='';
+        if(checkoutBooks.length&&checkinBooks.length){cellClass='mc-checkin-checkout';cellText=`${checkoutBooks[0].guestName.split(' ')[0]}↗${checkinBooks[0].guestName.split(' ')[0]}`;cellTitle=`Check-out: ${checkoutBooks[0].guestName} | Check-in: ${checkinBooks[0].guestName}`;}
+        else if(checkinBooks.length){cellClass='mc-checkin';cellText=checkinBooks[0].guestName.split(' ')[0];cellTitle=`Check-in: ${checkinBooks[0].guestName}`;}
+        else if(checkoutBooks.length){cellClass='mc-checkout';cellText=checkoutBooks[0].guestName.split(' ')[0];cellTitle=`Check-out: ${checkoutBooks[0].guestName}`;}
+        else if(stayBooks.length){cellClass='mc-stay';cellText=stayBooks[0].guestName.split(' ')[0];cellTitle=`Hóspede: ${stayBooks[0].guestName}`;}
+        else if(wc.waiting){cellClass='mc-waiting';cellText='🧹';cellTitle=`Aguardando limpeza (saída de ${wc.booking.guestName} em ${formatDateBR(wc.booking.checkout)})`;}
+        else{cellClass='mc-vacant';cellTitle='Disponível';}
+        tbody+=`<td class="${isToday}" title="${cellTitle}"><div class="map-cell ${cellClass}">${cellText}</div></td>`;
+      });
+      tbody+='</tr>';
+    });
+    tbody+='</tbody>';
+    document.getElementById('monthlyMapTable').innerHTML=thead+tbody;
+  }
+
+  // ── RELATÓRIO ──
   window.changeReportMonth=(delta)=>{
     if(delta===0){reportMonth=new Date().getMonth();reportYear=new Date().getFullYear();}
     else{reportMonth+=delta;if(reportMonth>11){reportMonth=0;reportYear++;}if(reportMonth<0){reportMonth=11;reportYear--;}}
     renderReport();
   };
-
   function renderReport(){
     document.getElementById('reportMonthTitle').textContent=`${MONTH_NAMES[reportMonth]} / ${reportYear}`;
     const dim=new Date(reportYear,reportMonth+1,0).getDate();
@@ -1495,6 +1546,7 @@
       </tr>`).join('');
   }
 
+  // ── DASHBOARD ──
   function renderSummary(){
     const now=new Date(),m=now.getMonth(),y=now.getFullYear();
     let mr=0,mp=0,tp=0,mn=0;
@@ -1530,23 +1582,19 @@
       `🚭 *Proibido fumar* em qualquer área do edifício.${obs}\n\n`+
       `Boas-vindas e aproveite sua estadia! 🙏`;
   }
-
   window.copiarMensagemCheckin=async(id)=>{
-    const b=bookings.find(x=>x.id===id);
-    if(!b) return;
+    const b=bookings.find(x=>x.id===id); if(!b) return;
     const msg=gerarMensagemCheckin(b);
     try{
       await navigator.clipboard.writeText(msg);
       const btn=document.querySelector(`[data-copy-id="${id}"]`);
       if(btn){btn.textContent='✅ Copiado!';btn.style.background='#16a34a';setTimeout(()=>{btn.textContent='📋 Copiar mensagem';btn.style.background='';},2500);}
     }catch{
-      const ta=document.createElement('textarea');
-      ta.value=msg;ta.style.position='fixed';ta.style.opacity='0';
+      const ta=document.createElement('textarea');ta.value=msg;ta.style.position='fixed';ta.style.opacity='0';
       document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);
       alert('Mensagem copiada!');
     }
   };
-
   function renderTodayPanels(){
     const today=todayStr();
     const ci=bookings.filter(b=>b.checkin===today&&!b.cancelled);
@@ -1572,77 +1620,49 @@
     const dow=dateObj.getDay();
     const diff=Math.round((dateObj-new Date(today+'T00:00:00'))/86400000);
     let label='';
-    if(diff===0)      label=`📅 Hoje — ${formatDateBR(refDate)} (${DAY_NAMES_SHORT[dow]})`;
-    else if(diff===1) label=`📅 Amanhã — ${formatDateBR(refDate)} (${DAY_NAMES_SHORT[dow]})`;
-    else if(diff===-1)label=`📅 Ontem — ${formatDateBR(refDate)} (${DAY_NAMES_SHORT[dow]})`;
-    else if(diff>0)   label=`📅 Em ${diff} dias — ${formatDateBR(refDate)} (${DAY_NAMES_SHORT[dow]})`;
-    else              label=`📅 ${Math.abs(diff)} dias atrás — ${formatDateBR(refDate)} (${DAY_NAMES_SHORT[dow]})`;
+    if(diff===0)       label=`📅 Hoje — ${formatDateBR(refDate)} (${DAY_NAMES_SHORT[dow]})`;
+    else if(diff===1)  label=`📅 Amanhã — ${formatDateBR(refDate)} (${DAY_NAMES_SHORT[dow]})`;
+    else if(diff===-1) label=`📅 Ontem — ${formatDateBR(refDate)} (${DAY_NAMES_SHORT[dow]})`;
+    else if(diff>0)    label=`📅 Em ${diff} dias — ${formatDateBR(refDate)} (${DAY_NAMES_SHORT[dow]})`;
+    else               label=`📅 ${Math.abs(diff)} dias atrás — ${formatDateBR(refDate)} (${DAY_NAMES_SHORT[dow]})`;
     document.getElementById('aptMapDateLabel').textContent=label;
-
     const hora=new Date().getHours()+new Date().getMinutes()/60;
     const apos12=isToday&&hora>=12;
-
     document.getElementById('apartmentsMap').innerHTML=FIXED_APARTMENTS.map(name=>{
       const aptB=bookings.filter(b=>b.apartment===name&&!b.cancelled);
-      const checkinRef =aptB.find(b=>b.checkin ===refDate);
+      const checkinRef=aptB.find(b=>b.checkin===refDate);
       const checkoutRef=aptB.find(b=>b.checkout===refDate);
-      const active     =aptB.find(b=>b.checkin<refDate&&b.checkout>refDate);
-      const weeklyRef  =aptB.find(b=>hasWeeklyCleaningToday(b,refDate));
-      const wc=isWaitingClean(name, refDate);
-
+      const active=aptB.find(b=>b.checkin<refDate&&b.checkout>refDate);
+      const weeklyRef=aptB.find(b=>hasWeeklyCleaningToday(b,refDate));
+      const wc=isWaitingClean(name,refDate);
       let displayBooking,statusLabel,statusClass,flagsHtml='',cardExtra='';
-
-      if(wc.waiting && !active && !checkinRef){
-        displayBooking=wc.booking;
-        statusLabel='Aguardando limpeza';
-        statusClass='status-waiting-clean';
-        cardExtra='waiting-clean';
+      if(wc.waiting&&!active&&!checkinRef){
+        displayBooking=wc.booking;statusLabel='Aguardando limpeza';statusClass='status-waiting-clean';cardExtra='waiting-clean';
         flagsHtml=`<span class="flag flag-waiting">🧹 Aguardando limpeza</span>`;
-        if(hasPriority(name, wc.booking.checkout)){
-          flagsHtml+=` <span class="flag flag-priority">⚡ PRIORIDADE</span>`;
-        }
+        if(hasPriority(name,wc.booking.checkout)) flagsHtml+=` <span class="flag flag-priority">⚡ PRIORIDADE</span>`;
       } else if(!apos12){
-        if(checkoutRef){
-          displayBooking=checkoutRef;statusLabel=isToday?'Check-out hoje':'Check-out';
-          statusClass='status-checkout';flagsHtml=`<span class="flag flag-checkout">${statusLabel}</span>`;
-        } else if(weeklyRef){
-          displayBooking=weeklyRef;statusLabel=isToday?'Faxina hoje':'Faxina';
-          statusClass='status-cleaning';flagsHtml=`<span class="flag flag-cleaning">${statusLabel}</span>`;
-        } else if(checkinRef){
-          displayBooking=checkinRef;statusLabel=isToday?'Check-in hoje':'Check-in';
-          statusClass='status-checkin';flagsHtml=`<span class="flag flag-checkin">${statusLabel}</span>`;
-        } else if(active){
-          displayBooking=active;statusLabel='Ocupado';statusClass='status-occupied';
-        } else {
-          displayBooking=null;statusLabel='Livre';statusClass='status-free';
-        }
+        if(checkoutRef){displayBooking=checkoutRef;statusLabel=isToday?'Check-out hoje':'Check-out';statusClass='status-checkout';flagsHtml=`<span class="flag flag-checkout">${statusLabel}</span>`;}
+        else if(weeklyRef){displayBooking=weeklyRef;statusLabel=isToday?'Faxina hoje':'Faxina';statusClass='status-cleaning';flagsHtml=`<span class="flag flag-cleaning">${statusLabel}</span>`;}
+        else if(checkinRef){displayBooking=checkinRef;statusLabel=isToday?'Check-in hoje':'Check-in';statusClass='status-checkin';flagsHtml=`<span class="flag flag-checkin">${statusLabel}</span>`;}
+        else if(active){displayBooking=active;statusLabel='Ocupado';statusClass='status-occupied';}
+        else{displayBooking=null;statusLabel='Livre';statusClass='status-free';}
       } else {
-        if(checkinRef){
-          displayBooking=checkinRef;statusLabel='Check-in hoje';
-          statusClass='status-checkin';flagsHtml='<span class="flag flag-checkin">Check-in hoje</span>';
-        } else if(weeklyRef){
-          displayBooking=weeklyRef;statusLabel='Faxina hoje';
-          statusClass='status-cleaning';flagsHtml='<span class="flag flag-cleaning">Faxina hoje</span>';
-        } else if(active){
-          displayBooking=active;statusLabel='Ocupado';statusClass='status-occupied';
-        } else {
-          displayBooking=null;statusLabel='Livre';statusClass='status-free';
-        }
+        if(checkinRef){displayBooking=checkinRef;statusLabel='Check-in hoje';statusClass='status-checkin';flagsHtml='<span class="flag flag-checkin">Check-in hoje</span>';}
+        else if(weeklyRef){displayBooking=weeklyRef;statusLabel='Faxina hoje';statusClass='status-cleaning';flagsHtml='<span class="flag flag-cleaning">Faxina hoje</span>';}
+        else if(active){displayBooking=active;statusLabel='Ocupado';statusClass='status-occupied';}
+        else{displayBooking=null;statusLabel='Livre';statusClass='status-free';}
       }
-
-      const metaText = displayBooking
-        ? (statusLabel==='Aguardando limpeza'
-            ? `Última saída: <strong>${displayBooking.guestName}</strong><br>Check-out: ${formatDateBR(displayBooking.checkout)}`
-            : `Hóspede: <strong>${displayBooking.guestName}</strong><br>Período: ${formatDateBR(displayBooking.checkin)} até ${formatDateBR(displayBooking.checkout)}`)
-        : 'Sem hóspede<br>Disponível para nova reserva';
-
-      return `
-        <div class="apt-card ${cardExtra}" onclick="openApartmentModal('${name}')">
-          <h4>Apto ${name}</h4>
-          <span class="apt-status ${statusClass}">${statusLabel}</span>
-          <div class="apt-meta">${metaText}</div>
-          <div class="apt-flags">${flagsHtml}</div>
-        </div>`;
+      const metaText=displayBooking
+        ?(statusLabel==='Aguardando limpeza'
+          ?`Última saída: <strong>${displayBooking.guestName}</strong><br>Check-out: ${formatDateBR(displayBooking.checkout)}`
+          :`Hóspede: <strong>${displayBooking.guestName}</strong><br>Período: ${formatDateBR(displayBooking.checkin)} até ${formatDateBR(displayBooking.checkout)}`)
+        :'Sem hóspede<br>Disponível para nova reserva';
+      return `<div class="apt-card ${cardExtra}" onclick="openApartmentModal('${name}')">
+        <h4>Apto ${name}</h4>
+        <span class="apt-status ${statusClass}">${statusLabel}</span>
+        <div class="apt-meta">${metaText}</div>
+        <div class="apt-flags">${flagsHtml}</div>
+      </div>`;
     }).join('');
   }
 
@@ -1696,39 +1716,113 @@
       const sa=(apartmentData[item.apartment]?.senhaApto)||'-';
       const sp=item.senhaPortaria||'-';
       const pdLabel=item.paymentDate?`<br><span class="muted" style="font-size:11px;">📅 Pgto: ${formatDateBR(item.paymentDate)}</span>`:'';
-      const wc=isWaitingClean(item.apartment, today);
+      const wc=isWaitingClean(item.apartment,today);
       const bloqTag=(wc.waiting&&wc.booking?.id===item.id)?`<div style="margin-top:4px;"><span class="badge" style="background:#fff7ed;color:#c2410c;border:1px solid #fed7aa;font-size:11px;">🧹 Apto aguardando limpeza</span></div>`:'';
-      return `
-        <tr>
-          <td><strong>${item.guestName}</strong><br><span class="muted">${item.phone||'-'} ${item.source?'• '+item.source:''}</span></td>
-          <td>Apto ${item.apartment}<br><button type="button" class="btn-secondary" style="margin-top:8px;width:auto;padding:6px 8px;font-size:12px;" onclick="openApartmentModal('${item.apartment}')">Ver apê</button></td>
-          <td>${formatDateBR(item.checkin)}<br><span class="muted">até ${formatDateBR(item.checkout)}</span><br><span class="muted">${item.nights||calculateNights(item.checkin,item.checkout)} noite(s)</span></td>
-          <td>${item.garageSpot&&item.garageSpot!=='Sem vaga'?item.garageSpot:'<span class="muted">Sem vaga</span>'}</td>
-          <td>
-            <span class="badge ${ss.className}">${ss.label}</span>
-            <div style="margin-top:6px;"><span class="badge ${ps.className}">${ps.label}</span></div>
-            ${item.checkin===today?`<div style="margin-top:6px;"><span class="badge badge-today-checkin">Check-in hoje</span></div>`:''}
-            ${item.checkout===today?`<div style="margin-top:6px;"><span class="badge badge-checkout-clean">Check-out hoje</span></div>`:''}
-            ${bloqTag}
-          </td>
-          <td><strong>Total:</strong> ${formatCurrency(item.totalValue)}<br><strong>Pago:</strong> ${formatCurrency(item.paidValue)}${pdLabel}<br><strong>Saldo:</strong> ${formatCurrency(bal)}<br><strong>Diária:</strong> ${formatCurrency(item.dailyRate||0)}</td>
-          <td><span style="font-size:12px;">🔐 Portaria:<br><strong>${sp}</strong></span><br><br><span style="font-size:12px;">🔒 Apto:<br><strong>${sa}</strong></span></td>
-          <td>
-            <div class="small-actions">
-              <button class="btn-secondary" onclick="editBooking('${item.id}')">Editar</button>
-              <button class="${item.cancelled?'btn-success':'btn-purple'}" onclick="toggleCancelled('${item.id}')">${item.cancelled?'Reativar':'Cancelar'}</button>
-              <button class="btn-danger" onclick="deleteBooking('${item.id}')">Excluir</button>
-              ${waLink?`<a class="wa-btn" href="${waLink}" target="_blank" rel="noopener"><svg viewBox="0 0 32 32" width="14" height="14" fill="currentColor"><path d="M19.11 17.23c-.29-.15-1.69-.83-1.95-.92-.26-.1-.45-.15-.64.15-.19.29-.74.92-.91 1.11-.17.19-.34.22-.63.08-.29-.15-1.21-.45-2.31-1.43-.86-.77-1.43-1.72-1.6-2.01-.17-.29-.02-.45.13-.6.13-.13.29-.34.43-.51.14-.17.19-.29.29-.48.1-.19.05-.36-.02-.51-.08-.15-.64-1.54-.88-2.11-.23-.56-.47-.48-.64-.49h-.55c-.19 0-.48.07-.74.36-.26.29-1 1-.99 2.43 0 1.43 1.03 2.81 1.18 3 .14.19 2.02 3.08 4.89 4.32.68.29 1.21.46 1.62.59.68.22 1.29.19 1.77.12.54-.08 1.69-.69 1.93-1.36.24-.67.24-1.24.17-1.36-.07-.12-.26-.19-.55-.34z"></path><path d="M16.03 3.2c-7.07 0-12.8 5.73-12.8 12.8 0 2.26.59 4.47 1.72 6.41L3.2 28.8l6.56-1.72a12.74 12.74 0 0 0 6.27 1.6h.01c7.06 0 12.79-5.73 12.79-12.8S23.1 3.2 16.03 3.2zm0 23.33h-.01a10.5 10.5 0 0 1-5.35-1.47l-.38-.22-3.89 1.02 1.04-3.79-.25-.39a10.54 10.54 0 1 1 8.84 4.85z"></path></svg>WhatsApp</a>`:''}
-            </div>
-          </td>
-        </tr>`;
+      return `<tr>
+        <td><strong>${item.guestName}</strong><br><span class="muted">${item.phone||'-'} ${item.source?'• '+item.source:''}</span></td>
+        <td>Apto ${item.apartment}<br><button type="button" class="btn-secondary" style="margin-top:8px;width:auto;padding:6px 8px;font-size:12px;" onclick="openApartmentModal('${item.apartment}')">Ver apê</button></td>
+        <td>${formatDateBR(item.checkin)}<br><span class="muted">até ${formatDateBR(item.checkout)}</span><br><span class="muted">${item.nights||calculateNights(item.checkin,item.checkout)} noite(s)</span></td>
+        <td>${item.garageSpot&&item.garageSpot!=='Sem vaga'?item.garageSpot:'<span class="muted">Sem vaga</span>'}</td>
+        <td>
+          <span class="badge ${ss.className}">${ss.label}</span>
+          <div style="margin-top:6px;"><span class="badge ${ps.className}">${ps.label}</span></div>
+          ${item.checkin===today?`<div style="margin-top:6px;"><span class="badge badge-today-checkin">Check-in hoje</span></div>`:''}
+          ${item.checkout===today?`<div style="margin-top:6px;"><span class="badge badge-checkout-clean">Check-out hoje</span></div>`:''}
+          ${bloqTag}
+        </td>
+        <td><strong>Total:</strong> ${formatCurrency(item.totalValue)}<br><strong>Pago:</strong> ${formatCurrency(item.paidValue)}${pdLabel}<br><strong>Saldo:</strong> ${formatCurrency(bal)}<br><strong>Diária:</strong> ${formatCurrency(item.dailyRate||0)}</td>
+        <td><span style="font-size:12px;">🔐 Portaria:<br><strong>${sp}</strong></span><br><br><span style="font-size:12px;">🔒 Apto:<br><strong>${sa}</strong></span></td>
+        <td>
+          <div class="small-actions">
+            <button class="btn-secondary" onclick="editBooking('${item.id}')">Editar</button>
+            <button class="${item.cancelled?'btn-success':'btn-purple'}" onclick="toggleCancelled('${item.id}')">${item.cancelled?'Reativar':'Cancelar'}</button>
+            <button class="btn-danger" onclick="deleteBooking('${item.id}')">Excluir</button>
+            ${waLink?`<a class="wa-btn" href="${waLink}" target="_blank" rel="noopener"><svg viewBox="0 0 32 32" width="14" height="14" fill="currentColor"><path d="M19.11 17.23c-.29-.15-1.69-.83-1.95-.92-.26-.1-.45-.15-.64.15-.19.29-.74.92-.91 1.11-.17.19-.34.22-.63.08-.29-.15-1.21-.45-2.31-1.43-.86-.77-1.43-1.72-1.6-2.01-.17-.29-.02-.45.13-.6.13-.13.29-.34.43-.51.14-.17.19-.29.29-.48.1-.19.05-.36-.02-.51-.08-.15-.64-1.54-.88-2.11-.23-.56-.47-.48-.64-.49h-.55c-.19 0-.48.07-.74.36-.26.29-1 1-.99 2.43 0 1.43 1.03 2.81 1.18 3 .14.19 2.02 3.08 4.89 4.32.68.29 1.21.46 1.62.59.68.22 1.29.19 1.77.12.54-.08 1.69-.69 1.93-1.36.24-.67.24-1.24.17-1.36-.07-.12-.26-.19-.55-.34z"></path><path d="M16.03 3.2c-7.07 0-12.8 5.73-12.8 12.8 0 2.26.59 4.47 1.72 6.41L3.2 28.8l6.56-1.72a12.74 12.74 0 0 0 6.27 1.6h.01c7.06 0 12.79-5.73 12.79-12.8S23.1 3.2 16.03 3.2zm0 23.33h-.01a10.5 10.5 0 0 1-5.35-1.47l-.38-.22-3.89 1.02 1.04-3.79-.25-.39a10.54 10.54 0 1 1 8.84 4.85z"></path></svg>WhatsApp</a>`:''}
+          </div>
+        </td>
+      </tr>`;
     }).join('');
   }
 
+  // ── FORMULÁRIO RESERVA ──
   const form=document.getElementById('bookingForm');
   const bookingModalOverlay=document.getElementById('bookingModalOverlay');
   const apartmentModalOverlay=document.getElementById('apartmentModalOverlay');
 
+  function isAptAvailable(aptName,start,end,currentId=null){
+    const hasConflict=bookings.some(b=>b.id!==currentId&&!b.cancelled&&b.apartment===aptName&&overlaps(start,end,b.checkin,b.checkout));
+    if(hasConflict) return false;
+    const today=todayStr();
+    if(start===today&&start>=BLOQUEIO_CUTOFF){const wc=isWaitingClean(aptName,start);if(wc.waiting)return false;}
+    return true;
+  }
+  function getAvailableApartments(start,end,currentId=null){
+    if(!start||!end||start>=end) return [];
+    return FIXED_APARTMENTS.filter(apt=>isAptAvailable(apt,start,end,currentId))
+      .map(apt=>{
+        const lastCheckout=bookings.filter(b=>!b.cancelled&&b.apartment===apt&&b.checkout<=start).map(b=>b.checkout).sort().pop();
+        const vagoDias=lastCheckout?Math.floor((new Date(start+'T00:00:00')-new Date(lastCheckout+'T00:00:00'))/86400000):9999;
+        return{apt,vagoDias};
+      })
+      .sort((a,b)=>a.vagoDias!==b.vagoDias?a.vagoDias-b.vagoDias:a.apt.localeCompare(b.apt,undefined,{numeric:true}))
+      .map(x=>x.apt);
+  }
+  function updateApartmentOptions(){
+    const currentId=document.getElementById('bookingId').value||null;
+    const start=document.getElementById('checkin').value;
+    const end=document.getElementById('checkout').value;
+    const currentValue=document.getElementById('apartment').value;
+    const sel=document.getElementById('apartment');
+    const msg=document.getElementById('autoAptMsg');
+    if(!start||!end||start>=end){
+      sel.innerHTML='<option value="">Selecione o apartamento</option>'+FIXED_APARTMENTS.map(a=>`<option value="${a}">Apto ${a}</option>`).join('');
+      if(currentValue) sel.value=currentValue; msg.style.display='none'; return;
+    }
+    const available=getAvailableApartments(start,end,currentId);
+    const unavailable=FIXED_APARTMENTS.filter(a=>!available.includes(a));
+    const editing=bookings.find(b=>b.id===currentId);
+    const today=todayStr();
+    sel.innerHTML='<option value="">Selecione o apartamento</option>'+
+      available.map(a=>`<option value="${a}">✅ Apto ${a}</option>`).join('')+
+      (unavailable.length?`<optgroup label="── Indisponíveis ──">`+unavailable.map(a=>{const wc=(start===today)?isWaitingClean(a,start):{waiting:false};const reason=wc.waiting?'🧹 Aguardando limpeza':'🚫 Ocupado';return`<option value="${a}" disabled>${reason} — Apto ${a}</option>`;}).join('')+`</optgroup>`:'');
+    if(currentValue&&available.includes(currentValue)) sel.value=currentValue;
+    else if(editing?.apartment&&available.includes(editing.apartment)) sel.value=editing.apartment;
+    else sel.value='';
+    msg.style.display='block';
+    msg.innerHTML=available.length===0
+      ?`<span style="color:#dc2626;">❌ Nenhum apartamento disponível neste período.</span>`
+      :`<span style="color:#16a34a;">✅ ${available.length} disponível(is) &nbsp;·&nbsp; 🚫 ${unavailable.length} indisponível(is)</span>`;
+  }
+  function autoSelectApartment(){
+    const start=document.getElementById('checkin').value;
+    const end=document.getElementById('checkout').value;
+    const msg=document.getElementById('autoAptMsg');
+    if(!start||!end||start>=end){alert('Informe o check-in e check-out primeiro!');return;}
+    const currentId=document.getElementById('bookingId').value||null;
+    const available=getAvailableApartments(start,end,currentId);
+    if(!available.length){msg.style.display='block';msg.innerHTML=`<span style="color:#dc2626;">❌ Nenhum apartamento disponível neste período.</span>`;return;}
+    document.getElementById('apartment').value=available[0];
+    msg.style.display='block';
+    msg.innerHTML=`<span style="color:#2563eb;">🤖 Apto <strong>${available[0]}</strong> selecionado! (${available.length} disponível(is))</span>`;
+    findConflict(currentId);updateGarageOptions();
+  }
+  function calcularPagamentoAutomatico(source,checkin,totalValue){
+    const total=Number(totalValue||0);
+    if(source==='Direto'||source==='WhatsApp') return{paidValue:total,paymentDate:todayStr(),paymentDesc:`Pago hoje (${formatDateBR(todayStr())}) via PIX ou Dinheiro`};
+    if(source==='Airbnb'){const pd=addDays(checkin,1);return{paidValue:total,paymentDate:pd,paymentDesc:`Repasse Airbnb em ${formatDateBR(pd)} (check-in + 1 dia)`};}
+    if(source==='Booking'){const d=new Date(checkin+'T00:00:00');const pd=`${d.getMonth()===11?d.getFullYear()+1:d.getFullYear()}-${String((d.getMonth()+2>12?1:d.getMonth()+2)).padStart(2,'0')}-05`;return{paidValue:total,paymentDate:pd,paymentDesc:`Repasse Booking em ${formatDateBR(pd)} (dia 5 do mês seguinte)`};}
+    return{paidValue:0,paymentDate:null,paymentDesc:null};
+  }
+  function atualizarBoxPagamentoAutomatico(){
+    const source=document.getElementById('source').value;
+    const checkin=document.getElementById('checkin').value;
+    const totalValue=document.getElementById('totalValue').value;
+    const box=document.getElementById('paymentAutoBox');
+    if(!source||!checkin||!totalValue||Number(totalValue)<=0){box.style.display='none';return;}
+    const r=calcularPagamentoAutomatico(source,checkin,totalValue);
+    if(r.paymentDesc){document.getElementById('paymentAutoDesc').textContent=' '+r.paymentDesc;box.style.display='block';}
+    else box.style.display='none';
+  }
   function openBookingModal(editMode=false){
     document.getElementById('bookingModalTitle').textContent=editMode?'Editar Reserva':'Nova Reserva';
     updateApartmentOptions();updateGarageOptions();
@@ -1745,7 +1839,7 @@
     if(!apartmentModalOverlay.classList.contains('show')) document.body.style.overflow='';
   }
   function getAvailableGarageSpots(start,end,currentId=null){
-    if(!start||!end||start>=end) return [...GARAGE_SPOTS];
+    if(!start||!end||start>=end) return[...GARAGE_SPOTS];
     return GARAGE_SPOTS.filter(spot=>!bookings.some(b=>b.id!==currentId&&!b.cancelled&&b.garageSpot&&b.garageSpot!=='Sem vaga'&&b.garageSpot===spot&&overlaps(start,end,b.checkin,b.checkout)));
   }
   function updateGarageOptions(){
@@ -1775,8 +1869,7 @@
   function updateNights(){ document.getElementById('nights').value=calculateNights(document.getElementById('checkin').value,document.getElementById('checkout').value); }
   function recalculateFinancials(){
     updateNights();
-    const n=Number(document.getElementById('nights').value||0);
-    if(n<=0) return;
+    const n=Number(document.getElementById('nights').value||0); if(n<=0) return;
     if(document.getElementById('lastEditedField').value==='dailyRate')
       document.getElementById('totalValue').value=(Number(document.getElementById('dailyRate').value||0)*n).toFixed(2);
     else
@@ -1804,27 +1897,14 @@
     document.getElementById('autoAptMsg').style.display='none';
     updateApartmentOptions();updateGarageOptions();
   }
-
-  async function sincronizarSenhaPortaria(bookingSalvo) {
-    const senha = bookingSalvo.senhaPortaria;
-    if (!senha) return;
-    const compartilham = bookings.filter(b =>
-      b.id !== bookingSalvo.id &&
-      !b.cancelled &&
-      b.checkout === bookingSalvo.checkout &&
-      b.senhaPortaria !== senha
-    );
-    if (!compartilham.length) return;
-    for (const b of compartilham) {
-      b.senhaPortaria = senha;
-      await saveBookingToFirebase(b);
-    }
-    const checkoutFormatado = formatDateBR(bookingSalvo.checkout);
-    setTimeout(() => {
-      alert(`🔑 Senha "${senha}" sincronizada automaticamente!\n\nCheck-out em ${checkoutFormatado}:\n• ${compartilham.map(b => `Apto ${b.apartment} — ${b.guestName}`).join('\n• ')}`);
-    }, 300);
+  async function sincronizarSenhaPortaria(bookingSalvo){
+    const senha=bookingSalvo.senhaPortaria; if(!senha) return;
+    const compartilham=bookings.filter(b=>b.id!==bookingSalvo.id&&!b.cancelled&&b.checkout===bookingSalvo.checkout&&b.senhaPortaria!==senha);
+    if(!compartilham.length) return;
+    for(const b of compartilham){b.senhaPortaria=senha;await saveBookingToFirebase(b);}
+    const checkoutFormatado=formatDateBR(bookingSalvo.checkout);
+    setTimeout(()=>{alert(`🔑 Senha "${senha}" sincronizada automaticamente!\n\nCheck-out em ${checkoutFormatado}:\n• ${compartilham.map(b=>`Apto ${b.apartment} — ${b.guestName}`).join('\n• ')}`);},300);
   }
-
   form.addEventListener('submit',async function(e){
     e.preventDefault();
     const bId=document.getElementById('bookingId').value||crypto.randomUUID();
@@ -1860,8 +1940,7 @@
   });
 
   window.editBooking=(id)=>{
-    const b=bookings.find(x=>x.id===id);
-    if(!b) return;
+    const b=bookings.find(x=>x.id===id); if(!b) return;
     document.getElementById('bookingId').value=b.id;
     document.getElementById('lastEditedField').value='dailyRate';
     document.getElementById('guestName').value=b.guestName;
@@ -1887,29 +1966,21 @@
     document.getElementById('apartment').value=b.apartment;
     updateGarageOptions();
     document.getElementById('garageSpot').value=b.garageSpot||'Sem vaga';
-    findConflict(id);
-    atualizarBoxPagamentoAutomatico();
-    openBookingModal(true);
+    findConflict(id);atualizarBoxPagamentoAutomatico();openBookingModal(true);
   };
-
   window.deleteBooking=async(id)=>{
     const b=bookings.find(x=>x.id===id);
     if(!b||!confirm(`Excluir reserva de ${b.guestName}?`)) return;
     bookings=bookings.filter(x=>x.id!==id);
-    await deleteBookingFromFirebase(id);
-    clearForm();renderAll();
+    await deleteBookingFromFirebase(id);clearForm();renderAll();
   };
-
   window.toggleCancelled=async(id)=>{
-    const b=bookings.find(x=>x.id===id);
-    if(!b) return;
-    b.cancelled=!b.cancelled;
-    await saveBookingToFirebase(b);
-    renderAll();
+    const b=bookings.find(x=>x.id===id); if(!b) return;
+    b.cancelled=!b.cancelled;await saveBookingToFirebase(b);renderAll();
   };
-
   window.setQuickFilter=(f)=>{quickFilter=f;renderTable();};
 
+  // ── MODAL APARTAMENTO ──
   window.openApartmentModal=(name)=>{
     currentModalApt=name;
     const ab=bookings.filter(b=>b.apartment===name).sort((a,b)=>a.checkin.localeCompare(b.checkin));
@@ -1931,28 +2002,24 @@
       const wd=getWeeklyCleaningDates(b);
       const wdl=(b.weeklyDayOfWeek!==null&&b.weeklyDayOfWeek!==undefined)?` (toda ${DAY_NAMES_FULL[Number(b.weeklyDayOfWeek)]})` :'';
       const pdI=b.paymentDate?`<br>📅 Pgto: ${formatDateBR(b.paymentDate)}`:'';
-      return `
-        <div class="timeline-item">
-          <div class="timeline-top">
-            <div><div class="timeline-title">${b.guestName}</div><div class="muted">${formatDateBR(b.checkin)} até ${formatDateBR(b.checkout)} • ${b.nights||calculateNights(b.checkin,b.checkout)} noite(s)</div></div>
-            <div><span class="badge ${ss.className}">${ss.label}</span><span class="badge ${ps.className}" style="margin-left:6px;">${ps.label}</span></div>
-          </div>
-          <div class="timeline-grid">
-            <div><strong>Reserva</strong><br>Origem: ${b.source||'-'}<br>Hóspedes: ${b.guests||1}<br>Telefone: ${b.phone||'-'}<br>Garagem: ${b.garageSpot&&b.garageSpot!=='Sem vaga'?b.garageSpot:'Sem vaga'}</div>
-            <div><strong>Financeiro</strong><br>Diária: ${formatCurrency(b.dailyRate||0)}<br>Total: ${formatCurrency(b.totalValue)}<br>Pago: ${formatCurrency(b.paidValue)}${pdI}<br>Saldo: ${formatCurrency(getBalance(b))}</div>
-            <div><strong>Operação</strong><br>🔐 Portaria: <strong>${b.senhaPortaria||'-'}</strong><br>Faxinas${wdl}: ${wd.length?wd.map(formatDateBR).join(', '):'Sem faxina'}<br>Obs: ${b.notes||'-'}</div>
-          </div>
-        </div>`;
+      return `<div class="timeline-item">
+        <div class="timeline-top">
+          <div><div class="timeline-title">${b.guestName}</div><div class="muted">${formatDateBR(b.checkin)} até ${formatDateBR(b.checkout)} • ${b.nights||calculateNights(b.checkin,b.checkout)} noite(s)</div></div>
+          <div><span class="badge ${ss.className}">${ss.label}</span><span class="badge ${ps.className}" style="margin-left:6px;">${ps.label}</span></div>
+        </div>
+        <div class="timeline-grid">
+          <div><strong>Reserva</strong><br>Origem: ${b.source||'-'}<br>Hóspedes: ${b.guests||1}<br>Telefone: ${b.phone||'-'}<br>Garagem: ${b.garageSpot&&b.garageSpot!=='Sem vaga'?b.garageSpot:'Sem vaga'}</div>
+          <div><strong>Financeiro</strong><br>Diária: ${formatCurrency(b.dailyRate||0)}<br>Total: ${formatCurrency(b.totalValue)}<br>Pago: ${formatCurrency(b.paidValue)}${pdI}<br>Saldo: ${formatCurrency(getBalance(b))}</div>
+          <div><strong>Operação</strong><br>🔐 Portaria: <strong>${b.senhaPortaria||'-'}</strong><br>Faxinas${wdl}: ${wd.length?wd.map(formatDateBR).join(', '):'Sem faxina'}<br>Obs: ${b.notes||'-'}</div>
+        </div>
+      </div>`;
     }).join(''):`<div class="timeline-empty">Nenhuma reserva encontrada.</div>`;
     apartmentModalOverlay.classList.add('show');document.body.style.overflow='hidden';
   };
-
   function closeApartmentDetailsModal(){
-    apartmentModalOverlay.classList.remove('show');
-    currentModalApt=null;
+    apartmentModalOverlay.classList.remove('show');currentModalApt=null;
     if(!bookingModalOverlay.classList.contains('show')) document.body.style.overflow='';
   }
-
   document.getElementById('saveSenhaAptoBtn').addEventListener('click',async()=>{
     if(!currentModalApt) return;
     await saveApartmentSenha(currentModalApt,document.getElementById('modalSenhaApto').value.trim());
@@ -1965,15 +2032,16 @@
     renderFiltersOptions();renderSummary();renderTodayPanels();
     renderAlerts();renderApartmentsMap();renderParkingMap();renderTable();
     if(document.getElementById('tab-mapamensal').classList.contains('active')) renderMonthlyMap();
+    if(document.getElementById('tab-financeiro').classList.contains('active')) renderFinanceiro();
   }
 
+  // ── EVENTOS ──
   document.getElementById('phone').addEventListener('input',function(){this.value=formatPhone(this.value);});
   document.getElementById('source').addEventListener('change',atualizarBoxPagamentoAutomatico);
   ['checkin','checkout'].forEach(id=>{
     document.getElementById(id).addEventListener('input',()=>{
       recalculateFinancials();updateApartmentOptions();updateGarageOptions();
-      findConflict(document.getElementById('bookingId').value||null);
-      atualizarBoxPagamentoAutomatico();
+      findConflict(document.getElementById('bookingId').value||null);atualizarBoxPagamentoAutomatico();
     });
   });
   document.getElementById('totalValue').addEventListener('input',atualizarBoxPagamentoAutomatico);
@@ -1989,8 +2057,7 @@
     document.getElementById('sourceFilter').value='';quickFilter='all';renderTable();
   });
   ['searchInput','filterStart','filterEnd','apartmentFilter','sourceFilter'].forEach(id=>{
-    const el=document.getElementById(id);
-    el.addEventListener('input',renderTable);el.addEventListener('change',renderTable);
+    const el=document.getElementById(id);el.addEventListener('input',renderTable);el.addEventListener('change',renderTable);
   });
   document.getElementById('cleanDateFilter').addEventListener('change',renderCleaningTab);
   document.getElementById('cleanTypeFilter').addEventListener('change',renderCleaningTab);
@@ -2003,18 +2070,18 @@
   document.addEventListener('keydown',e=>{
     if(e.key==='Escape'){
       if(document.getElementById('senhaAdminOverlay').classList.contains('show')){document.getElementById('senhaAdminOverlay').classList.remove('show');senhaAdminCallback=null;return;}
+      if(document.getElementById('atribModalOverlay').classList.contains('show')){fecharAtribModal();return;}
       if(bookingModalOverlay.classList.contains('show'))closeBookingFormModal();
       if(apartmentModalOverlay.classList.contains('show'))closeApartmentDetailsModal();
     }
   });
-
   document.getElementById('exportBtn').addEventListener('click',()=>{
-    const blob=new Blob([JSON.stringify({version:'4.2',apartments:FIXED_APARTMENTS,garageSpots:GARAGE_SPOTS,bookings,cleaningRecords,apartmentData},null,2)],{type:'application/json'});
-    const a=Object.assign(document.createElement('a'),{href:URL.createObjectURL(blob),download:'reservas-backup-v42.json'});
+    const blob=new Blob([JSON.stringify({version:'4.3',apartments:FIXED_APARTMENTS,garageSpots:GARAGE_SPOTS,bookings,cleaningRecords,apartmentData},null,2)],{type:'application/json'});
+    const a=Object.assign(document.createElement('a'),{href:URL.createObjectURL(blob),download:'reservas-backup-v43.json'});
     a.click();URL.revokeObjectURL(a.href);
   });
   document.getElementById('importFile').addEventListener('change',async e=>{
-    const file=e.target.files[0];if(!file) return;
+    const file=e.target.files[0]; if(!file) return;
     const reader=new FileReader();
     reader.onload=async ev=>{
       try{
@@ -2032,13 +2099,13 @@
         const nc=data.cleaningRecords||[];
         if(!confirm('Importar e substituir as reservas atuais no Firebase?')) return;
         bookings=norm;if(nc.length)cleaningRecords=nc;
-        await importBatchToFirebase(norm,nc);
-        clearForm();renderAll();
+        await importBatchToFirebase(norm,nc);clearForm();renderAll();
       }catch{alert('Erro ao importar arquivo.');}
     };
     reader.readAsText(file);e.target.value='';
   });
 
+  // ── FIREBASE REALTIME ──
   function initRealtimeListeners(){
     onSnapshot(BOOKINGS_COL,snap=>{bookings=snap.docs.map(d=>d.data());if(isReady)renderAll();},e=>{console.error(e);setSyncStatus('error','❌ Erro de conexão');});
     onSnapshot(CLEANINGS_COL,snap=>{cleaningRecords=snap.docs.map(d=>d.data());if(isReady)renderAll();},e=>console.error(e));
