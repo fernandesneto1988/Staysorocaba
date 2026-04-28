@@ -1845,28 +1845,17 @@
     updateApartmentOptions();updateGarageOptions();
   }
 
-  // ── FUNÇÃO CORRIGIDA: verificarSenhaCheckout ──
   function verificarSenhaCheckout(){
     const checkout = document.getElementById('checkout').value;
     const currentId = document.getElementById('bookingId').value || null;
     const senhaBox = document.getElementById('senhaPortariaHint');
-
     if(!checkout){ senhaBox.style.display='none'; return; }
-
-    // Busca TODAS as reservas com mesmo checkout (com ou sem senha)
     const mesmoCheckout = bookings.filter(b =>
-      b.id !== currentId &&
-      !b.cancelled &&
-      b.checkout === checkout
+      b.id !== currentId && !b.cancelled && b.checkout === checkout
     );
-
     if(!mesmoCheckout.length){ senhaBox.style.display='none'; return; }
-
-    // Verifica se alguma já tem senha cadastrada
     const comSenha = mesmoCheckout.filter(b => b.senhaPortaria);
-
     if(comSenha.length){
-      // Já existe senha → sugere usar a mesma
       const senha = comSenha[0].senhaPortaria;
       const nomes = mesmoCheckout.map(b => `Apto ${b.apartment} — ${b.guestName}`).join(', ');
       senhaBox.style.display = 'block';
@@ -1884,7 +1873,6 @@
           </button>
         </div>`;
     } else {
-      // Mesmo checkout mas SEM senha ainda → avisa para usar a mesma
       const nomes = mesmoCheckout.map(b => `Apto ${b.apartment} — ${b.guestName}`).join(', ');
       senhaBox.style.display = 'block';
       senhaBox.innerHTML = `
@@ -2124,6 +2112,55 @@
     onSnapshot(APTS_COL,snap=>{snap.docs.forEach(d=>{apartmentData[d.id]=d.data();});if(isReady)renderAll();},e=>console.error(e));
   }
 
+  // ✅ NOVO: Compensa pagamentos automáticos vencidos
+  async function compensarPagamentosAutomaticos() {
+    const hoje = todayStr();
+    const paraAtualizar = [];
+
+    bookings.forEach(b => {
+      if (b.cancelled) return;
+      if (Number(b.paidValue || 0) >= Number(b.totalValue || 0)) return;
+      if (!b.totalValue || Number(b.totalValue) <= 0) return;
+
+      let deveCompensar = false;
+
+      if (b.source === 'Airbnb') {
+        const dataPagamento = addDays(b.checkin, 1);
+        if (hoje >= dataPagamento) deveCompensar = true;
+      }
+
+      if (b.source === 'Booking') {
+        const d = new Date(b.checkin + 'T00:00:00');
+        const mesPag = d.getMonth() === 11 ? 0 : d.getMonth() + 1;
+        const anoPag = d.getMonth() === 11 ? d.getFullYear() + 1 : d.getFullYear();
+        const dataPagamento = `${anoPag}-${String(mesPag + 1).padStart(2, '0')}-05`;
+        if (hoje >= dataPagamento) deveCompensar = true;
+      }
+
+      if (b.source === 'Direto' || b.source === 'WhatsApp') {
+        if (hoje >= b.checkin) deveCompensar = true;
+      }
+
+      if (deveCompensar) {
+        paraAtualizar.push({
+          ...b,
+          paidValue: Number(b.totalValue),
+          paymentDate: b.paymentDate || hoje
+        });
+      }
+    });
+
+    if (!paraAtualizar.length) return;
+
+    for (const item of paraAtualizar) {
+      const idx = bookings.findIndex(b => b.id === item.id);
+      if (idx >= 0) bookings[idx] = item;
+      await saveBookingToFirebase(item);
+    }
+
+    console.log(`✅ ${paraAtualizar.length} pagamento(s) compensado(s) automaticamente.`);
+  }
+
   async function init(){
     try{
       const [bS,cS,aS]=await Promise.all([getDocs(BOOKINGS_COL),getDocs(CLEANINGS_COL),getDocs(APTS_COL)]);
@@ -2132,6 +2169,10 @@
       aS.docs.forEach(d=>{apartmentData[d.id]=d.data();});
       document.getElementById('cleanDateFilter').value=todayStr();
       aptMapDate=todayStr();
+
+      // ✅ Compensa pagamentos que já venceram
+      await compensarPagamentosAutomaticos();
+
       clearForm();renderAll();
       isReady=true;
       initRealtimeListeners();
