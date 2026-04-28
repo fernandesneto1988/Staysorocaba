@@ -322,7 +322,6 @@
 </div>
 <div id="syncStatus" class="saved">✅ Dados sincronizados</div>
 
-<!-- MODAL SENHA ADMIN -->
 <div id="senhaAdminOverlay" class="senha-modal-overlay">
   <div class="senha-modal">
     <h3>🔐 Acesso restrito</h3>
@@ -336,7 +335,6 @@
   </div>
 </div>
 
-<!-- MODAL ATRIBUIÇÃO DE LIMPEZA -->
 <div id="atribModalOverlay" class="atrib-modal-overlay">
   <div class="atrib-modal">
     <h3>🧹 Quem realizou a limpeza?</h3>
@@ -386,7 +384,6 @@
     <button class="tab-btn" onclick="switchTab('relatorio')">📈 Relatório</button>
   </div>
 
-  <!-- TAB: DASHBOARD -->
   <div id="tab-dashboard" class="tab-panel active">
     <div class="card">
       <div class="summary">
@@ -435,7 +432,6 @@
     </div>
   </div>
 
-  <!-- TAB: MAPA MENSAL -->
   <div id="tab-mapamensal" class="tab-panel">
     <div class="card">
       <div class="monthly-nav">
@@ -458,7 +454,6 @@
     </div>
   </div>
 
-  <!-- TAB: RESERVAS -->
   <div id="tab-reservas" class="tab-panel">
     <div class="card">
       <div class="quick-filters">
@@ -498,7 +493,6 @@
     </div>
   </div>
 
-  <!-- TAB: LIMPEZA -->
   <div id="tab-limpeza" class="tab-panel">
     <div class="card">
       <div class="section-title">
@@ -529,7 +523,6 @@
     </div>
   </div>
 
-  <!-- TAB: FINANCEIRO -->
   <div id="tab-financeiro" class="tab-panel">
     <div class="card">
       <div class="fin-nav">
@@ -584,7 +577,6 @@
     </div>
   </div>
 
-  <!-- TAB: RELATÓRIO -->
   <div id="tab-relatorio" class="tab-panel">
     <div class="card">
       <div class="report-month-nav">
@@ -674,23 +666,11 @@
           <div class="form-group"><label>Vaga de garagem</label><select id="garageSpot"></select></div>
           <div class="form-group"><label>Qtd. hóspedes</label><input type="number" id="guests" min="1" value="1" /></div>
         </div>
-
-        <!-- ▼▼▼ APENAS AQUI MUDOU: adicionado o div senhaPortariaHint ▼▼▼ -->
         <div class="form-group">
           <label>🔐 Senha da Portaria</label>
           <input type="text" id="senhaPortaria" placeholder="Ex: 1234*" />
-          <div id="senhaPortariaHint" style="
-            display:none;
-            margin-top:8px;
-            background:#eff6ff;
-            border:1px solid #bfdbfe;
-            border-radius:10px;
-            padding:10px 14px;
-            font-size:13px;
-          "></div>
+          <div id="senhaPortariaHint" style="display:none;margin-top:8px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:10px 14px;font-size:13px;"></div>
         </div>
-        <!-- ▲▲▲ FIM DA MUDANÇA NO HTML ▲▲▲ -->
-
         <div class="form-group" id="weeklyDayGroup">
           <label>🧹 Dia preferido para faxina semanal</label>
           <div style="display:flex;gap:8px;align-items:center;">
@@ -806,7 +786,6 @@
   let weeklyDayUnlocked   = false;
   let atribPending = null;
 
-  // ── HELPERS DE DATA ──
   function todayStr(){
     const d=new Date();
     return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
@@ -818,7 +797,6 @@
   function formatDateBR(s){ if(!s)return'-';const[y,m,d]=s.split('-');return`${d}/${m}/${y}`; }
   function formatCurrency(v){ return Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}); }
 
-  // ── LÓGICA DE ATRIBUIÇÃO AUTOMÁTICA ──
   function getAutoResponsavel(dateStr) {
     const d = new Date(dateStr + 'T00:00:00');
     const dow = d.getDay();
@@ -835,7 +813,6 @@
     return 'aberto';
   }
 
-  // ── FINANCEIRO CONFIG ──
   function getFinConfig() {
     return {
       salario: parseFloat(localStorage.getItem('fin_salario') || '0'),
@@ -847,7 +824,6 @@
     localStorage.setItem('fin_valorFreela', valorFreela);
   }
 
-  // ── MODAL ATRIBUIÇÃO ──
   function abrirAtribModal(bId, type, date, descricao) {
     atribPending = { bId, type, date };
     document.getElementById('atribModalDesc').textContent = descricao;
@@ -870,7 +846,6 @@
   });
   document.getElementById('atribCancelBtn').addEventListener('click', fecharAtribModal);
 
-  // ── FIREBASE HELPERS ──
   function setSyncStatus(state, msg) {
     const el = document.getElementById('syncStatus');
     el.className = state; el.textContent = msg;
@@ -910,7 +885,6 @@
     } catch(e){ console.error(e); setSyncStatus('error','❌ Erro na importação'); }
   }
 
-  // ── FUNÇÕES UTILITÁRIAS ──
   function normalizePhone(v){ return String(v||'').replace(/\D/g,''); }
   function formatPhone(v){
     const d=normalizePhone(v).slice(0,11);
@@ -975,7 +949,6 @@
     return bookings.some(b=>!b.cancelled&&b.apartment===aptName&&b.checkin===checkoutDate);
   }
 
-  // ── SENHA ADMIN ──
   function pedirSenhaAdmin(callback){
     senhaAdminCallback=callback;
     document.getElementById('senhaAdminInput').value='';
@@ -1020,7 +993,6 @@
     renderApartmentsMap();
   };
 
-  // ── FINANCEIRO ──
   window.changeFinMonth=(delta)=>{
     if(delta===0){finMonth=new Date().getMonth();finYear=new Date().getFullYear();}
     else{finMonth+=delta;if(finMonth>11){finMonth=0;finYear++;}if(finMonth<0){finMonth=11;finYear--;}}
@@ -1042,47 +1014,36 @@
     document.getElementById('finSalario').value=cfg.salario||'';
     document.getElementById('finValorFreela').value=cfg.valorFreela||'';
     document.getElementById('finMonthTitle').textContent=`${MONTH_NAMES[finMonth]} / ${finYear}`;
-
     const ms=`${finYear}-${String(finMonth+1).padStart(2,'0')}-01`;
     const me=`${finYear}-${String(finMonth+1).padStart(2,'0')}-${String(new Date(finYear,finMonth+1,0).getDate()).padStart(2,'0')}`;
-
     const recs = cleaningRecords.filter(r => r.done && r.date >= ms && r.date <= me);
-
     let cntFax = 0, cntFreela = 0, cntAberto = 0;
     const rows = [];
-
     recs.forEach(r => {
       const b = bookings.find(x => x.id === r.bookingId);
       const apt = b ? b.apartment : '—';
       const guest = b ? b.guestName : '—';
       const tipoLabel = r.type === 'checkout' ? 'Saída' : 'Semanal';
       const resp = r.responsavel || 'aberto';
-
       if (resp === 'faxineira') cntFax++;
       else if (resp === 'freela') cntFreela++;
       else cntAberto++;
-
       const valor = resp === 'freela' ? cfg.valorFreela : 0;
       rows.push({ date: r.date, apt, guest, tipoLabel, resp, valor, key: r.key, bId: r.bookingId, type: r.type });
     });
-
     rows.sort((a,b) => a.date.localeCompare(b.date));
-
     const totalFreela = cntFreela * cfg.valorFreela;
     const totalGeral = cfg.salario + totalFreela;
-
     document.getElementById('finResumoSalario').textContent = formatCurrency(cfg.salario);
     document.getElementById('finResumoFaxineiraCount').textContent = `${cntFax} limpeza(s) registradas`;
     document.getElementById('finResumoFreela').textContent = formatCurrency(totalFreela);
     document.getElementById('finResumoFreelaCount').textContent = `${cntFreela} limpeza(s) × ${formatCurrency(cfg.valorFreela)}`;
     document.getElementById('finResumoTotal').textContent = formatCurrency(totalGeral);
     document.getElementById('finResumoOpenCount').textContent = cntAberto > 0 ? `⚠️ ${cntAberto} sem atribuição` : '✅ Todas atribuídas';
-
     if (!rows.length) {
       document.getElementById('finHistoryTable').innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px;">Nenhuma limpeza concluída neste mês.</td></tr>`;
       return;
     }
-
     document.getElementById('finHistoryTable').innerHTML = rows.map(r => {
       const respBadge = r.resp === 'faxineira'
         ? `<span class="badge badge-faxineira">👩 Faxineira</span>`
@@ -1105,7 +1066,6 @@
     abrirAtribModal(bId, type, date, desc);
   };
 
-  // ── MARK CLEANING ──
   async function markCleaning(bId, type, date, done, responsavel) {
     const key = getCleaningKey(bId, type, date);
     if (done && !responsavel) {
@@ -1150,7 +1110,6 @@
     });
   };
 
-  // ── TABS ──
   function switchTab(name){
     document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
     document.getElementById(`tab-${name}`).classList.add('active');
@@ -1190,7 +1149,6 @@
     if(btn&&menu&&!btn.contains(e.target)&&!menu.contains(e.target)) closeMobileMenu();
   });
 
-  // ── WA ──
   async function enviarParaTodos(msg){
     const enc=encodeURIComponent(msg);
     await Promise.all(WA_RECIPIENTS.map(r=>fetch(`https://api.callmebot.com/whatsapp.php?phone=${r.phone}&text=${enc}&apikey=${r.apikey}`,{mode:'no-cors'}).catch(e=>console.error(e))));
@@ -1301,7 +1259,6 @@
     setTimeout(()=>{btn.textContent='📊 Testar relatório mensal';btn.style.background='#7c3aed';btn.disabled=false;},3500);
   });
 
-  // ── ALERTS ──
   function renderAlerts(){
     const today=todayStr();
     const days=[0,1,2,3],names=['Hoje','Amanhã','Em 2 dias','Em 3 dias'];
@@ -1322,7 +1279,6 @@
     document.getElementById('alertPanel').style.display=hasAny?'block':'none';
   }
 
-  // ── CLEANING TAB ──
   function buildCleaningItems(refDate){
     const today=todayStr();
     const items=[];
@@ -1439,7 +1395,6 @@
     renderCleaningTab();
   };
 
-  // ── MAPA MENSAL ──
   window.changeMonthlyMap=(delta)=>{
     if(delta===0){monthlyMapMonth=new Date().getMonth();monthlyMapYear=new Date().getFullYear();}
     else{monthlyMapMonth+=delta;if(monthlyMapMonth>11){monthlyMapMonth=0;monthlyMapYear++;}if(monthlyMapMonth<0){monthlyMapMonth=11;monthlyMapYear--;}}
@@ -1489,7 +1444,6 @@
     document.getElementById('monthlyMapTable').innerHTML=thead+tbody;
   }
 
-  // ── RELATÓRIO ──
   window.changeReportMonth=(delta)=>{
     if(delta===0){reportMonth=new Date().getMonth();reportYear=new Date().getFullYear();}
     else{reportMonth+=delta;if(reportMonth>11){reportMonth=0;reportYear++;}if(reportMonth<0){reportMonth=11;reportYear--;}}
@@ -1537,7 +1491,6 @@
       </tr>`).join('');
   }
 
-  // ── DASHBOARD ──
   function renderSummary(){
     const now=new Date(),m=now.getMonth(),y=now.getFullYear();
     let mr=0,mp=0,tp=0,mn=0;
@@ -1586,6 +1539,7 @@
       alert('Mensagem copiada!');
     }
   };
+
   function renderTodayPanels(){
     const today=todayStr();
     const ci=bookings.filter(b=>b.checkin===today&&!b.cancelled);
@@ -1735,7 +1689,7 @@
     }).join('');
   }
 
-  // ── FORMULÁRIO RESERVA ──
+  // ── FORMULÁRIO ──
   const form=document.getElementById('bookingForm');
   const bookingModalOverlay=document.getElementById('bookingModalOverlay');
   const apartmentModalOverlay=document.getElementById('apartmentModalOverlay');
@@ -1891,37 +1845,55 @@
     updateApartmentOptions();updateGarageOptions();
   }
 
-  // ── NOVA FUNÇÃO: verificarSenhaCheckout ──
+  // ── FUNÇÃO CORRIGIDA: verificarSenhaCheckout ──
   function verificarSenhaCheckout(){
-    const checkout=document.getElementById('checkout').value;
-    const currentId=document.getElementById('bookingId').value||null;
-    const senhaBox=document.getElementById('senhaPortariaHint');
-    if(!checkout){senhaBox.style.display='none';return;}
-    const comSenha=bookings.filter(b=>
-      b.id!==currentId&&
-      !b.cancelled&&
-      b.checkout===checkout&&
-      b.senhaPortaria
+    const checkout = document.getElementById('checkout').value;
+    const currentId = document.getElementById('bookingId').value || null;
+    const senhaBox = document.getElementById('senhaPortariaHint');
+
+    if(!checkout){ senhaBox.style.display='none'; return; }
+
+    // Busca TODAS as reservas com mesmo checkout (com ou sem senha)
+    const mesmoCheckout = bookings.filter(b =>
+      b.id !== currentId &&
+      !b.cancelled &&
+      b.checkout === checkout
     );
-    if(!comSenha.length){senhaBox.style.display='none';return;}
-    const senha=comSenha[0].senhaPortaria;
-    const nomes=comSenha.map(b=>`Apto ${b.apartment} — ${b.guestName}`).join(', ');
-    senhaBox.style.display='block';
-    senhaBox.innerHTML=`
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+
+    if(!mesmoCheckout.length){ senhaBox.style.display='none'; return; }
+
+    // Verifica se alguma já tem senha cadastrada
+    const comSenha = mesmoCheckout.filter(b => b.senhaPortaria);
+
+    if(comSenha.length){
+      // Já existe senha → sugere usar a mesma
+      const senha = comSenha[0].senhaPortaria;
+      const nomes = mesmoCheckout.map(b => `Apto ${b.apartment} — ${b.guestName}`).join(', ');
+      senhaBox.style.display = 'block';
+      senhaBox.innerHTML = `
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+          <div>
+            🔑 <strong>Senha já cadastrada para este check-out:</strong>
+            <span style="font-size:16px;font-weight:bold;letter-spacing:2px;color:#1d4ed8;">${senha}</span><br>
+            <span style="font-size:12px;color:#6b7280;">Compartilhada com: ${nomes}</span>
+          </div>
+          <button type="button"
+            onclick="aplicarSenhaExistente('${senha}')"
+            style="padding:8px 14px;border-radius:8px;background:#2563eb;color:white;border:none;font-weight:bold;font-size:13px;cursor:pointer;white-space:nowrap;">
+            ✅ Usar esta senha
+          </button>
+        </div>`;
+    } else {
+      // Mesmo checkout mas SEM senha ainda → avisa para usar a mesma
+      const nomes = mesmoCheckout.map(b => `Apto ${b.apartment} — ${b.guestName}`).join(', ');
+      senhaBox.style.display = 'block';
+      senhaBox.innerHTML = `
         <div>
-          🔑 <strong>Senha já cadastrada para este check-out:</strong>
-          <span style="font-size:16px;font-weight:bold;letter-spacing:2px;color:#1d4ed8;">${senha}</span>
-          <br>
-          <span style="font-size:12px;color:#6b7280;">Compartilhada com: ${nomes}</span>
-        </div>
-        <button
-          type="button"
-          onclick="aplicarSenhaExistente('${senha}')"
-          style="padding:8px 14px;border-radius:8px;background:#2563eb;color:white;border:none;font-weight:bold;font-size:13px;cursor:pointer;white-space:nowrap;">
-          ✅ Usar esta senha
-        </button>
-      </div>`;
+          ⚠️ <strong>Atenção:</strong> Há outra(s) reserva(s) com check-out nesta mesma data.<br>
+          <span style="font-size:12px;color:#6b7280;">Reservas: ${nomes}</span><br>
+          <span style="font-size:12px;color:#92400e;">💡 Use a mesma senha da portaria para todos com check-out no mesmo dia.</span>
+        </div>`;
+    }
   }
 
   window.aplicarSenhaExistente=(senha)=>{
@@ -2018,7 +1990,6 @@
   };
   window.setQuickFilter=(f)=>{quickFilter=f;renderTable();};
 
-  // ── MODAL APARTAMENTO ──
   window.openApartmentModal=(name)=>{
     currentModalApt=name;
     const ab=bookings.filter(b=>b.apartment===name).sort((a,b)=>a.checkin.localeCompare(b.checkin));
@@ -2078,10 +2049,12 @@
   document.getElementById('source').addEventListener('change',atualizarBoxPagamentoAutomatico);
   ['checkin','checkout'].forEach(id=>{
     document.getElementById(id).addEventListener('input',()=>{
-      recalculateFinancials();updateApartmentOptions();updateGarageOptions();
+      recalculateFinancials();
+      updateApartmentOptions();
+      updateGarageOptions();
       findConflict(document.getElementById('bookingId').value||null);
       atualizarBoxPagamentoAutomatico();
-      verificarSenhaCheckout(); // ← NOVO
+      verificarSenhaCheckout();
     });
   });
   document.getElementById('totalValue').addEventListener('input',atualizarBoxPagamentoAutomatico);
@@ -2145,7 +2118,6 @@
     reader.readAsText(file);e.target.value='';
   });
 
-  // ── FIREBASE REALTIME ──
   function initRealtimeListeners(){
     onSnapshot(BOOKINGS_COL,snap=>{bookings=snap.docs.map(d=>d.data());if(isReady)renderAll();},e=>{console.error(e);setSyncStatus('error','❌ Erro de conexão');});
     onSnapshot(CLEANINGS_COL,snap=>{cleaningRecords=snap.docs.map(d=>d.data());if(isReady)renderAll();},e=>console.error(e));
