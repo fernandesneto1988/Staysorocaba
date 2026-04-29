@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Controle de Reservas - V4.3</title>
+  <title>Controle de Reservas - V4.4</title>
   <style>
     :root{
       --bg:#f4f7fb;
@@ -285,6 +285,36 @@
     .senha-modal .senha-error{color:#dc2626;font-size:13px;margin-bottom:10px;display:none;text-align:center}
     .senha-modal .senha-btns{display:flex;gap:10px}
     .badge-auto-payment{background:#ede9fe;color:#5b21b6;border:1px solid #c4b5fd}
+
+    /* ── PRECIFICAÇÃO ── */
+    .prec-config-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px}
+    .prec-box{background:#f8fafc;border:1px solid var(--border);border-radius:14px;padding:16px}
+    .prec-box h4{margin:0 0 12px 0;font-size:15px;color:var(--primary)}
+    .prec-box .form-group{margin-bottom:10px}
+    .prec-box label{display:block;font-size:13px;color:var(--muted);margin-bottom:4px}
+    .prec-box input{padding:9px 11px;font-size:14px}
+    .prec-resultado{background:linear-gradient(135deg,#eff6ff,#f0fdf4);border:2px solid var(--primary);border-radius:16px;padding:20px;margin-bottom:18px;display:none}
+    .prec-resultado h3{margin:0 0 12px 0;font-size:18px;color:var(--primary)}
+    .prec-valor-final{font-size:36px;font-weight:bold;color:var(--success);margin:8px 0}
+    .prec-breakdown{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px}
+    .prec-fator{background:white;border:1px solid var(--border);border-radius:12px;padding:10px;text-align:center;font-size:12px}
+    .prec-fator strong{display:block;font-size:16px;margin-bottom:2px}
+    .prec-fator.positivo strong{color:var(--success)}
+    .prec-fator.negativo strong{color:var(--danger)}
+    .prec-fator.neutro strong{color:var(--muted)}
+    .prec-simulador{background:#f8fafc;border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:18px}
+    .prec-simulador h3{margin:0 0 14px 0;font-size:16px}
+    .prec-sim-grid{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:12px;align-items:end}
+    .prec-feriados-box{background:#fffbeb;border:1px solid #fde68a;border-radius:14px;padding:18px}
+    .prec-feriados-box h3{margin:0 0 14px 0;font-size:16px;color:#92400e}
+    .prec-feriados-table{width:100%;border-collapse:collapse;background:white;border-radius:12px;overflow:hidden;border:1px solid var(--border);margin-bottom:14px}
+    .prec-feriados-table th,.prec-feriados-table td{padding:10px 12px;border-bottom:1px solid #fef3c7;text-align:left;font-size:13px}
+    .prec-feriados-table th{background:#fef9c3;font-weight:bold}
+    .prec-feriados-table tr:last-child td{border-bottom:none}
+    .prec-add-feriado{display:grid;grid-template-columns:1fr 2fr auto;gap:10px;align-items:end;margin-top:12px}
+    .prec-suggestion-box{background:#f0fdf4;border:2px solid #86efac;border-radius:12px;padding:14px;margin-top:10px;display:none}
+    .prec-suggestion-box strong{font-size:20px;color:var(--success)}
+
     @media(max-width:1120px){
       .summary{grid-template-columns:1fr 1fr}
       .mini-panels{grid-template-columns:1fr}
@@ -298,6 +328,9 @@
       .clean-grid{grid-template-columns:1fr 1fr}
       .fin-summary-grid{grid-template-columns:1fr}
       .fin-config-row{grid-template-columns:1fr}
+      .prec-config-grid{grid-template-columns:1fr 1fr}
+      .prec-breakdown{grid-template-columns:1fr 1fr}
+      .prec-sim-grid{grid-template-columns:1fr 1fr}
       table{min-width:980px}
     }
     @media(max-width:760px){
@@ -308,6 +341,9 @@
       .modal-summary{grid-template-columns:1fr}
       .report-grid{grid-template-columns:1fr}
       .clean-grid{grid-template-columns:1fr}
+      .prec-config-grid{grid-template-columns:1fr}
+      .prec-breakdown{grid-template-columns:1fr 1fr}
+      .prec-sim-grid{grid-template-columns:1fr}
       h1{font-size:22px}
       .modal{max-height:92vh;border-radius:16px}
       .modal-header,.modal-body{padding:16px}
@@ -351,7 +387,7 @@
   <div class="topbar">
     <div>
       <h1>🏨 Controle de Reservas</h1>
-      <div class="subtitle">V4.3 — Controle de faxineira e freelas</div>
+      <div class="subtitle">V4.4 — Precificação dinâmica</div>
     </div>
     <div style="display:flex;gap:10px;flex-wrap:wrap;">
       <button type="button" id="sendWABtn" style="width:auto;padding:11px 16px;border-radius:10px;background:#25D366;color:white;border:none;font-weight:bold;font-size:14px;cursor:pointer;">📲 Enviar resumo WhatsApp</button>
@@ -372,6 +408,7 @@
     <button class="tab-btn" onclick="switchTab('reservas');closeMobileMenu()">📋 Reservas</button>
     <button class="tab-btn" onclick="switchTab('limpeza');closeMobileMenu()">🧹 Limpeza</button>
     <button class="tab-btn" onclick="switchTab('financeiro');closeMobileMenu()">💰 Financeiro</button>
+    <button class="tab-btn" onclick="switchTab('precificacao');closeMobileMenu()">💲 Precificação</button>
     <button class="tab-btn" onclick="switchTab('relatorio');closeMobileMenu()">📈 Relatório</button>
   </div>
 
@@ -381,9 +418,11 @@
     <button class="tab-btn" onclick="switchTab('reservas')">📋 Reservas</button>
     <button class="tab-btn" onclick="switchTab('limpeza')">🧹 Limpeza</button>
     <button class="tab-btn" onclick="switchTab('financeiro')">💰 Financeiro</button>
+    <button class="tab-btn" onclick="switchTab('precificacao')">💲 Precificação</button>
     <button class="tab-btn" onclick="switchTab('relatorio')">📈 Relatório</button>
   </div>
 
+  <!-- DASHBOARD -->
   <div id="tab-dashboard" class="tab-panel active">
     <div class="card">
       <div class="summary">
@@ -432,6 +471,7 @@
     </div>
   </div>
 
+  <!-- MAPA MENSAL -->
   <div id="tab-mapamensal" class="tab-panel">
     <div class="card">
       <div class="monthly-nav">
@@ -454,6 +494,7 @@
     </div>
   </div>
 
+  <!-- RESERVAS -->
   <div id="tab-reservas" class="tab-panel">
     <div class="card">
       <div class="quick-filters">
@@ -493,6 +534,7 @@
     </div>
   </div>
 
+  <!-- LIMPEZA -->
   <div id="tab-limpeza" class="tab-panel">
     <div class="card">
       <div class="section-title">
@@ -523,6 +565,7 @@
     </div>
   </div>
 
+  <!-- FINANCEIRO -->
   <div id="tab-financeiro" class="tab-panel">
     <div class="card">
       <div class="fin-nav">
@@ -577,6 +620,158 @@
     </div>
   </div>
 
+  <!-- ══════════════════════════════════════════
+       NOVA ABA: PRECIFICAÇÃO
+  ══════════════════════════════════════════ -->
+  <div id="tab-precificacao" class="tab-panel">
+    <div class="card">
+      <div class="section-title">
+        <h2>💲 Precificação Dinâmica</h2>
+        <span class="muted">Configure as regras e simule preços por período</span>
+      </div>
+
+      <div class="info-box">
+        💡 O preço sugerido é calculado com base na <strong>diária base</strong> + fatores de ajuste.
+        Use o simulador para testar períodos antes de cadastrar uma reserva.
+      </div>
+
+      <!-- CONFIGURAÇÕES -->
+      <div class="prec-config-grid">
+        <div class="prec-box">
+          <h4>📌 Diária Base</h4>
+          <div class="form-group">
+            <label>Valor base (R$)</label>
+            <input type="number" id="precDiariaBase" min="0" step="0.01" placeholder="Ex: 120.00" />
+          </div>
+          <button type="button" class="btn-success" id="precSaveBaseBtn" style="width:auto;padding:9px 16px;">💾 Salvar</button>
+          <span id="precBaseSavedMsg" style="margin-left:8px;font-size:13px;color:#166534;display:none;">✅ Salvo!</span>
+        </div>
+
+        <div class="prec-box">
+          <h4>📅 Fatores de Dia</h4>
+          <div class="form-group">
+            <label>Fim de semana — Sex/Sáb (%)</label>
+            <input type="number" id="precFatorFds" min="0" max="200" step="1" placeholder="Ex: 20" />
+          </div>
+          <div class="form-group">
+            <label>Feriado (%)</label>
+            <input type="number" id="precFatorFeriado" min="0" max="200" step="1" placeholder="Ex: 30" />
+          </div>
+        </div>
+
+        <div class="prec-box">
+          <h4>🏠 Fator de Ocupação</h4>
+          <div class="form-group">
+            <label>Ocupação &gt; 70% (%)</label>
+            <input type="number" id="precFatorOc70" min="0" max="100" step="1" placeholder="Ex: 15" />
+          </div>
+          <div class="form-group">
+            <label>Ocupação &gt; 90% (%)</label>
+            <input type="number" id="precFatorOc90" min="0" max="100" step="1" placeholder="Ex: 25" />
+          </div>
+        </div>
+
+        <div class="prec-box">
+          <h4>🌡️ Temporada Alta</h4>
+          <div class="form-group">
+            <label>Meses de alta (%) — Dez, Jan, Jul</label>
+            <input type="number" id="precFatorTemporada" min="0" max="100" step="1" placeholder="Ex: 25" />
+          </div>
+          <div class="form-group">
+            <label>Meses de alta — quais? (ex: 0,6,11)</label>
+            <input type="text" id="precMesesAlta" placeholder="0,6,11" />
+          </div>
+        </div>
+
+        <div class="prec-box">
+          <h4>⏰ Antecedência</h4>
+          <div class="form-group">
+            <label>Desconto última hora — &lt; 3 dias (%)</label>
+            <input type="number" id="precDescontoUltimaHora" min="0" max="50" step="1" placeholder="Ex: 10" />
+          </div>
+          <div class="form-group">
+            <label>Antecedência mínima (dias)</label>
+            <input type="number" id="precAntecedenciaMin" min="1" max="30" step="1" placeholder="Ex: 3" />
+          </div>
+        </div>
+
+        <div class="prec-box" style="display:flex;flex-direction:column;justify-content:flex-end;">
+          <button type="button" class="btn-primary" id="precSaveAllBtn" style="margin-bottom:10px;">💾 Salvar todas as configurações</button>
+          <button type="button" class="btn-secondary" id="precResetBtn">↩️ Restaurar padrões</button>
+          <span id="precAllSavedMsg" style="margin-top:8px;font-size:13px;color:#166534;display:none;">✅ Configurações salvas!</span>
+        </div>
+      </div>
+
+      <!-- SIMULADOR -->
+      <div class="prec-simulador">
+        <h3>🔮 Simulador de Preço</h3>
+        <div class="prec-sim-grid">
+          <div class="form-group" style="margin:0;">
+            <label style="display:block;font-size:13px;color:var(--muted);margin-bottom:4px;">Check-in</label>
+            <input type="date" id="precSimCheckin" />
+          </div>
+          <div class="form-group" style="margin:0;">
+            <label style="display:block;font-size:13px;color:var(--muted);margin-bottom:4px;">Check-out</label>
+            <input type="date" id="precSimCheckout" />
+          </div>
+          <div class="form-group" style="margin:0;">
+            <label style="display:block;font-size:13px;color:var(--muted);margin-bottom:4px;">Origem</label>
+            <select id="precSimSource">
+              <option value="">Selecione</option>
+              <option>Direto</option><option>WhatsApp</option>
+              <option>Airbnb</option><option>Booking</option><option>Outro</option>
+            </select>
+          </div>
+          <div>
+            <button type="button" class="btn-primary" id="precSimularBtn" style="height:44px;">🔮 Simular</button>
+          </div>
+        </div>
+
+        <!-- RESULTADO -->
+        <div class="prec-resultado" id="precResultado">
+          <h3>💡 Sugestão de preço</h3>
+          <div style="display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;">
+            <div class="prec-valor-final" id="precValorDiaria">R$ 0,00</div>
+            <span style="color:var(--muted);font-size:14px;">por noite</span>
+            <div style="font-size:22px;font-weight:bold;color:var(--primary);" id="precValorTotal"></div>
+            <span style="color:var(--muted);font-size:14px;" id="precValorTotalLabel"></span>
+          </div>
+          <div class="prec-breakdown" id="precBreakdown"></div>
+          <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;">
+            <button type="button" class="btn-success" id="precUsarPrecoBtn" style="width:auto;padding:10px 18px;">✅ Usar este preço em nova reserva</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- FERIADOS -->
+      <div class="prec-feriados-box">
+        <h3>🗓️ Feriados cadastrados</h3>
+        <div class="table-wrap" style="border:none;margin-bottom:12px;">
+          <table class="prec-feriados-table" style="min-width:400px;">
+            <thead>
+              <tr><th>Data</th><th>Nome</th><th>Tipo</th><th>Ação</th></tr>
+            </thead>
+            <tbody id="precFeriadosTable"></tbody>
+          </table>
+        </div>
+        <div class="prec-add-feriado">
+          <div class="form-group" style="margin:0;">
+            <label style="font-size:13px;color:var(--muted);">Data</label>
+            <input type="date" id="precNovoFeriadoData" />
+          </div>
+          <div class="form-group" style="margin:0;">
+            <label style="font-size:13px;color:var(--muted);">Nome</label>
+            <input type="text" id="precNovoFeriadoNome" placeholder="Ex: Carnaval" />
+          </div>
+          <div>
+            <button type="button" class="btn-warning" id="precAddFeriadoBtn" style="height:44px;">+ Adicionar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RELATÓRIO -->
   <div id="tab-relatorio" class="tab-panel">
     <div class="card">
       <div class="report-month-nav">
@@ -632,6 +827,12 @@
         <strong style="color:#166534;">💳 Pagamento automático:</strong>
         <span id="paymentAutoDesc" style="color:#166534;font-size:14px;"></span>
       </div>
+      <!-- SUGESTÃO DE PREÇO NO MODAL -->
+      <div id="precSugestaoModal" class="prec-suggestion-box">
+        💡 Preço sugerido para este período: <strong id="precSugestaoValor">R$ 0,00</strong>/noite
+        &nbsp;·&nbsp; Total: <strong id="precSugestaoTotal">R$ 0,00</strong>
+        <button type="button" id="precAplicarSugestaoBtn" style="margin-left:12px;width:auto;padding:6px 14px;border-radius:8px;background:#16a34a;color:white;border:none;font-weight:bold;font-size:13px;cursor:pointer;">✅ Aplicar</button>
+      </div>
       <form id="bookingForm">
         <input type="hidden" id="bookingId" />
         <input type="hidden" id="lastEditedField" value="dailyRate" />
@@ -659,7 +860,13 @@
         </div>
         <div class="row-3">
           <div class="form-group"><label>Noites</label><input type="number" id="nights" min="0" value="0" class="readonly" readonly /></div>
-          <div class="form-group"><label>Diária (R$)</label><input type="number" id="dailyRate" min="0" step="0.01" value="0" /></div>
+          <div class="form-group">
+            <label>Diária (R$)</label>
+            <div style="display:flex;gap:6px;align-items:center;">
+              <input type="number" id="dailyRate" min="0" step="0.01" value="0" style="flex:1;" />
+              <button type="button" id="precSugerirBtn" class="btn-warning" style="width:auto;padding:10px 10px;white-space:nowrap;font-size:12px;" title="Sugerir preço">💡</button>
+            </div>
+          </div>
           <div class="form-group"><label>Valor total (R$)</label><input type="number" id="totalValue" min="0" step="0.01" value="0" /></div>
         </div>
         <div class="row">
@@ -728,7 +935,6 @@
     </div>
   </div>
 </div>
-
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
   import {
@@ -786,6 +992,375 @@
   let weeklyDayUnlocked   = false;
   let atribPending = null;
 
+  // ══════════════════════════════════════════
+  // PRECIFICAÇÃO — CONFIGURAÇÕES & FERIADOS SP
+  // ══════════════════════════════════════════
+
+  const PREC_DEFAULTS = {
+    diariaBase: 120,
+    fatorFds: 20,
+    fatorFeriado: 30,
+    fatorOc70: 15,
+    fatorOc90: 25,
+    fatorTemporada: 25,
+    mesesAlta: [0, 6, 11],
+    descontoUltimaHora: 10,
+    antecedenciaMin: 3,
+  };
+
+  const FERIADOS_SP_FIXOS = [
+    // ── Nacionais ──
+    { data: '2025-01-01', nome: 'Confraternização Universal', tipo: 'Nacional' },
+    { data: '2025-03-04', nome: 'Carnaval', tipo: 'Nacional' },
+    { data: '2025-03-05', nome: 'Carnaval', tipo: 'Nacional' },
+    { data: '2025-04-18', nome: 'Sexta-feira Santa', tipo: 'Nacional' },
+    { data: '2025-04-20', nome: 'Páscoa', tipo: 'Nacional' },
+    { data: '2025-04-21', nome: 'Tiradentes', tipo: 'Nacional' },
+    { data: '2025-05-01', nome: 'Dia do Trabalho', tipo: 'Nacional' },
+    { data: '2025-06-19', nome: 'Corpus Christi', tipo: 'Nacional' },
+    { data: '2025-09-07', nome: 'Independência do Brasil', tipo: 'Nacional' },
+    { data: '2025-10-12', nome: 'Nossa Sra. Aparecida', tipo: 'Nacional' },
+    { data: '2025-11-02', nome: 'Finados', tipo: 'Nacional' },
+    { data: '2025-11-15', nome: 'Proclamação da República', tipo: 'Nacional' },
+    { data: '2025-11-20', nome: 'Consciência Negra', tipo: 'Nacional' },
+    { data: '2025-12-25', nome: 'Natal', tipo: 'Nacional' },
+    // ── Estaduais SP ──
+    { data: '2025-07-09', nome: 'Revolução Constitucionalista', tipo: 'Estadual SP' },
+    // ── Nacionais 2026 ──
+    { data: '2026-01-01', nome: 'Confraternização Universal', tipo: 'Nacional' },
+    { data: '2026-02-17', nome: 'Carnaval', tipo: 'Nacional' },
+    { data: '2026-02-18', nome: 'Carnaval', tipo: 'Nacional' },
+    { data: '2026-04-03', nome: 'Sexta-feira Santa', tipo: 'Nacional' },
+    { data: '2026-04-05', nome: 'Páscoa', tipo: 'Nacional' },
+    { data: '2026-04-21', nome: 'Tiradentes', tipo: 'Nacional' },
+    { data: '2026-05-01', nome: 'Dia do Trabalho', tipo: 'Nacional' },
+    { data: '2026-06-04', nome: 'Corpus Christi', tipo: 'Nacional' },
+    { data: '2026-09-07', nome: 'Independência do Brasil', tipo: 'Nacional' },
+    { data: '2026-10-12', nome: 'Nossa Sra. Aparecida', tipo: 'Nacional' },
+    { data: '2026-11-02', nome: 'Finados', tipo: 'Nacional' },
+    { data: '2026-11-15', nome: 'Proclamação da República', tipo: 'Nacional' },
+    { data: '2026-11-20', nome: 'Consciência Negra', tipo: 'Nacional' },
+    { data: '2026-12-25', nome: 'Natal', tipo: 'Nacional' },
+    { data: '2026-07-09', nome: 'Revolução Constitucionalista', tipo: 'Estadual SP' },
+  ];
+
+  function getPrecConfig() {
+    const saved = JSON.parse(localStorage.getItem('precConfig') || '{}');
+    return { ...PREC_DEFAULTS, ...saved };
+  }
+  function savePrecConfig(cfg) {
+    localStorage.setItem('precConfig', JSON.stringify(cfg));
+  }
+  function getFeriados() {
+    const extras = JSON.parse(localStorage.getItem('precFeriados') || '[]');
+    const all = [...FERIADOS_SP_FIXOS, ...extras];
+    const seen = new Set();
+    return all.filter(f => {
+      if (seen.has(f.data)) return false;
+      seen.add(f.data); return true;
+    }).sort((a, b) => a.data.localeCompare(b.data));
+  }
+  function saveFeriadosExtras(list) {
+    localStorage.setItem('precFeriados', JSON.stringify(list));
+  }
+  function isFeriado(dateStr) {
+    return getFeriados().some(f => f.data === dateStr);
+  }
+  function getFeriadoNome(dateStr) {
+    return getFeriados().find(f => f.data === dateStr)?.nome || '';
+  }
+
+  function getOcupacaoDia(dateStr) {
+    const ocupados = bookings.filter(b =>
+      !b.cancelled && b.checkin <= dateStr && b.checkout > dateStr
+    ).length;
+    return FIXED_APARTMENTS.length > 0 ? ocupados / FIXED_APARTMENTS.length : 0;
+  }
+
+  function calcularDiariaSugerida(checkinStr, checkoutStr) {
+    if (!checkinStr || !checkoutStr || checkinStr >= checkoutStr) return null;
+    const cfg = getPrecConfig();
+    const nights = calculateNights(checkinStr, checkoutStr);
+    const today = todayStr();
+    const diasAntecedencia = Math.floor(
+      (new Date(checkinStr + 'T00:00:00') - new Date(today + 'T00:00:00')) / 86400000
+    );
+
+    // Calcula por cada noite e tira a média
+    let totalFator = 0;
+    const breakdown = {
+      base: cfg.diariaBase,
+      fds: 0, feriado: 0, ocupacao: 0, temporada: 0, antecedencia: 0
+    };
+
+    let nNoites = 0;
+    let current = checkinStr;
+    while (current < checkoutStr) {
+      const d = new Date(current + 'T00:00:00');
+      const dow = d.getDay();
+      const mes = d.getMonth();
+      let fator = 1.0;
+
+      // Fim de semana
+      if (dow === 5 || dow === 6) {
+        fator += cfg.fatorFds / 100;
+        breakdown.fds += cfg.fatorFds / 100;
+      }
+      // Feriado
+      if (isFeriado(current)) {
+        fator += cfg.fatorFeriado / 100;
+        breakdown.feriado += cfg.fatorFeriado / 100;
+      }
+      // Temporada alta
+      const mesesAlta = Array.isArray(cfg.mesesAlta) ? cfg.mesesAlta : [0, 6, 11];
+      if (mesesAlta.includes(mes)) {
+        fator += cfg.fatorTemporada / 100;
+        breakdown.temporada += cfg.fatorTemporada / 100;
+      }
+      // Ocupação
+      const occ = getOcupacaoDia(current);
+      if (occ >= 0.9) {
+        fator += cfg.fatorOc90 / 100;
+        breakdown.ocupacao += cfg.fatorOc90 / 100;
+      } else if (occ >= 0.7) {
+        fator += cfg.fatorOc70 / 100;
+        breakdown.ocupacao += cfg.fatorOc70 / 100;
+      }
+
+      totalFator += fator;
+      nNoites++;
+      current = addDays(current, 1);
+    }
+
+    // Antecedência — aplica no total
+    let fatorAntecedencia = 1.0;
+    if (diasAntecedencia < cfg.antecedenciaMin && diasAntecedencia >= 0) {
+      fatorAntecedencia = 1 - cfg.descontoUltimaHora / 100;
+      breakdown.antecedencia = -cfg.descontoUltimaHora / 100;
+    }
+
+    const fatorMedio = nNoites > 0 ? totalFator / nNoites : 1;
+    const diariaMedia = Math.round(cfg.diariaBase * fatorMedio * fatorAntecedencia);
+
+    // Médias dos fatores
+    if (nNoites > 0) {
+      breakdown.fds       = breakdown.fds / nNoites;
+      breakdown.feriado   = breakdown.feriado / nNoites;
+      breakdown.ocupacao  = breakdown.ocupacao / nNoites;
+      breakdown.temporada = breakdown.temporada / nNoites;
+    }
+
+    return {
+      diariaMedia,
+      totalSugerido: diariaMedia * nights,
+      nights,
+      diasAntecedencia,
+      breakdown,
+    };
+  }
+
+  function renderPrecificacaoTab() {
+    const cfg = getPrecConfig();
+    document.getElementById('precDiariaBase').value    = cfg.diariaBase || '';
+    document.getElementById('precFatorFds').value      = cfg.fatorFds ?? 20;
+    document.getElementById('precFatorFeriado').value  = cfg.fatorFeriado ?? 30;
+    document.getElementById('precFatorOc70').value     = cfg.fatorOc70 ?? 15;
+    document.getElementById('precFatorOc90').value     = cfg.fatorOc90 ?? 25;
+    document.getElementById('precFatorTemporada').value= cfg.fatorTemporada ?? 25;
+    document.getElementById('precMesesAlta').value     = (cfg.mesesAlta||[0,6,11]).join(',');
+    document.getElementById('precDescontoUltimaHora').value = cfg.descontoUltimaHora ?? 10;
+    document.getElementById('precAntecedenciaMin').value    = cfg.antecedenciaMin ?? 3;
+    renderFeriadosTable();
+  }
+
+  function lerConfigDaTela() {
+    const mesesStr = document.getElementById('precMesesAlta').value;
+    const mesesAlta = mesesStr.split(',').map(s => parseInt(s.trim())).filter(n => !isNaN(n));
+    return {
+      diariaBase:           parseFloat(document.getElementById('precDiariaBase').value) || 120,
+      fatorFds:             parseFloat(document.getElementById('precFatorFds').value) || 20,
+      fatorFeriado:         parseFloat(document.getElementById('precFatorFeriado').value) || 30,
+      fatorOc70:            parseFloat(document.getElementById('precFatorOc70').value) || 15,
+      fatorOc90:            parseFloat(document.getElementById('precFatorOc90').value) || 25,
+      fatorTemporada:       parseFloat(document.getElementById('precFatorTemporada').value) || 25,
+      mesesAlta,
+      descontoUltimaHora:   parseFloat(document.getElementById('precDescontoUltimaHora').value) || 10,
+      antecedenciaMin:      parseInt(document.getElementById('precAntecedenciaMin').value) || 3,
+    };
+  }
+
+  function renderFeriadosTable() {
+    const feriados = getFeriados();
+    const extras   = JSON.parse(localStorage.getItem('precFeriados') || '[]');
+    const fixosSet = new Set(FERIADOS_SP_FIXOS.map(f => f.data));
+    document.getElementById('precFeriadosTable').innerHTML = feriados.map(f => {
+      const isExtra = !fixosSet.has(f.data);
+      return `<tr>
+        <td>${formatDateBR(f.data)}</td>
+        <td>${f.nome}</td>
+        <td><span class="badge ${f.tipo === 'Nacional' ? 'badge-future' : 'badge-active'}">${f.tipo}</span></td>
+        <td>${isExtra
+          ? `<button type="button" onclick="removerFeriado('${f.data}')"
+               style="width:auto;padding:5px 10px;font-size:12px;border-radius:8px;background:#dc2626;color:white;border:none;cursor:pointer;font-weight:bold;">
+               🗑️ Remover
+             </button>`
+          : `<span class="muted">Fixo</span>`
+        }</td>
+      </tr>`;
+    }).join('') || `<tr><td colspan="4" class="muted" style="text-align:center;padding:16px;">Nenhum feriado cadastrado.</td></tr>`;
+  }
+
+  window.removerFeriado = (data) => {
+    const extras = JSON.parse(localStorage.getItem('precFeriados') || '[]');
+    saveFeriadosExtras(extras.filter(f => f.data !== data));
+    renderFeriadosTable();
+  };
+
+  function mostrarResultadoSimulacao(resultado, checkin, checkout) {
+    const box = document.getElementById('precResultado');
+    box.style.display = 'block';
+    document.getElementById('precValorDiaria').textContent = formatCurrency(resultado.diariaMedia);
+    document.getElementById('precValorTotal').textContent  = formatCurrency(resultado.totalSugerido);
+    document.getElementById('precValorTotalLabel').textContent =
+      `total (${resultado.nights} noite${resultado.nights !== 1 ? 's' : ''})`;
+
+    const bk = resultado.breakdown;
+    const cfg = getPrecConfig();
+
+    const fatores = [
+      { label: 'Diária base', valor: cfg.diariaBase, pct: null, classe: 'neutro' },
+      { label: 'Fim de semana', valor: bk.fds > 0 ? `+${(bk.fds * 100).toFixed(0)}%` : '—', pct: bk.fds, classe: bk.fds > 0 ? 'positivo' : 'neutro' },
+      { label: 'Feriado',      valor: bk.feriado > 0 ? `+${(bk.feriado * 100).toFixed(0)}%` : '—', pct: bk.feriado, classe: bk.feriado > 0 ? 'positivo' : 'neutro' },
+      { label: 'Temporada',    valor: bk.temporada > 0 ? `+${(bk.temporada * 100).toFixed(0)}%` : '—', pct: bk.temporada, classe: bk.temporada > 0 ? 'positivo' : 'neutro' },
+      { label: 'Ocupação',     valor: bk.ocupacao > 0 ? `+${(bk.ocupacao * 100).toFixed(0)}%` : '—', pct: bk.ocupacao, classe: bk.ocupacao > 0 ? 'positivo' : 'neutro' },
+      { label: 'Antecedência', valor: bk.antecedencia < 0 ? `${(bk.antecedencia * 100).toFixed(0)}%` : '—', pct: bk.antecedencia, classe: bk.antecedencia < 0 ? 'negativo' : 'neutro' },
+      { label: 'Antecedência', valor: resultado.diasAntecedencia >= 0 ? `${resultado.diasAntecedencia} dias` : 'passado', pct: null, classe: 'neutro' },
+    ];
+
+    document.getElementById('precBreakdown').innerHTML = [
+      { label: 'Diária base',   val: formatCurrency(cfg.diariaBase), cls: 'neutro' },
+      { label: 'Fim de semana', val: bk.fds > 0 ? `+${(bk.fds * 100).toFixed(0)}%` : '—', cls: bk.fds > 0 ? 'positivo' : 'neutro' },
+      { label: 'Feriado',       val: bk.feriado > 0 ? `+${(bk.feriado * 100).toFixed(0)}%` : '—', cls: bk.feriado > 0 ? 'positivo' : 'neutro' },
+      { label: 'Temporada',     val: bk.temporada > 0 ? `+${(bk.temporada * 100).toFixed(0)}%` : '—', cls: bk.temporada > 0 ? 'positivo' : 'neutro' },
+      { label: 'Ocupação',      val: bk.ocupacao > 0 ? `+${(bk.ocupacao * 100).toFixed(0)}%` : '—', cls: bk.ocupacao > 0 ? 'positivo' : 'neutro' },
+      { label: 'Antecedência',  val: bk.antecedencia < 0 ? `${(bk.antecedencia * 100).toFixed(0)}%` : '—', cls: bk.antecedencia < 0 ? 'negativo' : 'neutro' },
+      { label: '💡 Diária final', val: formatCurrency(resultado.diariaMedia), cls: 'positivo' },
+      { label: '💰 Total',       val: formatCurrency(resultado.totalSugerido), cls: 'positivo' },
+    ].map(f => `
+      <div class="prec-fator ${f.cls}">
+        <strong>${f.val}</strong>
+        <span>${f.label}</span>
+      </div>`).join('');
+
+    // guarda para uso no botão "Usar este preço"
+    document.getElementById('precUsarPrecoBtn').dataset.diaria = resultado.diariaMedia;
+    document.getElementById('precUsarPrecoBtn').dataset.total  = resultado.totalSugerido;
+    document.getElementById('precUsarPrecoBtn').dataset.checkin  = checkin;
+    document.getElementById('precUsarPrecoBtn').dataset.checkout = checkout;
+  }
+
+  // Botão Simular
+  document.getElementById('precSimularBtn').addEventListener('click', () => {
+    const ci = document.getElementById('precSimCheckin').value;
+    const co = document.getElementById('precSimCheckout').value;
+    if (!ci || !co || ci >= co) { alert('Informe check-in e check-out válidos.'); return; }
+    const resultado = calcularDiariaSugerida(ci, co);
+    if (!resultado) return;
+    mostrarResultadoSimulacao(resultado, ci, co);
+  });
+
+  // Botão "Usar este preço" — abre modal de nova reserva preenchido
+  document.getElementById('precUsarPrecoBtn').addEventListener('click', () => {
+    const btn = document.getElementById('precUsarPrecoBtn');
+    const diaria = parseFloat(btn.dataset.diaria || '0');
+    const total  = parseFloat(btn.dataset.total  || '0');
+    const ci     = btn.dataset.checkin  || '';
+    const co     = btn.dataset.checkout || '';
+    clearForm();
+    if (ci) document.getElementById('checkin').value  = ci;
+    if (co) document.getElementById('checkout').value = co;
+    document.getElementById('dailyRate').value  = diaria.toFixed(2);
+    document.getElementById('totalValue').value = total.toFixed(2);
+    recalculateFinancials();
+    openBookingModal(false);
+    switchTab('reservas');
+  });
+
+  // Salvar configs
+  document.getElementById('precSaveBaseBtn').addEventListener('click', () => {
+    const cfg = getPrecConfig();
+    cfg.diariaBase = parseFloat(document.getElementById('precDiariaBase').value) || 120;
+    savePrecConfig(cfg);
+    const msg = document.getElementById('precBaseSavedMsg');
+    msg.style.display = 'inline'; setTimeout(() => { msg.style.display = 'none'; }, 2000);
+  });
+
+  document.getElementById('precSaveAllBtn').addEventListener('click', () => {
+    savePrecConfig(lerConfigDaTela());
+    const msg = document.getElementById('precAllSavedMsg');
+    msg.style.display = 'block'; setTimeout(() => { msg.style.display = 'none'; }, 2000);
+  });
+
+  document.getElementById('precResetBtn').addEventListener('click', () => {
+    if (!confirm('Restaurar todos os valores padrão de precificação?')) return;
+    savePrecConfig({ ...PREC_DEFAULTS });
+    renderPrecificacaoTab();
+  });
+
+  document.getElementById('precAddFeriadoBtn').addEventListener('click', () => {
+    const data  = document.getElementById('precNovoFeriadoData').value;
+    const nome  = document.getElementById('precNovoFeriadoNome').value.trim();
+    if (!data || !nome) { alert('Informe data e nome do feriado.'); return; }
+    const extras = JSON.parse(localStorage.getItem('precFeriados') || '[]');
+    if (extras.some(f => f.data === data) || FERIADOS_SP_FIXOS.some(f => f.data === data)) {
+      alert('Feriado já cadastrado para esta data.'); return;
+    }
+    extras.push({ data, nome, tipo: 'Manual' });
+    saveFeriadosExtras(extras);
+    document.getElementById('precNovoFeriadoData').value = '';
+    document.getElementById('precNovoFeriadoNome').value = '';
+    renderFeriadosTable();
+  });
+
+  // Botão 💡 no modal de reserva
+  document.getElementById('precSugerirBtn').addEventListener('click', () => {
+    const ci = document.getElementById('checkin').value;
+    const co = document.getElementById('checkout').value;
+    if (!ci || !co || ci >= co) { alert('Informe check-in e check-out primeiro.'); return; }
+    const res = calcularDiariaSugerida(ci, co);
+    if (!res) return;
+    const box   = document.getElementById('precSugestaoModal');
+    document.getElementById('precSugestaoValor').textContent = formatCurrency(res.diariaMedia);
+    document.getElementById('precSugestaoTotal').textContent = formatCurrency(res.totalSugerido);
+    box.style.display = 'block';
+    document.getElementById('precAplicarSugestaoBtn').onclick = () => {
+      document.getElementById('dailyRate').value  = res.diariaMedia.toFixed(2);
+      document.getElementById('lastEditedField').value = 'dailyRate';
+      recalculateFinancials();
+      box.style.display = 'none';
+    };
+  });
+
+  // Atualiza sugestão ao mudar datas no modal
+  function atualizarSugestaoModal() {
+    const ci = document.getElementById('checkin').value;
+    const co = document.getElementById('checkout').value;
+    const box = document.getElementById('precSugestaoModal');
+    if (!ci || !co || ci >= co) { box.style.display = 'none'; return; }
+    // não abre automaticamente — só se já estiver aberta
+    if (box.style.display === 'block') {
+      const res = calcularDiariaSugerida(ci, co);
+      if (res) {
+        document.getElementById('precSugestaoValor').textContent = formatCurrency(res.diariaMedia);
+        document.getElementById('precSugestaoTotal').textContent = formatCurrency(res.totalSugerido);
+      }
+    }
+  }
+
+  // ══════════════════════════════════════════
+  // FUNÇÕES ORIGINAIS (mantidas integralmente)
+  // ══════════════════════════════════════════
+
   function todayStr(){
     const d=new Date();
     return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
@@ -796,7 +1371,6 @@
   }
   function formatDateBR(s){ if(!s)return'-';const[y,m,d]=s.split('-');return`${d}/${m}/${y}`; }
   function formatCurrency(v){ return Number(v||0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}); }
-
   function getAutoResponsavel(dateStr) {
     const d = new Date(dateStr + 'T00:00:00');
     const dow = d.getDay();
@@ -812,7 +1386,6 @@
     }
     return 'aberto';
   }
-
   function getFinConfig() {
     return {
       salario: parseFloat(localStorage.getItem('fin_salario') || '0'),
@@ -823,7 +1396,6 @@
     localStorage.setItem('fin_salario', salario);
     localStorage.setItem('fin_valorFreela', valorFreela);
   }
-
   function abrirAtribModal(bId, type, date, descricao) {
     atribPending = { bId, type, date };
     document.getElementById('atribModalDesc').textContent = descricao;
@@ -833,7 +1405,6 @@
     document.getElementById('atribModalOverlay').classList.remove('show');
     atribPending = null;
   }
-
   document.getElementById('atribFaxineiraBtn').addEventListener('click', async () => {
     if (!atribPending) return;
     await markCleaning(atribPending.bId, atribPending.type, atribPending.date, true, 'faxineira');
@@ -845,7 +1416,6 @@
     fecharAtribModal();
   });
   document.getElementById('atribCancelBtn').addEventListener('click', fecharAtribModal);
-
   function setSyncStatus(state, msg) {
     const el = document.getElementById('syncStatus');
     el.className = state; el.textContent = msg;
@@ -884,7 +1454,6 @@
       setSyncStatus('saved','✅ Importação concluída');
     } catch(e){ console.error(e); setSyncStatus('error','❌ Erro na importação'); }
   }
-
   function normalizePhone(v){ return String(v||'').replace(/\D/g,''); }
   function formatPhone(v){
     const d=normalizePhone(v).slice(0,11);
@@ -914,7 +1483,6 @@
     return                         {label:'Pendente',className:'badge-pending'};
   }
   function getBalance(item){ return Math.max(0,Number(item.totalValue||0)-Number(item.paidValue||0)); }
-
   function getWeeklyCleaningDates(item){
     if(item.cancelled||!item.checkin||!item.checkout) return [];
     if(item.weeklyDayOfWeek!==undefined&&item.weeklyDayOfWeek!==null&&item.weeklyDayOfWeek!==''){
@@ -935,7 +1503,6 @@
   function getCleaningKey(bId,type,date){ return `${bId}__${type}__${date}`; }
   function isCleaningDone(bId,type,date){ return cleaningRecords.some(r=>r.key===getCleaningKey(bId,type,date)&&r.done); }
   function getCleaningRecord(bId,type,date){ return cleaningRecords.find(r=>r.key===getCleaningKey(bId,type,date)); }
-
   function isWaitingClean(aptName,refDate){
     const pastCheckouts=bookings.filter(b=>!b.cancelled&&b.apartment===aptName&&b.checkout<=refDate&&b.checkout>=BLOQUEIO_CUTOFF);
     if(!pastCheckouts.length) return{waiting:false};
@@ -948,7 +1515,6 @@
   function hasPriority(aptName,checkoutDate){
     return bookings.some(b=>!b.cancelled&&b.apartment===aptName&&b.checkin===checkoutDate);
   }
-
   function pedirSenhaAdmin(callback){
     senhaAdminCallback=callback;
     document.getElementById('senhaAdminInput').value='';
@@ -987,18 +1553,15 @@
       });
     }
   });
-
   window.changeAptMapDate=(delta)=>{
     if(delta===0) aptMapDate=todayStr(); else aptMapDate=addDays(aptMapDate,delta);
     renderApartmentsMap();
   };
-
   window.changeFinMonth=(delta)=>{
     if(delta===0){finMonth=new Date().getMonth();finYear=new Date().getFullYear();}
     else{finMonth+=delta;if(finMonth>11){finMonth=0;finYear++;}if(finMonth<0){finMonth=11;finYear--;}}
     renderFinanceiro();
   };
-
   document.getElementById('finSaveConfigBtn').addEventListener('click',()=>{
     const sal=parseFloat(document.getElementById('finSalario').value||'0');
     const vf=parseFloat(document.getElementById('finValorFreela').value||'0');
@@ -1008,7 +1571,6 @@
     setTimeout(()=>{msg.style.display='none';},2000);
     renderFinanceiro();
   });
-
   function renderFinanceiro(){
     const cfg=getFinConfig();
     document.getElementById('finSalario').value=cfg.salario||'';
@@ -1061,11 +1623,7 @@
       </tr>`;
     }).join('');
   }
-
-  window.abrirAtribModalDireto = (bId, type, date, desc) => {
-    abrirAtribModal(bId, type, date, desc);
-  };
-
+  window.abrirAtribModalDireto = (bId, type, date, desc) => { abrirAtribModal(bId, type, date, desc); };
   async function markCleaning(bId, type, date, done, responsavel) {
     const key = getCleaningKey(bId, type, date);
     if (done && !responsavel) {
@@ -1073,11 +1631,8 @@
       if (auto === 'aberto') {
         const b = bookings.find(x => x.id === bId);
         const desc = `Apto ${b ? b.apartment : ''} — ${type === 'checkout' ? 'Limpeza de saída' : 'Faxina semanal'}`;
-        abrirAtribModal(bId, type, date, desc);
-        return;
-      } else {
-        responsavel = auto;
-      }
+        abrirAtribModal(bId, type, date, desc); return;
+      } else { responsavel = auto; }
     }
     const record = { key, bookingId: bId, type, date, done, responsavel: responsavel || null, updatedAt: new Date().toISOString() };
     const idx = cleaningRecords.findIndex(r => r.key === key);
@@ -1087,7 +1642,6 @@
     if (document.getElementById('tab-financeiro').classList.contains('active')) renderFinanceiro();
   }
   window.markCleaning = markCleaning;
-
   window.reagendarFaxina=(bId,currentDate,type)=>{
     pedirSenhaAdmin(()=>{
       const b=bookings.find(x=>x.id===bId); if(!b) return;
@@ -1109,7 +1663,6 @@
       renderCleaningTab();
     });
   };
-
   function switchTab(name){
     document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
     document.getElementById(`tab-${name}`).classList.add('active');
@@ -1120,22 +1673,21 @@
       const match=b.getAttribute('onclick')?.includes(`switchTab('${name}')`);
       b.classList.toggle('active',!!match);
     });
-    const labels={dashboard:'📊 Dashboard',mapamensal:'🗓️ Mapa Mensal',reservas:'📋 Reservas',limpeza:'🧹 Limpeza',financeiro:'💰 Financeiro',relatorio:'📈 Relatório'};
+    const labels={dashboard:'📊 Dashboard',mapamensal:'🗓️ Mapa Mensal',reservas:'📋 Reservas',limpeza:'🧹 Limpeza',financeiro:'💰 Financeiro',precificacao:'💲 Precificação',relatorio:'📈 Relatório'};
     const labelEl=document.getElementById('hamburgerLabel');
     if(labelEl) labelEl.textContent=labels[name]||'';
-    if(name==='limpeza')    renderCleaningTab();
-    if(name==='relatorio')  renderReport();
-    if(name==='mapamensal') renderMonthlyMap();
-    if(name==='financeiro') renderFinanceiro();
+    if(name==='limpeza')      renderCleaningTab();
+    if(name==='relatorio')    renderReport();
+    if(name==='mapamensal')   renderMonthlyMap();
+    if(name==='financeiro')   renderFinanceiro();
+    if(name==='precificacao') renderPrecificacaoTab();
   }
   window.switchTab=switchTab;
-
   function closeMobileMenu(){
     document.getElementById('mobileMenu')?.classList.remove('open');
     document.getElementById('hamburgerBtn')?.classList.remove('open');
   }
   window.closeMobileMenu=closeMobileMenu;
-
   document.getElementById('hamburgerBtn')?.addEventListener('click',()=>{
     const menu=document.getElementById('mobileMenu');
     const btn=document.getElementById('hamburgerBtn');
@@ -1148,7 +1700,6 @@
     const menu=document.getElementById('mobileMenu');
     if(btn&&menu&&!btn.contains(e.target)&&!menu.contains(e.target)) closeMobileMenu();
   });
-
   async function enviarParaTodos(msg){
     const enc=encodeURIComponent(msg);
     await Promise.all(WA_RECIPIENTS.map(r=>fetch(`https://api.callmebot.com/whatsapp.php?phone=${r.phone}&text=${enc}&apikey=${r.apikey}`,{mode:'no-cors'}).catch(e=>console.error(e))));
@@ -1258,7 +1809,6 @@
     btn.textContent=ok?'✅ Enviado!':'❌ Erro';btn.style.background=ok?'#16a34a':'#dc2626';
     setTimeout(()=>{btn.textContent='📊 Testar relatório mensal';btn.style.background='#7c3aed';btn.disabled=false;},3500);
   });
-
   function renderAlerts(){
     const today=todayStr();
     const days=[0,1,2,3],names=['Hoje','Amanhã','Em 2 dias','Em 3 dias'];
@@ -1278,7 +1828,6 @@
     document.getElementById('alertGrid').innerHTML=html;
     document.getElementById('alertPanel').style.display=hasAny?'block':'none';
   }
-
   function buildCleaningItems(refDate){
     const today=todayStr();
     const items=[];
@@ -1335,7 +1884,6 @@
     });
     return items;
   }
-
   function renderCleaningTab(){
     const df=document.getElementById('cleanDateFilter').value||todayStr();
     const tf=document.getElementById('cleanTypeFilter').value;
@@ -1394,7 +1942,6 @@
     document.getElementById('cleanStatusFilter').value='';
     renderCleaningTab();
   };
-
   window.changeMonthlyMap=(delta)=>{
     if(delta===0){monthlyMapMonth=new Date().getMonth();monthlyMapYear=new Date().getFullYear();}
     else{monthlyMapMonth+=delta;if(monthlyMapMonth>11){monthlyMapMonth=0;monthlyMapYear++;}if(monthlyMapMonth<0){monthlyMapMonth=11;monthlyMapYear--;}}
@@ -1443,7 +1990,6 @@
     tbody+='</tbody>';
     document.getElementById('monthlyMapTable').innerHTML=thead+tbody;
   }
-
   window.changeReportMonth=(delta)=>{
     if(delta===0){reportMonth=new Date().getMonth();reportYear=new Date().getFullYear();}
     else{reportMonth+=delta;if(reportMonth>11){reportMonth=0;reportYear++;}if(reportMonth<0){reportMonth=11;reportYear--;}}
@@ -1490,7 +2036,6 @@
         <td><span>${r.oRate}% (${r.oDays}d)</span><div class="occ-bar-wrap"><div class="occ-bar" style="width:${Math.min(r.oRate,100)}%"></div></div></td>
       </tr>`).join('');
   }
-
   function renderSummary(){
     const now=new Date(),m=now.getMonth(),y=now.getFullYear();
     let mr=0,mp=0,tp=0,mn=0;
@@ -1505,7 +2050,6 @@
     document.getElementById('sumPending').textContent=formatCurrency(tp);
     document.getElementById('sumAvgDaily').textContent=formatCurrency(mn>0?mr/mn:0);
   }
-
   function gerarMensagemCheckin(b){
     const sa=apartmentData[b.apartment]?.senhaApto||'-';
     const sp=b.senhaPortaria||'-';
@@ -1539,7 +2083,6 @@
       alert('Mensagem copiada!');
     }
   };
-
   function renderTodayPanels(){
     const today=todayStr();
     const ci=bookings.filter(b=>b.checkin===today&&!b.cancelled);
@@ -1556,7 +2099,6 @@
       ?wk.map(b=>`<li><strong>Apto ${b.apartment}</strong> — ${b.guestName}<br><span class="badge badge-cleaning">Faxina semanal</span></li>`).join('')
       :'<li class="muted">Nenhuma faxina semanal hoje.</li>';
   }
-
   function renderApartmentsMap(){
     const today=todayStr();
     const refDate=aptMapDate;
@@ -1610,7 +2152,6 @@
       </div>`;
     }).join('');
   }
-
   function renderParkingMap(){
     document.getElementById('parkingMap').innerHTML=GARAGE_SPOTS.map(spot=>{
       const item=bookings.find(b=>!b.cancelled&&b.garageSpot===spot&&b.checkin<=todayStr()&&b.checkout>todayStr());
@@ -1618,7 +2159,6 @@
       return `<div class="parking-card busy"><h4>${spot}</h4><span class="badge badge-future">Ocupada hoje</span><div class="apt-meta" style="margin-top:8px;">Hóspede: <strong>${item.guestName}</strong><br>Apto ${item.apartment}<br>${formatDateBR(item.checkin)} até ${formatDateBR(item.checkout)}</div></div>`;
     }).join('');
   }
-
   function renderFiltersOptions(){
     const sources=[...new Set(bookings.map(b=>b.source).filter(Boolean))].sort();
     const ca=document.getElementById('apartmentFilter').value;
@@ -1628,7 +2168,6 @@
     if(FIXED_APARTMENTS.includes(ca)) document.getElementById('apartmentFilter').value=ca;
     if(sources.includes(cs))          document.getElementById('sourceFilter').value=cs;
   }
-
   function applyFilters(data){
     const term=document.getElementById('searchInput').value.trim().toLowerCase();
     const start=document.getElementById('filterStart').value;
@@ -1650,7 +2189,6 @@
       return ms&&mp&&ma&&mr&&mq;
     });
   }
-
   function renderTable(){
     const filtered=applyFilters([...bookings]).sort((a,b)=>a.checkin.localeCompare(b.checkin));
     const today=todayStr();
@@ -1688,12 +2226,9 @@
       </tr>`;
     }).join('');
   }
-
-  // ── FORMULÁRIO ──
   const form=document.getElementById('bookingForm');
   const bookingModalOverlay=document.getElementById('bookingModalOverlay');
   const apartmentModalOverlay=document.getElementById('apartmentModalOverlay');
-
   function isAptAvailable(aptName,start,end,currentId=null){
     const hasConflict=bookings.some(b=>b.id!==currentId&&!b.cancelled&&b.apartment===aptName&&overlaps(start,end,b.checkin,b.checkout));
     if(hasConflict) return false;
@@ -1782,6 +2317,7 @@
     document.getElementById('weeklyDayMsg').style.display='none';
     document.getElementById('paymentAutoBox').style.display='none';
     document.getElementById('senhaPortariaHint').style.display='none';
+    document.getElementById('precSugestaoModal').style.display='none';
     if(!apartmentModalOverlay.classList.contains('show')) document.body.style.overflow='';
   }
   function getAvailableGarageSpots(start,end,currentId=null){
@@ -1821,6 +2357,7 @@
     else
       document.getElementById('dailyRate').value=(Number(document.getElementById('totalValue').value||0)/n).toFixed(2);
     atualizarBoxPagamentoAutomatico();
+    atualizarSugestaoModal();
   }
   function clearForm(){
     document.getElementById('bookingId').value='';
@@ -1838,13 +2375,13 @@
     document.getElementById('weeklyDayLockBtn').className='btn-warning';
     document.getElementById('weeklyDayMsg').style.display='none';
     document.getElementById('paymentAutoBox').style.display='none';
+    document.getElementById('precSugestaoModal').style.display='none';
     weeklyDayUnlocked=false;
     document.getElementById('bookingModalTitle').textContent='Nova Reserva';
     document.getElementById('conflictWarning').style.display='none';
     document.getElementById('autoAptMsg').style.display='none';
     updateApartmentOptions();updateGarageOptions();
   }
-
   function verificarSenhaCheckout(){
     const checkout = document.getElementById('checkout').value;
     const currentId = document.getElementById('bookingId').value || null;
@@ -1883,16 +2420,13 @@
         </div>`;
     }
   }
-
   window.aplicarSenhaExistente=(senha)=>{
     document.getElementById('senhaPortaria').value=senha;
     document.getElementById('senhaPortariaHint').style.display='none';
     const input=document.getElementById('senhaPortaria');
-    input.style.borderColor='#22c55e';
-    input.style.background='#f0fdf4';
+    input.style.borderColor='#22c55e';input.style.background='#f0fdf4';
     setTimeout(()=>{input.style.borderColor='';input.style.background='';},2000);
   };
-
   async function sincronizarSenhaPortaria(bookingSalvo){
     const senha=bookingSalvo.senhaPortaria; if(!senha) return;
     const compartilham=bookings.filter(b=>b.id!==bookingSalvo.id&&!b.cancelled&&b.checkout===bookingSalvo.checkout&&b.senhaPortaria!==senha);
@@ -1901,7 +2435,6 @@
     const checkoutFormatado=formatDateBR(bookingSalvo.checkout);
     setTimeout(()=>{alert(`🔑 Senha "${senha}" sincronizada automaticamente!\n\nCheck-out em ${checkoutFormatado}:\n• ${compartilham.map(b=>`Apto ${b.apartment} — ${b.guestName}`).join('\n• ')}`);},300);
   }
-
   form.addEventListener('submit',async function(e){
     e.preventDefault();
     const bId=document.getElementById('bookingId').value||crypto.randomUUID();
@@ -1935,7 +2468,6 @@
     await sincronizarSenhaPortaria(item);
     clearForm();closeBookingFormModal();renderAll();
   });
-
   window.editBooking=(id)=>{
     const b=bookings.find(x=>x.id===id); if(!b) return;
     document.getElementById('bookingId').value=b.id;
@@ -1977,7 +2509,6 @@
     b.cancelled=!b.cancelled;await saveBookingToFirebase(b);renderAll();
   };
   window.setQuickFilter=(f)=>{quickFilter=f;renderTable();};
-
   window.openApartmentModal=(name)=>{
     currentModalApt=name;
     const ab=bookings.filter(b=>b.apartment===name).sort((a,b)=>a.checkin.localeCompare(b.checkin));
@@ -2024,15 +2555,12 @@
     const btn=document.getElementById('saveSenhaAptoBtn');
     btn.textContent='✅ Salvo!';setTimeout(()=>{btn.textContent='💾 Salvar senha';},2000);
   });
-
   function renderAll(){
     renderFiltersOptions();renderSummary();renderTodayPanels();
     renderAlerts();renderApartmentsMap();renderParkingMap();renderTable();
     if(document.getElementById('tab-mapamensal').classList.contains('active')) renderMonthlyMap();
     if(document.getElementById('tab-financeiro').classList.contains('active')) renderFinanceiro();
   }
-
-  // ── EVENTOS ──
   document.getElementById('phone').addEventListener('input',function(){this.value=formatPhone(this.value);});
   document.getElementById('source').addEventListener('change',atualizarBoxPagamentoAutomatico);
   ['checkin','checkout'].forEach(id=>{
@@ -2043,6 +2571,7 @@
       findConflict(document.getElementById('bookingId').value||null);
       atualizarBoxPagamentoAutomatico();
       verificarSenhaCheckout();
+      atualizarSugestaoModal();
     });
   });
   document.getElementById('totalValue').addEventListener('input',atualizarBoxPagamentoAutomatico);
@@ -2077,8 +2606,8 @@
     }
   });
   document.getElementById('exportBtn').addEventListener('click',()=>{
-    const blob=new Blob([JSON.stringify({version:'4.3',apartments:FIXED_APARTMENTS,garageSpots:GARAGE_SPOTS,bookings,cleaningRecords,apartmentData},null,2)],{type:'application/json'});
-    const a=Object.assign(document.createElement('a'),{href:URL.createObjectURL(blob),download:'reservas-backup-v43.json'});
+    const blob=new Blob([JSON.stringify({version:'4.4',apartments:FIXED_APARTMENTS,garageSpots:GARAGE_SPOTS,bookings,cleaningRecords,apartmentData},null,2)],{type:'application/json'});
+    const a=Object.assign(document.createElement('a'),{href:URL.createObjectURL(blob),download:'reservas-backup-v44.json'});
     a.click();URL.revokeObjectURL(a.href);
   });
   document.getElementById('importFile').addEventListener('change',async e=>{
@@ -2105,30 +2634,23 @@
     };
     reader.readAsText(file);e.target.value='';
   });
-
   function initRealtimeListeners(){
     onSnapshot(BOOKINGS_COL,snap=>{bookings=snap.docs.map(d=>d.data());if(isReady)renderAll();},e=>{console.error(e);setSyncStatus('error','❌ Erro de conexão');});
     onSnapshot(CLEANINGS_COL,snap=>{cleaningRecords=snap.docs.map(d=>d.data());if(isReady)renderAll();},e=>console.error(e));
     onSnapshot(APTS_COL,snap=>{snap.docs.forEach(d=>{apartmentData[d.id]=d.data();});if(isReady)renderAll();},e=>console.error(e));
   }
-
-  // ✅ NOVO: Compensa pagamentos automáticos vencidos
   async function compensarPagamentosAutomaticos() {
     const hoje = todayStr();
     const paraAtualizar = [];
-
     bookings.forEach(b => {
       if (b.cancelled) return;
       if (Number(b.paidValue || 0) >= Number(b.totalValue || 0)) return;
       if (!b.totalValue || Number(b.totalValue) <= 0) return;
-
       let deveCompensar = false;
-
       if (b.source === 'Airbnb') {
         const dataPagamento = addDays(b.checkin, 1);
         if (hoje >= dataPagamento) deveCompensar = true;
       }
-
       if (b.source === 'Booking') {
         const d = new Date(b.checkin + 'T00:00:00');
         const mesPag = d.getMonth() === 11 ? 0 : d.getMonth() + 1;
@@ -2136,31 +2658,21 @@
         const dataPagamento = `${anoPag}-${String(mesPag + 1).padStart(2, '0')}-05`;
         if (hoje >= dataPagamento) deveCompensar = true;
       }
-
       if (b.source === 'Direto' || b.source === 'WhatsApp') {
         if (hoje >= b.checkin) deveCompensar = true;
       }
-
       if (deveCompensar) {
-        paraAtualizar.push({
-          ...b,
-          paidValue: Number(b.totalValue),
-          paymentDate: b.paymentDate || hoje
-        });
+        paraAtualizar.push({ ...b, paidValue: Number(b.totalValue), paymentDate: b.paymentDate || hoje });
       }
     });
-
     if (!paraAtualizar.length) return;
-
     for (const item of paraAtualizar) {
       const idx = bookings.findIndex(b => b.id === item.id);
       if (idx >= 0) bookings[idx] = item;
       await saveBookingToFirebase(item);
     }
-
     console.log(`✅ ${paraAtualizar.length} pagamento(s) compensado(s) automaticamente.`);
   }
-
   async function init(){
     try{
       const [bS,cS,aS]=await Promise.all([getDocs(BOOKINGS_COL),getDocs(CLEANINGS_COL),getDocs(APTS_COL)]);
@@ -2169,10 +2681,7 @@
       aS.docs.forEach(d=>{apartmentData[d.id]=d.data();});
       document.getElementById('cleanDateFilter').value=todayStr();
       aptMapDate=todayStr();
-
-      // ✅ Compensa pagamentos que já venceram
       await compensarPagamentosAutomaticos();
-
       clearForm();renderAll();
       isReady=true;
       initRealtimeListeners();
@@ -2184,7 +2693,6 @@
       document.getElementById('loadingOverlay').innerHTML=`<div style="text-align:center;padding:20px;"><p style="color:#dc2626;font-size:18px;">❌ Erro ao conectar ao Firebase</p><p style="color:#6b7280;">${err.message}</p></div>`;
     }
   }
-
   init();
 </script>
 </body>
