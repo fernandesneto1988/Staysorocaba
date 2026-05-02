@@ -3148,12 +3148,14 @@ document.getElementById('finExportCSVBtn').addEventListener('click', () => {
     const btn=document.getElementById('saveSenhaAptoBtn');
     btn.textContent='✅ Salvo!';setTimeout(()=>{btn.textContent='💾 Salvar senha';},2000);
   });
-  function renderAll(){
+ function renderAll(){
     renderFiltersOptions();renderSummary();renderTodayPanels();
     renderAlerts();renderApartmentsMap();renderParkingMap();renderTable();
-    renderDashboardKpis(); // ← ADICIONA ESTA LINHA
+    renderDashboardKpis();
     if(document.getElementById('tab-mapamensal').classList.contains('active')) renderMonthlyMap();
-    if(document.getElementById('tab-financeiro').classList.contains('active')) renderFinanceiro();
+    if(document.getElementById('tab-financeiro').classList.contains('active')){
+        setTimeout(()=>renderFinanceiro(), 50);
+    }
 }
   document.getElementById('phone').addEventListener('input',function(){this.value=formatPhone(this.value);});
   document.getElementById('source').addEventListener('change',atualizarBoxPagamentoAutomatico);
