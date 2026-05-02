@@ -2413,9 +2413,9 @@ document.getElementById('finExportCSVBtn').addEventListener('click', () => {
       const wk=bookings.filter(b=>!b.cancelled&&hasWeeklyCleaningToday(b,d));
       if(ci.length||cx.length||wk.length) hasAny=true;
       let items='';
-      ci.forEach(b=>{items+=`<li>✈️ <strong>Check-in</strong> — Apto ${b.apartment} · ${b.guestName}</li>`;});
-      cx.forEach(b=>{items+=`<li>🚪 <strong>Check-out</strong> — Apto ${b.apartment} · ${b.guestName}</li>`;});
-      wk.forEach(b=>{items+=`<li>🧹 <strong>Faxina semanal</strong> — Apto ${b.apartment} · ${b.guestName}</li>`;});
+      ci.forEach(b=>{items+=`<li>✈️ Apto ${b.apto} · ${b.hospede}</li>`});
+      cx.forEach(b=>{items+=`<li>🚪 Apto ${b.apto} · ${b.hospede}</li>`});
+      wk.forEach(b=>{items+=`<li>🧹 Apto ${b.apto} · ${b.hospede}</li>`});
       html+=`<div class="alert-day"><h4>${names[i]} — ${formatDateBR(d)}</h4>${items?`<ul>${items}</ul>`:`<span class="alert-empty">Nada agendado</span>`}</div>`;
     });
     document.getElementById('alertGrid').innerHTML=html;
