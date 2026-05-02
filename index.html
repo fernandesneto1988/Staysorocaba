@@ -3294,6 +3294,276 @@ if ('serviceWorker' in navigator) {
       .catch(err => console.error('❌ SW erro:', err));
   });
 }
+  // ══════════════════════════════════════════
+// KPIs EXTRAS + META + GRÁFICO 14 DIAS
+// ══════════════════════════════════════════
+
+let dashOcupChart = null;
+
+function getMetaConfig() {
+  return {
+    valor: parseFloat(localStorage.getItem('meta_mensal') || '0'),
+  };
+}
+function saveMetaConfig(valor) {
+  localStorage.setItem('meta_mensal', valor);
+}
+
+function renderKpiExtras() {
+  const today = todayStr();
+  const now   = new Date();
+  const m     = now.getMonth();
+  const y     = now.getFullYear();
+
+  // Ocupação hoje
+  const ocupadosHoje = bookings.filter(b =>
+    !b.cancelled && b.checkin <= today && b.checkout > today
+  ).length;
+  const pctOcup = ((ocupadosHoje / 18) * 100).toFixed(0);
+  document.getElementById('kpiOcupacaoHoje').textContent       = `${pctOcup}%`;
+  document.getElementById('kpiOcupacaoHojeDetail').textContent = `${ocupadosHoje} de 18 aptos`;
+
+  // Aptos livres hoje
+  const livresHoje = 18 - ocupadosHoje;
+  document.getElementById('kpiAptosLivres').textContent = livresHoje;
+
+  // Limpezas pendentes hoje
+  const itenslimpeza = buildCleaningItems(today);
+  const pendentes    = itenslimpeza.filter(i => !i.done).length;
+  document.getElementById('kpiLimpezasPendentes').textContent = pendentes;
+
+  // Check-ins próximos 7 dias
+  const em7 = addDays(today, 7);
+  const checkinsWeek = bookings.filter(b =>
+    !b.cancelled && b.checkin >= today && b.checkin <= em7
+  ).length;
+  document.getElementById('kpiCheckinsSemana').textContent       = checkinsWeek;
+  document.getElementById('kpiCheckinsSemanaDetail').textContent = `próximos 7 dias`;
+}
+
+function renderMeta() {
+  const now = new Date();
+  const m   = now.getMonth();
+  const y   = now.getFullYear();
+  const cfg = getMetaConfig();
+
+  // Label do mês
+  document.getElementById('metaMesLabel').textContent =
+    `${MONTH_NAMES[m]} / ${y}`;
+
+  // Carrega valor salvo no input
+  if (cfg.valor > 0) {
+    document.getElementById('metaInput').value = cfg.valor;
+  }
+
+  // Faturamento do mês
+  const faturado = bookings
+    .filter(b => {
+      if (b.cancelled) return false;
+      const d = new Date(b.checkin + 'T00:00:00');
+      return d.getMonth() === m && d.getFullYear() === y;
+    })
+    .reduce((s, b) => s + Number(b.totalValue || 0), 0);
+
+  const meta  = cfg.valor || 0;
+  const falta = Math.max(0, meta - faturado);
+  const pct   = meta > 0 ? Math.min((faturado / meta) * 100, 100) : 0;
+
+  document.getElementById('metaValor').textContent   = formatCurrency(meta);
+  document.getElementById('metaFaturado').textContent = formatCurrency(faturado);
+  document.getElementById('metaFalta').textContent   = formatCurrency(falta);
+  document.getElementById('metaFalta').style.color   =
+    falta === 0 ? '#16a34a' : '#d97706';
+
+  // Labels dos milestones
+  document.getElementById('meta50Label').textContent =
+    meta > 0 ? formatCurrency(meta * 0.5).replace('R$','R$\u00a0') : '50%';
+  document.getElementById('meta80Label').textContent =
+    meta > 0 ? formatCurrency(meta * 0.8).replace('R$','R$\u00a0') : '80%';
+
+  // Barra
+  const bar = document.getElementById('metaProgressBar');
+  bar.style.width = `${Math.max(pct, 4)}%`;
+
+  // Cor dinâmica da barra
+  if (pct >= 100)      bar.style.background = 'linear-gradient(90deg,#16a34a,#15803d)';
+  else if (pct >= 80)  bar.style.background = 'linear-gradient(90deg,#22c55e,#16a34a)';
+  else if (pct >= 50)  bar.style.background = 'linear-gradient(90deg,#f59e0b,#d97706)';
+  else                 bar.style.background = 'linear-gradient(90deg,#ef4444,#dc2626)';
+
+  document.getElementById('metaProgressPct').textContent = `${pct.toFixed(0)}%`;
+
+  // Badge de status
+  const badgeEl = document.getElementById('metaStatusBadge');
+  if (meta <= 0) {
+    badgeEl.innerHTML = `<span style="font-size:13px;color:var(--muted);">
+      💡 Defina sua meta mensal acima para acompanhar o progresso.
+    </span>`;
+  } else if (pct >= 100) {
+    badgeEl.innerHTML = `<span class="badge badge-paid" style="font-size:13px;padding:8px 14px;">
+      🎉 Meta atingida! Parabéns, Eliseu!
+    </span>`;
+  } else if (pct >= 80) {
+    badgeEl.innerHTML = `<span class="badge badge-active" style="font-size:13px;padding:8px 14px;">
+      💪 Quase lá! Faltam apenas ${formatCurrency(falta)}.
+    </span>`;
+  } else if (pct >= 50) {
+    badgeEl.innerHTML = `<span class="badge badge-partial" style="font-size:13px;padding:8px 14px;">
+      📈 Na metade! Continue assim. Faltam ${formatCurrency(falta)}.
+    </span>`;
+  } else {
+    badgeEl.innerHTML = `<span class="badge badge-pending" style="font-size:13px;padding:8px 14px;">
+      🚀 Início de mês — faturado ${pct.toFixed(0)}% da meta.
+    </span>`;
+  }
+}
+
+function renderTopAptos() {
+  const now = new Date();
+  const m   = now.getMonth();
+  const y   = now.getFullYear();
+
+  const porApto = FIXED_APARTMENTS.map(apt => {
+    const ab = bookings.filter(b => {
+      if (b.cancelled) return false;
+      const d = new Date(b.checkin + 'T00:00:00');
+      return b.apartment === apt && d.getMonth() === m && d.getFullYear() === y;
+    });
+    return {
+      apt,
+      receita : ab.reduce((s, b) => s + Number(b.totalValue || 0), 0),
+      reservas: ab.length,
+      noites  : ab.reduce((s, b) => s + Number(b.nights || calculateNights(b.checkin, b.checkout)), 0),
+    };
+  }).filter(x => x.receita > 0).sort((a, b) => b.receita - a.receita);
+
+  const medals = ['🥇', '🥈', '🥉'];
+  const colors = ['#f59e0b', '#94a3b8', '#b45309'];
+  const maxRec = porApto[0]?.receita || 1;
+
+  if (!porApto.length) {
+    document.getElementById('topAptosRanking').innerHTML =
+      `<p class="muted" style="text-align:center;">Nenhuma receita este mês.</p>`;
+    return;
+  }
+
+  document.getElementById('topAptosRanking').innerHTML = porApto.slice(0, 5).map((r, i) => `
+    <div style="margin-bottom:14px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+        <span style="font-size:14px;font-weight:bold;">
+          ${medals[i] || `${i + 1}º`} Apto ${r.apt}
+        </span>
+        <span style="font-size:14px;font-weight:bold;color:#16a34a;">
+          ${formatCurrency(r.receita)}
+        </span>
+      </div>
+      <div style="background:#e5e7eb;border-radius:999px;height:8px;margin-bottom:4px;">
+        <div style="
+          width:${((r.receita / maxRec) * 100).toFixed(0)}%;
+          height:8px;
+          border-radius:999px;
+          background:${colors[i] || '#6366f1'};
+          transition:width .5s;
+        "></div>
+      </div>
+      <div style="font-size:12px;color:var(--muted);">
+        ${r.reservas} reserva(s) · ${r.noites} noite(s)
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderDashOcupacaoChart() {
+  if (!window.Chart) {
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js';
+    script.onload = renderDashOcupacaoChart;
+    document.head.appendChild(script);
+    return;
+  }
+
+  const today  = todayStr();
+  const labels = [], dataOcup = [], colors = [];
+
+  // 7 dias atrás até hoje até +6 dias futuros = 14 dias total
+  for (let i = -7; i <= 6; i++) {
+    const d   = addDays(today, i);
+    const obj = new Date(d + 'T00:00:00');
+    const dow = obj.getDay();
+
+    // Label: dia + nome curto
+    labels.push(`${String(obj.getDate()).padStart(2,'0')}/${String(obj.getMonth()+1).padStart(2,'0')}\n${DAY_NAMES_SHORT[dow]}`);
+
+    // Ocupação neste dia
+    const ocup = bookings.filter(b =>
+      !b.cancelled && b.checkin <= d && b.checkout > d
+    ).length;
+    dataOcup.push(((ocup / 18) * 100).toFixed(1));
+
+    // Cor: passado = azul, hoje = amarelo, futuro = verde
+    if (i < 0)      colors.push('#3b82f6');
+    else if (i === 0) colors.push('#f59e0b');
+    else            colors.push('#22c55e');
+  }
+
+  // Destrói gráfico anterior se existir
+  if (dashOcupChart) { dashOcupChart.destroy(); dashOcupChart = null; }
+
+  const ctx = document.getElementById('dashOcupacaoChart').getContext('2d');
+  dashOcupChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [{
+        label: 'Ocupação (%)',
+        data: dataOcup,
+        backgroundColor: colors,
+        borderRadius: 6,
+        borderSkipped: false,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => ` Ocupação: ${ctx.parsed.y}% (${Math.round(ctx.parsed.y * 18 / 100)} aptos)`,
+          }
+        }
+      },
+      scales: {
+        y: {
+          min: 0, max: 100,
+          ticks: { callback: v => v + '%' },
+          grid: { color: '#f1f5f9' }
+        },
+        x: {
+          ticks: { font: { size: 11 } }
+        }
+      }
+    }
+  });
+}
+
+// Botão salvar meta
+document.getElementById('metaSaveBtn').addEventListener('click', () => {
+  const val = parseFloat(document.getElementById('metaInput').value || '0');
+  saveMetaConfig(val);
+  renderMeta();
+  const btn = document.getElementById('metaSaveBtn');
+  btn.textContent = '✅ Salvo!';
+  setTimeout(() => { btn.textContent = '💾 Salvar meta'; }, 2000);
+});
+
+// Função que renderiza tudo do dashboard novo
+function renderDashboardKpis() {
+  renderKpiExtras();
+  renderMeta();
+  renderTopAptos();
+  renderDashOcupacaoChart();
+}
+
   init();
 </script>
 </body>
