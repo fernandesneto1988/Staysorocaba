@@ -3151,9 +3151,10 @@ document.getElementById('finExportCSVBtn').addEventListener('click', () => {
   function renderAll(){
     renderFiltersOptions();renderSummary();renderTodayPanels();
     renderAlerts();renderApartmentsMap();renderParkingMap();renderTable();
+    renderDashboardKpis(); // ← ADICIONA ESTA LINHA
     if(document.getElementById('tab-mapamensal').classList.contains('active')) renderMonthlyMap();
     if(document.getElementById('tab-financeiro').classList.contains('active')) renderFinanceiro();
-  }
+}
   document.getElementById('phone').addEventListener('input',function(){this.value=formatPhone(this.value);});
   document.getElementById('source').addEventListener('change',atualizarBoxPagamentoAutomatico);
   ['checkin','checkout'].forEach(id=>{
@@ -3266,26 +3267,7 @@ document.getElementById('finExportCSVBtn').addEventListener('click', () => {
     }
     console.log(`✅ ${paraAtualizar.length} pagamento(s) compensado(s) automaticamente.`);
   }
-  async function init(){
-    try{
-      const [bS,cS,aS]=await Promise.all([getDocs(BOOKINGS_COL),getDocs(CLEANINGS_COL),getDocs(APTS_COL)]);
-      bookings=bS.docs.map(d=>d.data());
-      cleaningRecords=cS.docs.map(d=>d.data());
-      aS.docs.forEach(d=>{apartmentData[d.id]=d.data();});
-      document.getElementById('cleanDateFilter').value=todayStr();
-      aptMapDate=todayStr();
-      await compensarPagamentosAutomaticos();
-      clearForm();renderAll();
-      isReady=true;
-      initRealtimeListeners();
-      agendarProximoEnvio();
-      document.getElementById('loadingOverlay').style.display='none';
-      setSyncStatus('saved','✅ Dados sincronizados');
-    }catch(err){
-      console.error(err);
-      document.getElementById('loadingOverlay').innerHTML=`<div style="text-align:center;padding:20px;"><p style="color:#dc2626;font-size:18px;">❌ Erro ao conectar ao Firebase</p><p style="color:#6b7280;">${err.message}</p></div>`;
-    }
-  }
+
 // ── PWA Service Worker ──
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
@@ -3294,7 +3276,8 @@ if ('serviceWorker' in navigator) {
       .catch(err => console.error('❌ SW erro:', err));
   });
 }
-  // ══════════════════════════════════════════
+
+// ══════════════════════════════════════════
 // KPIs EXTRAS + META + GRÁFICO 14 DIAS
 // ══════════════════════════════════════════
 
@@ -3315,7 +3298,6 @@ function renderKpiExtras() {
   const m     = now.getMonth();
   const y     = now.getFullYear();
 
-  // Ocupação hoje
   const ocupadosHoje = bookings.filter(b =>
     !b.cancelled && b.checkin <= today && b.checkout > today
   ).length;
@@ -3323,16 +3305,13 @@ function renderKpiExtras() {
   document.getElementById('kpiOcupacaoHoje').textContent       = `${pctOcup}%`;
   document.getElementById('kpiOcupacaoHojeDetail').textContent = `${ocupadosHoje} de 18 aptos`;
 
-  // Aptos livres hoje
   const livresHoje = 18 - ocupadosHoje;
   document.getElementById('kpiAptosLivres').textContent = livresHoje;
 
-  // Limpezas pendentes hoje
   const itenslimpeza = buildCleaningItems(today);
   const pendentes    = itenslimpeza.filter(i => !i.done).length;
   document.getElementById('kpiLimpezasPendentes').textContent = pendentes;
 
-  // Check-ins próximos 7 dias
   const em7 = addDays(today, 7);
   const checkinsWeek = bookings.filter(b =>
     !b.cancelled && b.checkin >= today && b.checkin <= em7
@@ -3347,16 +3326,12 @@ function renderMeta() {
   const y   = now.getFullYear();
   const cfg = getMetaConfig();
 
-  // Label do mês
-  document.getElementById('metaMesLabel').textContent =
-    `${MONTH_NAMES[m]} / ${y}`;
+  document.getElementById('metaMesLabel').textContent = `${MONTH_NAMES[m]} / ${y}`;
 
-  // Carrega valor salvo no input
   if (cfg.valor > 0) {
     document.getElementById('metaInput').value = cfg.valor;
   }
 
-  // Faturamento do mês
   const faturado = bookings
     .filter(b => {
       if (b.cancelled) return false;
@@ -3369,31 +3344,26 @@ function renderMeta() {
   const falta = Math.max(0, meta - faturado);
   const pct   = meta > 0 ? Math.min((faturado / meta) * 100, 100) : 0;
 
-  document.getElementById('metaValor').textContent   = formatCurrency(meta);
+  document.getElementById('metaValor').textContent    = formatCurrency(meta);
   document.getElementById('metaFaturado').textContent = formatCurrency(faturado);
-  document.getElementById('metaFalta').textContent   = formatCurrency(falta);
-  document.getElementById('metaFalta').style.color   =
-    falta === 0 ? '#16a34a' : '#d97706';
+  document.getElementById('metaFalta').textContent    = formatCurrency(falta);
+  document.getElementById('metaFalta').style.color    = falta === 0 ? '#16a34a' : '#d97706';
 
-  // Labels dos milestones
   document.getElementById('meta50Label').textContent =
-    meta > 0 ? formatCurrency(meta * 0.5).replace('R$','R$\u00a0') : '50%';
+    meta > 0 ? formatCurrency(meta * 0.5) : '50%';
   document.getElementById('meta80Label').textContent =
-    meta > 0 ? formatCurrency(meta * 0.8).replace('R$','R$\u00a0') : '80%';
+    meta > 0 ? formatCurrency(meta * 0.8) : '80%';
 
-  // Barra
   const bar = document.getElementById('metaProgressBar');
   bar.style.width = `${Math.max(pct, 4)}%`;
 
-  // Cor dinâmica da barra
-  if (pct >= 100)      bar.style.background = 'linear-gradient(90deg,#16a34a,#15803d)';
-  else if (pct >= 80)  bar.style.background = 'linear-gradient(90deg,#22c55e,#16a34a)';
-  else if (pct >= 50)  bar.style.background = 'linear-gradient(90deg,#f59e0b,#d97706)';
-  else                 bar.style.background = 'linear-gradient(90deg,#ef4444,#dc2626)';
+  if (pct >= 100)     bar.style.background = 'linear-gradient(90deg,#16a34a,#15803d)';
+  else if (pct >= 80) bar.style.background = 'linear-gradient(90deg,#22c55e,#16a34a)';
+  else if (pct >= 50) bar.style.background = 'linear-gradient(90deg,#f59e0b,#d97706)';
+  else                bar.style.background = 'linear-gradient(90deg,#ef4444,#dc2626)';
 
   document.getElementById('metaProgressPct').textContent = `${pct.toFixed(0)}%`;
 
-  // Badge de status
   const badgeEl = document.getElementById('metaStatusBadge');
   if (meta <= 0) {
     badgeEl.innerHTML = `<span style="font-size:13px;color:var(--muted);">
@@ -3485,28 +3455,25 @@ function renderDashOcupacaoChart() {
   const today  = todayStr();
   const labels = [], dataOcup = [], colors = [];
 
-  // 7 dias atrás até hoje até +6 dias futuros = 14 dias total
   for (let i = -7; i <= 6; i++) {
     const d   = addDays(today, i);
     const obj = new Date(d + 'T00:00:00');
     const dow = obj.getDay();
 
-    // Label: dia + nome curto
-    labels.push(`${String(obj.getDate()).padStart(2,'0')}/${String(obj.getMonth()+1).padStart(2,'0')}\n${DAY_NAMES_SHORT[dow]}`);
+    labels.push(
+      `${String(obj.getDate()).padStart(2,'0')}/${String(obj.getMonth()+1).padStart(2,'0')}\n${DAY_NAMES_SHORT[dow]}`
+    );
 
-    // Ocupação neste dia
     const ocup = bookings.filter(b =>
       !b.cancelled && b.checkin <= d && b.checkout > d
     ).length;
     dataOcup.push(((ocup / 18) * 100).toFixed(1));
 
-    // Cor: passado = azul, hoje = amarelo, futuro = verde
-    if (i < 0)      colors.push('#3b82f6');
+    if (i < 0)       colors.push('#3b82f6');
     else if (i === 0) colors.push('#f59e0b');
-    else            colors.push('#22c55e');
+    else             colors.push('#22c55e');
   }
 
-  // Destrói gráfico anterior se existir
   if (dashOcupChart) { dashOcupChart.destroy(); dashOcupChart = null; }
 
   const ctx = document.getElementById('dashOcupacaoChart').getContext('2d');
@@ -3546,6 +3513,13 @@ function renderDashOcupacaoChart() {
   });
 }
 
+function renderDashboardKpis() {
+  renderKpiExtras();
+  renderMeta();
+  renderTopAptos();
+  renderDashOcupacaoChart();
+}
+
 // Botão salvar meta
 document.getElementById('metaSaveBtn').addEventListener('click', () => {
   const val = parseFloat(document.getElementById('metaInput').value || '0');
@@ -3556,15 +3530,32 @@ document.getElementById('metaSaveBtn').addEventListener('click', () => {
   setTimeout(() => { btn.textContent = '💾 Salvar meta'; }, 2000);
 });
 
-// Função que renderiza tudo do dashboard novo
-function renderDashboardKpis() {
-  renderKpiExtras();
-  renderMeta();
-  renderTopAptos();
-  renderDashOcupacaoChart();
-}
+// ══════════════════════════════════════════
+// INIT — sempre por último
+// ══════════════════════════════════════════
+async function init(){
+    try{
+      const [bS,cS,aS]=await Promise.all([getDocs(BOOKINGS_COL),getDocs(CLEANINGS_COL),getDocs(APTS_COL)]);
+      bookings=bS.docs.map(d=>d.data());
+      cleaningRecords=cS.docs.map(d=>d.data());
+      aS.docs.forEach(d=>{apartmentData[d.id]=d.data();});
+      document.getElementById('cleanDateFilter').value=todayStr();
+      aptMapDate=todayStr();
+      await compensarPagamentosAutomaticos();
+      clearForm();renderAll();
+      isReady=true;
+      initRealtimeListeners();
+      agendarProximoEnvio();
+      document.getElementById('loadingOverlay').style.display='none';
+      setSyncStatus('saved','✅ Dados sincronizados');
+    }catch(err){
+      console.error(err);
+      document.getElementById('loadingOverlay').innerHTML=`<div style="text-align:center;padding:20px;"><p style="color:#dc2626;font-size:18px;">❌ Erro ao conectar ao Firebase</p><p style="color:#6b7280;">${err.message}</p></div>`;
+    }
+  }
 
-  init();
+init();
+
 </script>
 </body>
 </html>
