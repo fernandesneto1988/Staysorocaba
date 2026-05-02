@@ -1,7 +1,10 @@
-const CACHE_NAME = 'stay-sorocaba-v2';
+const CACHE_NAME = 'stay-sorocaba-v3';
 const FILES_TO_CACHE = [
+  '/Staysorocaba/',
   '/Staysorocaba/index.html',
-  '/Staysorocaba/manifest.json'
+  '/Staysorocaba/manifest.json',
+  '/Staysorocaba/icon-192.png',
+  '/Staysorocaba/icon-512.png'
 ];
 
 self.addEventListener('install', event => {
