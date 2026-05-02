@@ -566,59 +566,192 @@
   </div>
 
   <!-- FINANCEIRO -->
-  <div id="tab-financeiro" class="tab-panel">
-    <div class="card">
-      <div class="fin-nav">
-        <button type="button" class="btn-secondary" onclick="changeFinMonth(-1)">← Anterior</button>
-        <h3 id="finMonthTitle"></h3>
-        <button type="button" class="btn-secondary" onclick="changeFinMonth(1)">Próximo →</button>
-        <button type="button" class="btn-primary" onclick="changeFinMonth(0)">Mês atual</button>
-      </div>
-      <div class="fin-config-box">
-        <h3>⚙️ Configurações de Pagamento</h3>
-        <div class="fin-config-row">
-          <div class="form-group">
-            <label>💰 Salário mensal da faxineira (R$)</label>
-            <input type="number" id="finSalario" min="0" step="0.01" placeholder="Ex: 1800.00" />
-          </div>
-          <div class="form-group">
-            <label>🧹 Valor por limpeza — Freela (R$)</label>
-            <input type="number" id="finValorFreela" min="0" step="0.01" placeholder="Ex: 50.00" />
-          </div>
+<!-- FINANCEIRO -->
+<div id="tab-financeiro" class="tab-panel">
+  <div class="card">
+
+    <!-- NAVEGAÇÃO DE MÊS -->
+    <div class="fin-nav">
+      <button type="button" class="btn-secondary" onclick="changeFinMonth(-1)">← Anterior</button>
+      <h3 id="finMonthTitle"></h3>
+      <button type="button" class="btn-secondary" onclick="changeFinMonth(1)">Próximo →</button>
+      <button type="button" class="btn-primary" onclick="changeFinMonth(0)">Mês atual</button>
+      <button type="button" class="btn-success" id="finExportPDFBtn" style="width:auto;padding:8px 16px;margin-left:auto;">📄 Exportar PDF</button>
+      <button type="button" class="btn-teal" id="finExportCSVBtn" style="width:auto;padding:8px 16px;">📊 Exportar CSV</button>
+    </div>
+
+    <!-- CONFIGURAÇÕES DE PAGAMENTO -->
+    <div class="fin-config-box">
+      <h3>⚙️ Configurações de Pagamento</h3>
+      <div class="fin-config-row">
+        <div class="form-group">
+          <label>💰 Salário mensal da faxineira (R$)</label>
+          <input type="number" id="finSalario" min="0" step="0.01" placeholder="Ex: 1800.00" />
         </div>
-        <button type="button" class="btn-success" id="finSaveConfigBtn" style="width:auto;padding:10px 18px;margin-top:8px;">💾 Salvar configurações</button>
-        <span id="finConfigSavedMsg" style="margin-left:12px;font-size:13px;color:#166534;display:none;">✅ Salvo!</span>
-      </div>
-      <div class="fin-summary-grid">
-        <div class="fin-box">
-          <small>👩 Faxineira — Salário fixo</small>
-          <strong id="finResumoSalario">R$ 0,00</strong>
-          <span id="finResumoFaxineiraCount">0 limpezas registradas</span>
-        </div>
-        <div class="fin-box">
-          <small>🧹 Freelas — Total a pagar</small>
-          <strong id="finResumoFreela">R$ 0,00</strong>
-          <span id="finResumoFreelaCount">0 limpezas × R$ 0,00</span>
-        </div>
-        <div class="fin-box highlight">
-          <small>💰 Total a pagar no mês</small>
-          <strong id="finResumoTotal">R$ 0,00</strong>
-          <span id="finResumoOpenCount">0 limpezas sem atribuição</span>
+        <div class="form-group">
+          <label>🧹 Valor por limpeza — Freela (R$)</label>
+          <input type="number" id="finValorFreela" min="0" step="0.01" placeholder="Ex: 50.00" />
         </div>
       </div>
-      <h3 style="margin-bottom:12px;">📋 Limpezas do mês</h3>
-      <div class="table-wrap" style="min-width:0;">
-        <table class="fin-history-table" style="min-width:600px;">
-          <thead>
-            <tr>
-              <th>Data</th><th>Apto</th><th>Tipo</th><th>Hóspede</th><th>Realizada por</th><th>Valor</th>
-            </tr>
-          </thead>
-          <tbody id="finHistoryTable"></tbody>
-        </table>
+      <button type="button" class="btn-success" id="finSaveConfigBtn" style="width:auto;padding:10px 18px;margin-top:8px;">💾 Salvar configurações</button>
+      <span id="finConfigSavedMsg" style="margin-left:12px;font-size:13px;color:#166534;display:none;">✅ Salvo!</span>
+    </div>
+
+    <!-- RESUMO RECEITAS -->
+    <h3 style="margin:0 0 12px 0;">💰 Resumo de Receitas</h3>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px;" id="finReceitaGrid">
+      <div class="fin-box highlight">
+        <small>📈 Faturamento do mês</small>
+        <strong id="finFaturamento">R$ 0,00</strong>
+        <span id="finFaturamentoCount">0 reservas</span>
+      </div>
+      <div class="fin-box" style="background:#f0fdf4;border-color:#86efac;">
+        <small>✅ Total recebido</small>
+        <strong id="finRecebido" style="color:#16a34a;">R$ 0,00</strong>
+        <span id="finRecebidoPct">0% do faturamento</span>
+      </div>
+      <div class="fin-box" style="background:#fff7ed;border-color:#fed7aa;">
+        <small>⏳ Saldo pendente</small>
+        <strong id="finPendente" style="color:#d97706;">R$ 0,00</strong>
+        <span id="finPendenteCount">0 reservas</span>
+      </div>
+      <div class="fin-box">
+        <small>🛏️ Diária média do mês</small>
+        <strong id="finDiariaMedia">R$ 0,00</strong>
+        <span id="finNightCount">0 noites</span>
       </div>
     </div>
+
+    <!-- RESUMO DESPESAS -->
+    <h3 style="margin:0 0 12px 0;">🧹 Resumo de Despesas (Limpezas)</h3>
+    <div class="fin-summary-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:18px;">
+      <div class="fin-box">
+        <small>👩 Faxineira — Salário fixo</small>
+        <strong id="finResumoSalario">R$ 0,00</strong>
+        <span id="finResumoFaxineiraCount">0 limpezas registradas</span>
+      </div>
+      <div class="fin-box">
+        <small>🧹 Freelas — Total a pagar</small>
+        <strong id="finResumoFreela">R$ 0,00</strong>
+        <span id="finResumoFreelaCount">0 limpezas × R$ 0,00</span>
+      </div>
+      <div class="fin-box highlight">
+        <small>💸 Total despesas do mês</small>
+        <strong id="finResumoTotal">R$ 0,00</strong>
+        <span id="finResumoOpenCount">0 limpezas sem atribuição</span>
+      </div>
+    </div>
+
+    <!-- LUCRO ESTIMADO -->
+    <div id="finLucroBox" style="background:linear-gradient(135deg,#f0fdf4,#eff6ff);border:2px solid #22c55e;border-radius:16px;padding:18px;margin-bottom:18px;display:flex;gap:24px;flex-wrap:wrap;align-items:center;">
+      <div>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:4px;">💡 Resultado estimado do mês</div>
+        <div style="font-size:32px;font-weight:bold;" id="finLucroValor">R$ 0,00</div>
+        <div style="font-size:12px;color:var(--muted);">Receitas recebidas − Despesas com limpeza</div>
+      </div>
+      <div style="display:flex;gap:18px;flex-wrap:wrap;">
+        <div style="text-align:center;">
+          <div style="font-size:12px;color:var(--muted);">Receitas</div>
+          <div style="font-size:18px;font-weight:bold;color:#16a34a;" id="finLucroReceita">R$ 0,00</div>
+        </div>
+        <div style="font-size:24px;color:var(--muted);align-self:center;">−</div>
+        <div style="text-align:center;">
+          <div style="font-size:12px;color:var(--muted);">Despesas</div>
+          <div style="font-size:18px;font-weight:bold;color:#dc2626;" id="finLucroDespesa">R$ 0,00</div>
+        </div>
+        <div style="font-size:24px;color:var(--muted);align-self:center;">=</div>
+        <div style="text-align:center;">
+          <div style="font-size:12px;color:var(--muted);">Lucro</div>
+          <div style="font-size:18px;font-weight:bold;" id="finLucroLiquido">R$ 0,00</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- GRÁFICOS -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px;">
+
+      <!-- GRÁFICO RECEITA x DESPESA -->
+      <div style="background:#f8fafc;border:1px solid var(--border);border-radius:14px;padding:18px;">
+        <h3 style="margin:0 0 14px 0;font-size:16px;">📊 Receita × Despesa</h3>
+        <canvas id="finChartReceitaDespesa" height="200"></canvas>
+      </div>
+
+      <!-- GRÁFICO RECEITA POR UNIDADE -->
+      <div style="background:#f8fafc;border:1px solid var(--border);border-radius:14px;padding:18px;">
+        <h3 style="margin:0 0 14px 0;font-size:16px;">🏠 Receita por Apartamento</h3>
+        <canvas id="finChartApartamentos" height="200"></canvas>
+      </div>
+
+    </div>
+
+    <!-- GRÁFICO OCUPAÇÃO x RECEITA -->
+    <div style="background:#f8fafc;border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:18px;">
+      <h3 style="margin:0 0 14px 0;font-size:16px;">📈 Taxa de Ocupação × Receita (últimos 6 meses)</h3>
+      <canvas id="finChartOcupacao" height="120"></canvas>
+    </div>
+
+    <!-- RECEITA POR APARTAMENTO (tabela) -->
+    <h3 style="margin:0 0 12px 0;">🏠 Receita por Apartamento</h3>
+    <div class="table-wrap" style="margin-bottom:18px;">
+      <table class="fin-history-table" style="min-width:700px;">
+        <thead>
+          <tr>
+            <th>Apartamento</th>
+            <th>Reservas</th>
+            <th>Noites</th>
+            <th>Receita total</th>
+            <th>Recebido</th>
+            <th>Pendente</th>
+            <th>Diária média</th>
+            <th>Ocupação</th>
+          </tr>
+        </thead>
+        <tbody id="finAptTable"></tbody>
+      </table>
+    </div>
+
+    <!-- HISTÓRICO DE RESERVAS DO MÊS -->
+    <h3 style="margin:0 0 12px 0;">📋 Reservas do mês</h3>
+    <div class="table-wrap" style="margin-bottom:18px;">
+      <table class="fin-history-table" style="min-width:700px;">
+        <thead>
+          <tr>
+            <th>Hóspede</th>
+            <th>Apto</th>
+            <th>Período</th>
+            <th>Noites</th>
+            <th>Origem</th>
+            <th>Total</th>
+            <th>Recebido</th>
+            <th>Saldo</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="finReservasTable"></tbody>
+      </table>
+    </div>
+
+    <!-- HISTÓRICO DE LIMPEZAS DO MÊS -->
+    <h3 style="margin:0 0 12px 0;">🧹 Limpezas do mês</h3>
+    <div class="table-wrap" style="min-width:0;">
+      <table class="fin-history-table" style="min-width:600px;">
+        <thead>
+          <tr>
+            <th>Data</th>
+            <th>Apto</th>
+            <th>Tipo</th>
+            <th>Hóspede</th>
+            <th>Realizada por</th>
+            <th>Valor</th>
+          </tr>
+        </thead>
+        <tbody id="finHistoryTable"></tbody>
+      </table>
+    </div>
+
   </div>
+</div>
+
 
   <!-- ══════════════════════════════════════════
        NOVA ABA: PRECIFICAÇÃO
@@ -1571,58 +1704,394 @@
     setTimeout(()=>{msg.style.display='none';},2000);
     renderFinanceiro();
   });
-  function renderFinanceiro(){
-    const cfg=getFinConfig();
-    document.getElementById('finSalario').value=cfg.salario||'';
-    document.getElementById('finValorFreela').value=cfg.valorFreela||'';
-    document.getElementById('finMonthTitle').textContent=`${MONTH_NAMES[finMonth]} / ${finYear}`;
-    const ms=`${finYear}-${String(finMonth+1).padStart(2,'0')}-01`;
-    const me=`${finYear}-${String(finMonth+1).padStart(2,'0')}-${String(new Date(finYear,finMonth+1,0).getDate()).padStart(2,'0')}`;
-    const recs = cleaningRecords.filter(r => r.done && r.date >= ms && r.date <= me);
-    let cntFax = 0, cntFreela = 0, cntAberto = 0;
-    const rows = [];
-    recs.forEach(r => {
-      const b = bookings.find(x => x.id === r.bookingId);
-      const apt = b ? b.apartment : '—';
-      const guest = b ? b.guestName : '—';
-      const tipoLabel = r.type === 'checkout' ? 'Saída' : 'Semanal';
-      const resp = r.responsavel || 'aberto';
-      if (resp === 'faxineira') cntFax++;
-      else if (resp === 'freela') cntFreela++;
-      else cntAberto++;
-      const valor = resp === 'freela' ? cfg.valorFreela : 0;
-      rows.push({ date: r.date, apt, guest, tipoLabel, resp, valor, key: r.key, bId: r.bookingId, type: r.type });
-    });
-    rows.sort((a,b) => a.date.localeCompare(b.date));
-    const totalFreela = cntFreela * cfg.valorFreela;
-    const totalGeral = cfg.salario + totalFreela;
-    document.getElementById('finResumoSalario').textContent = formatCurrency(cfg.salario);
-    document.getElementById('finResumoFaxineiraCount').textContent = `${cntFax} limpeza(s) registradas`;
-    document.getElementById('finResumoFreela').textContent = formatCurrency(totalFreela);
-    document.getElementById('finResumoFreelaCount').textContent = `${cntFreela} limpeza(s) × ${formatCurrency(cfg.valorFreela)}`;
-    document.getElementById('finResumoTotal').textContent = formatCurrency(totalGeral);
-    document.getElementById('finResumoOpenCount').textContent = cntAberto > 0 ? `⚠️ ${cntAberto} sem atribuição` : '✅ Todas atribuídas';
-    if (!rows.length) {
-      document.getElementById('finHistoryTable').innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px;">Nenhuma limpeza concluída neste mês.</td></tr>`;
-      return;
-    }
-    document.getElementById('finHistoryTable').innerHTML = rows.map(r => {
-      const respBadge = r.resp === 'faxineira'
-        ? `<span class="badge badge-faxineira">👩 Faxineira</span>`
-        : r.resp === 'freela'
-          ? `<span class="badge badge-freela">🧹 Freela</span>`
-          : `<span class="badge badge-open" onclick="abrirAtribModalDireto('${r.bId}','${r.type}','${r.date}','Apto ${r.apt} — ${r.tipoLabel}')" style="cursor:pointer;">⚠️ Definir</span>`;
-      const valorStr = r.resp === 'freela' ? formatCurrency(cfg.valorFreela) : r.resp === 'faxineira' ? '<span class="muted">Salário fixo</span>' : '—';
-      return `<tr>
-        <td>${formatDateBR(r.date)}</td>
-        <td><strong>Apto ${r.apt}</strong></td>
-        <td>${r.tipoLabel}</td>
-        <td>${r.guest}</td>
-        <td>${respBadge}</td>
-        <td>${valorStr}</td>
-      </tr>`;
-    }).join('');
+ function renderFinanceiro(){
+  const cfg = getFinConfig();
+  document.getElementById('finSalario').value = cfg.salario || '';
+  document.getElementById('finValorFreela').value = cfg.valorFreela || '';
+  document.getElementById('finMonthTitle').textContent = `${MONTH_NAMES[finMonth]} / ${finYear}`;
+
+  const daysInMonth = new Date(finYear, finMonth + 1, 0).getDate();
+  const ms = `${finYear}-${String(finMonth+1).padStart(2,'0')}-01`;
+  const me = `${finYear}-${String(finMonth+1).padStart(2,'0')}-${String(daysInMonth).padStart(2,'0')}`;
+
+  // ── Reservas do mês (check-in dentro do mês) ──
+  const reservasMes = bookings.filter(b => {
+    if (b.cancelled) return false;
+    const d = new Date(b.checkin + 'T00:00:00');
+    return d.getMonth() === finMonth && d.getFullYear() === finYear;
+  });
+
+  // ── Reservas que OCUPAM o mês (para ocupação) ──
+  const reservasOcupam = bookings.filter(b => !b.cancelled && b.checkin <= me && b.checkout > ms);
+
+  const faturamento = reservasMes.reduce((s,b) => s + Number(b.totalValue||0), 0);
+  const recebido    = reservasMes.reduce((s,b) => s + Number(b.paidValue||0), 0);
+  const pendente    = faturamento - recebido;
+  const totalNoites = reservasMes.reduce((s,b) => s + Number(b.nights||calculateNights(b.checkin,b.checkout)), 0);
+  const diariaMedia = totalNoites > 0 ? faturamento / totalNoites : 0;
+  const pendenteCount = reservasMes.filter(b => Number(b.totalValue||0) > Number(b.paidValue||0)).length;
+
+  document.getElementById('finFaturamento').textContent    = formatCurrency(faturamento);
+  document.getElementById('finFaturamentoCount').textContent = `${reservasMes.length} reserva(s)`;
+  document.getElementById('finRecebido').textContent       = formatCurrency(recebido);
+  document.getElementById('finRecebidoPct').textContent    = faturamento > 0 ? `${((recebido/faturamento)*100).toFixed(0)}% do faturamento` : '0% do faturamento';
+  document.getElementById('finPendente').textContent       = formatCurrency(pendente);
+  document.getElementById('finPendenteCount').textContent  = `${pendenteCount} reserva(s)`;
+  document.getElementById('finDiariaMedia').textContent    = formatCurrency(diariaMedia);
+  document.getElementById('finNightCount').textContent     = `${totalNoites} noite(s)`;
+
+  // ── Limpezas ──
+  const recs = cleaningRecords.filter(r => r.done && r.date >= ms && r.date <= me);
+  let cntFax = 0, cntFreela = 0, cntAberto = 0;
+  recs.forEach(r => {
+    const resp = r.responsavel || 'aberto';
+    if (resp === 'faxineira') cntFax++;
+    else if (resp === 'freela') cntFreela++;
+    else cntAberto++;
+  });
+  const totalFreela = cntFreela * cfg.valorFreela;
+  const totalDespesas = cfg.salario + totalFreela;
+
+  document.getElementById('finResumoSalario').textContent      = formatCurrency(cfg.salario);
+  document.getElementById('finResumoFaxineiraCount').textContent = `${cntFax} limpeza(s) registradas`;
+  document.getElementById('finResumoFreela').textContent       = formatCurrency(totalFreela);
+  document.getElementById('finResumoFreelaCount').textContent  = `${cntFreela} limpeza(s) × ${formatCurrency(cfg.valorFreela)}`;
+  document.getElementById('finResumoTotal').textContent        = formatCurrency(totalDespesas);
+  document.getElementById('finResumoOpenCount').textContent    = cntAberto > 0 ? `⚠️ ${cntAberto} sem atribuição` : '✅ Todas atribuídas';
+
+  // ── Lucro estimado ──
+  const lucro = recebido - totalDespesas;
+  document.getElementById('finLucroReceita').textContent  = formatCurrency(recebido);
+  document.getElementById('finLucroDespesa').textContent  = formatCurrency(totalDespesas);
+  document.getElementById('finLucroLiquido').textContent  = formatCurrency(lucro);
+  document.getElementById('finLucroValor').textContent    = formatCurrency(lucro);
+  document.getElementById('finLucroValor').style.color    = lucro >= 0 ? '#16a34a' : '#dc2626';
+  document.getElementById('finLucroLiquido').style.color  = lucro >= 0 ? '#16a34a' : '#dc2626';
+
+  // ── Tabela de reservas do mês ──
+  if (!reservasMes.length) {
+    document.getElementById('finReservasTable').innerHTML = `<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:20px;">Nenhuma reserva neste mês.</td></tr>`;
+  } else {
+    document.getElementById('finReservasTable').innerHTML = reservasMes
+      .sort((a,b) => a.checkin.localeCompare(b.checkin))
+      .map(b => {
+        const bal = getBalance(b);
+        const ps  = getPaymentStatus(b);
+        return `<tr>
+          <td><strong>${b.guestName}</strong></td>
+          <td>Apto ${b.apartment}</td>
+          <td>${formatDateBR(b.checkin)} → ${formatDateBR(b.checkout)}</td>
+          <td>${b.nights||calculateNights(b.checkin,b.checkout)}</td>
+          <td>${b.source||'-'}</td>
+          <td>${formatCurrency(b.totalValue)}</td>
+          <td>${formatCurrency(b.paidValue)}</td>
+          <td>${formatCurrency(bal)}</td>
+          <td><span class="badge ${ps.className}">${ps.label}</span></td>
+        </tr>`;
+      }).join('');
   }
+
+  // ── Tabela receita por apartamento ──
+  const aptRows = FIXED_APARTMENTS.map(apt => {
+    const ab = reservasMes.filter(b => b.apartment === apt);
+    const ao = reservasOcupam.filter(b => b.apartment === apt);
+    const rv = ab.reduce((s,b) => s + Number(b.totalValue||0), 0);
+    const pd = ab.reduce((s,b) => s + Number(b.paidValue||0), 0);
+    const nt = ab.reduce((s,b) => s + Number(b.nights||calculateNights(b.checkin,b.checkout)), 0);
+    let diasOcup = 0;
+    ao.forEach(b => {
+      const st = b.checkin > ms ? b.checkin : ms;
+      const en = b.checkout < me ? b.checkout : me;
+      diasOcup += calculateNights(st, en);
+    });
+    const oRate = ((diasOcup / daysInMonth) * 100).toFixed(0);
+    return { apt, count: ab.length, nt, rv, pd, bal: rv-pd, avg: nt>0?rv/nt:0, oRate, diasOcup };
+  }).filter(r => r.rv > 0 || r.count > 0).sort((a,b) => b.rv - a.rv);
+
+  document.getElementById('finAptTable').innerHTML = aptRows.length
+    ? aptRows.map(r => `<tr>
+        <td><strong>Apto ${r.apt}</strong></td>
+        <td>${r.count}</td>
+        <td>${r.nt}</td>
+        <td>${formatCurrency(r.rv)}</td>
+        <td>${formatCurrency(r.pd)}</td>
+        <td>${formatCurrency(r.bal)}</td>
+        <td>${formatCurrency(r.avg)}</td>
+        <td>
+          <span>${r.oRate}% (${r.diasOcup}d)</span>
+          <div class="occ-bar-wrap"><div class="occ-bar" style="width:${Math.min(r.oRate,100)}%"></div></div>
+        </td>
+      </tr>`).join('')
+    : `<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:20px;">Nenhuma reserva neste mês.</td></tr>`;
+
+  // ── Tabela de limpezas ──
+  const limpRows = [];
+  recs.forEach(r => {
+    const b = bookings.find(x => x.id === r.bookingId);
+    const apt   = b ? b.apartment : '—';
+    const guest = b ? b.guestName : '—';
+    const tipoLabel = r.type === 'checkout' ? 'Saída' : 'Semanal';
+    const resp  = r.responsavel || 'aberto';
+    const valor = resp === 'freela' ? cfg.valorFreela : 0;
+    limpRows.push({ date: r.date, apt, guest, tipoLabel, resp, valor, key: r.key, bId: r.bookingId, type: r.type });
+  });
+  limpRows.sort((a,b) => a.date.localeCompare(b.date));
+
+  document.getElementById('finHistoryTable').innerHTML = limpRows.length
+    ? limpRows.map(r => {
+        const respBadge = r.resp === 'faxineira'
+          ? `<span class="badge badge-faxineira">👩 Faxineira</span>`
+          : r.resp === 'freela'
+            ? `<span class="badge badge-freela">🧹 Freela</span>`
+            : `<span class="badge badge-open" onclick="abrirAtribModalDireto('${r.bId}','${r.type}','${r.date}','Apto ${r.apt} — ${r.tipoLabel}')" style="cursor:pointer;">⚠️ Definir</span>`;
+        const valorStr = r.resp === 'freela'
+          ? formatCurrency(cfg.valorFreela)
+          : r.resp === 'faxineira' ? '<span class="muted">Salário fixo</span>' : '—';
+        return `<tr>
+          <td>${formatDateBR(r.date)}</td>
+          <td><strong>Apto ${r.apt}</strong></td>
+          <td>${r.tipoLabel}</td>
+          <td>${r.guest}</td>
+          <td>${respBadge}</td>
+          <td>${valorStr}</td>
+        </tr>`;
+      }).join('')
+    : `<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px;">Nenhuma limpeza concluída neste mês.</td></tr>`;
+
+  // ── Gráficos ──
+  renderFinCharts(faturamento, recebido, pendente, totalDespesas, aptRows);
+  renderFinOcupacaoChart();
+}
+
+// ─────────────────────────────────────────────
+// GRÁFICOS FINANCEIRO
+// ─────────────────────────────────────────────
+let finChartRD = null, finChartApt = null, finChartOcup = null;
+
+function destroyChart(ref) { if (ref) { ref.destroy(); } return null; }
+
+function renderFinCharts(faturamento, recebido, pendente, despesas, aptRows) {
+  // Carrega Chart.js dinamicamente se necessário
+  if (!window.Chart) {
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js';
+    script.onload = () => renderFinCharts(faturamento, recebido, pendente, despesas, aptRows);
+    document.head.appendChild(script);
+    return;
+  }
+
+  // ── Gráfico Receita x Despesa (Barras) ──
+  finChartRD = destroyChart(finChartRD);
+  const ctx1 = document.getElementById('finChartReceitaDespesa').getContext('2d');
+  finChartRD = new Chart(ctx1, {
+    type: 'bar',
+    data: {
+      labels: ['Faturamento', 'Recebido', 'Pendente', 'Despesas'],
+      datasets: [{
+        label: 'R$',
+        data: [faturamento, recebido, pendente, despesas],
+        backgroundColor: ['#3b82f6','#22c55e','#f59e0b','#ef4444'],
+        borderRadius: 8,
+        borderSkipped: false,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => ' ' + Number(ctx.parsed.y).toLocaleString('pt-BR', { style:'currency', currency:'BRL' })
+          }
+        }
+      },
+      scales: {
+        y: {
+          ticks: {
+            callback: v => 'R$ ' + Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 0 })
+          }
+        }
+      }
+    }
+  });
+
+  // ── Gráfico Receita por Apartamento (Horizontal) ──
+  finChartApt = destroyChart(finChartApt);
+  const top8 = [...aptRows].sort((a,b) => b.rv - a.rv).slice(0, 8);
+  const ctx2 = document.getElementById('finChartApartamentos').getContext('2d');
+  finChartApt = new Chart(ctx2, {
+    type: 'bar',
+    data: {
+      labels: top8.map(r => `Apto ${r.apt}`),
+      datasets: [{
+        label: 'Receita',
+        data: top8.map(r => r.rv),
+        backgroundColor: '#6366f1',
+        borderRadius: 6,
+        borderSkipped: false,
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      responsive: true,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: ctx => ' ' + Number(ctx.parsed.x).toLocaleString('pt-BR', { style:'currency', currency:'BRL' })
+          }
+        }
+      },
+      scales: {
+        x: {
+          ticks: {
+            callback: v => 'R$ ' + Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 0 })
+          }
+        }
+      }
+    }
+  });
+}
+
+function renderFinOcupacaoChart() {
+  if (!window.Chart) return;
+  finChartOcup = destroyChart(finChartOcup);
+
+  // Últimos 6 meses
+  const labels = [], dataReceita = [], dataOcupacao = [];
+  for (let i = 5; i >= 0; i--) {
+    let m = finMonth - i, y = finYear;
+    if (m < 0) { m += 12; y--; }
+    const dim = new Date(y, m+1, 0).getDate();
+    const ms  = `${y}-${String(m+1).padStart(2,'0')}-01`;
+    const me  = `${y}-${String(m+1).padStart(2,'0')}-${String(dim).padStart(2,'0')}`;
+
+    const rb = bookings.filter(b => {
+      if (b.cancelled) return false;
+      const d = new Date(b.checkin + 'T00:00:00');
+      return d.getMonth() === m && d.getFullYear() === y;
+    });
+    const receita = rb.reduce((s,b) => s + Number(b.totalValue||0), 0);
+
+    const ro = bookings.filter(b => !b.cancelled && b.checkin <= me && b.checkout > ms);
+    let diasOcup = 0;
+    ro.forEach(b => {
+      const st = b.checkin > ms ? b.checkin : ms;
+      const en = b.checkout < me ? b.checkout : me;
+      diasOcup += calculateNights(st, en);
+    });
+    const taxa = ((diasOcup / (18 * dim)) * 100).toFixed(1);
+
+    labels.push(`${MONTH_NAMES[m].substring(0,3)}/${y}`);
+    dataReceita.push(receita);
+    dataOcupacao.push(Number(taxa));
+  }
+
+  const ctx3 = document.getElementById('finChartOcupacao').getContext('2d');
+  finChartOcup = new Chart(ctx3, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        {
+          type: 'bar',
+          label: 'Receita (R$)',
+          data: dataReceita,
+          backgroundColor: '#3b82f6',
+          borderRadius: 6,
+          yAxisID: 'yReceita',
+        },
+        {
+          type: 'line',
+          label: 'Ocupação (%)',
+          data: dataOcupacao,
+          borderColor: '#f59e0b',
+          backgroundColor: 'rgba(245,158,11,0.15)',
+          pointBackgroundColor: '#f59e0b',
+          tension: 0.3,
+          yAxisID: 'yOcupacao',
+          fill: true,
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        tooltip: {
+          callbacks: {
+            label: ctx => {
+              if (ctx.dataset.label.includes('Receita'))
+                return ' Receita: ' + Number(ctx.parsed.y).toLocaleString('pt-BR', { style:'currency', currency:'BRL' });
+              return ` Ocupação: ${ctx.parsed.y}%`;
+            }
+          }
+        }
+      },
+      scales: {
+        yReceita: {
+          type: 'linear',
+          position: 'left',
+          ticks: { callback: v => 'R$ ' + Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 0 }) }
+        },
+        yOcupacao: {
+          type: 'linear',
+          position: 'right',
+          min: 0, max: 100,
+          grid: { drawOnChartArea: false },
+          ticks: { callback: v => v + '%' }
+        }
+      }
+    }
+  });
+}
+// ── Exportar PDF ──
+document.getElementById('finExportPDFBtn').addEventListener('click', () => {
+  window.print();
+});
+
+// ── Exportar CSV ──
+document.getElementById('finExportCSVBtn').addEventListener('click', () => {
+  const cfg = getFinConfig();
+  const daysInMonth = new Date(finYear, finMonth + 1, 0).getDate();
+  const ms = `${finYear}-${String(finMonth+1).padStart(2,'0')}-01`;
+  const me = `${finYear}-${String(finMonth+1).padStart(2,'0')}-${String(daysInMonth).padStart(2,'0')}`;
+
+  const reservasMes = bookings.filter(b => {
+    if (b.cancelled) return false;
+    const d = new Date(b.checkin + 'T00:00:00');
+    return d.getMonth() === finMonth && d.getFullYear() === finYear;
+  });
+
+  let csv = 'sep=;\n';
+  csv += `RELATÓRIO FINANCEIRO — ${MONTH_NAMES[finMonth]}/${finYear}\n\n`;
+  csv += 'RESERVAS DO MÊS\n';
+  csv += 'Hóspede;Apto;Check-in;Check-out;Noites;Origem;Total;Recebido;Saldo;Status\n';
+  reservasMes.forEach(b => {
+    const bal = getBalance(b);
+    const ps  = getPaymentStatus(b);
+    csv += `${b.guestName};${b.apartment};${formatDateBR(b.checkin)};${formatDateBR(b.checkout)};${b.nights||calculateNights(b.checkin,b.checkout)};${b.source||'-'};${Number(b.totalValue||0).toFixed(2)};${Number(b.paidValue||0).toFixed(2)};${bal.toFixed(2)};${ps.label}\n`;
+  });
+
+  csv += '\nLIMPEZAS DO MÊS\n';
+  csv += 'Data;Apto;Tipo;Hóspede;Responsável;Valor\n';
+  const recs = cleaningRecords.filter(r => r.done && r.date >= ms && r.date <= me)
+    .sort((a,b) => a.date.localeCompare(b.date));
+  recs.forEach(r => {
+    const b = bookings.find(x => x.id === r.bookingId);
+    const valor = r.responsavel === 'freela' ? cfg.valorFreela.toFixed(2) : '0.00';
+    csv += `${formatDateBR(r.date)};${b ? b.apartment : '-'};${r.type === 'checkout' ? 'Saída' : 'Semanal'};${b ? b.guestName : '-'};${r.responsavel||'aberto'};${valor}\n`;
+  });
+
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+  const a = Object.assign(document.createElement('a'), {
+    href: URL.createObjectURL(blob),
+    download: `financeiro-${MONTH_NAMES[finMonth]}-${finYear}.csv`
+  });
+  a.click();
+  URL.revokeObjectURL(a.href);
+});
+
   window.abrirAtribModalDireto = (bId, type, date, desc) => { abrirAtribModal(bId, type, date, desc); };
   async function markCleaning(bId, type, date, done, responsavel) {
     const key = getCleaningKey(bId, type, date);
