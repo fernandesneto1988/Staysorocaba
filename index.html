@@ -2528,7 +2528,7 @@ document.getElementById('finExportCSVBtn').addEventListener('click', () => {
   function gerarMensagemCheckin(b){
     const sa=apartmentData[b.apartment]?.senhaApto||'-';
     const sp=b.senhaPortaria||'-';
-    const gar=b.garageSpot&&b.garageSpot!=='Sem vaga'?`\n🚗 *Vaga de garagem:* ${b.garageSpot}`:'';
+    const gar=b.garageSpot&&b.garageSpot!=='Sem vaga'?`\n🚗 *Vaga de garagem:* ${b.garageSpot}\n📦 *Controle da garagem:* Antes de guardar o carro, pegue o controle no *hall de entrada*, dentro da *bomboniere* na bancada.`:'';
     const obs=b.notes?`\n\n📝 *Obs:* ${b.notes}`:'';
     return `Olá, *${b.guestName}*! 🏠\n\nSeja bem-vindo(a)!\n\n`+
       `📍 *Endereço:*\nRua Joana Miranda Corrêa, 130 — Jd. Ferreira, Sorocaba/SP\n\n`+
