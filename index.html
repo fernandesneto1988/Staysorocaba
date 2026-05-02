@@ -1075,7 +1075,11 @@
   </div>
 </div>
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+import {
+  getFirestore, collection, doc, getDocs,
+  setDoc, deleteDoc, onSnapshot, writeBatch
+} from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
   import {
     getFirestore, collection, doc, getDocs,
     setDoc, deleteDoc, onSnapshot, writeBatch
