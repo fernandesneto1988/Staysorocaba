@@ -428,54 +428,172 @@
     <button class="tab-btn" onclick="switchTab('relatorio')">📈 Relatório</button>
   </div>
 
-  <!-- DASHBOARD -->
-  <div id="tab-dashboard" class="tab-panel active">
-    <div class="card">
-      <div class="summary">
-        <div class="box"><small>Total de reservas</small><strong id="sumBookings">0</strong></div>
-        <div class="box"><small>Receita do mês</small><strong id="sumMonthRevenue">R$ 0,00</strong></div>
-        <div class="box"><small>Recebido no mês</small><strong id="sumMonthPaid">R$ 0,00</strong></div>
-        <div class="box"><small>Saldo pendente</small><strong id="sumPending">R$ 0,00</strong></div>
-        <div class="box"><small>Diária média do mês</small><strong id="sumAvgDaily">R$ 0,00</strong></div>
+ <!-- DASHBOARD -->
+<div id="tab-dashboard" class="tab-panel active">
+  <div class="card">
+
+    <!-- ── KPI CARDS ── -->
+    <div class="summary" style="grid-template-columns:repeat(5,1fr);">
+      <div class="box"><small>Total de reservas</small><strong id="sumBookings">0</strong></div>
+      <div class="box"><small>Receita do mês</small><strong id="sumMonthRevenue">R$ 0,00</strong></div>
+      <div class="box"><small>Recebido no mês</small><strong id="sumMonthPaid">R$ 0,00</strong></div>
+      <div class="box"><small>Saldo pendente</small><strong id="sumPending">R$ 0,00</strong></div>
+      <div class="box"><small>Diária média do mês</small><strong id="sumAvgDaily">R$ 0,00</strong></div>
+    </div>
+
+    <!-- ── KPI EXTRAS ── -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px;" id="kpiExtrasGrid">
+      <div class="box" style="background:#eff6ff;border-color:#bfdbfe;">
+        <small>🏠 Ocupação hoje</small>
+        <strong id="kpiOcupacaoHoje">0%</strong>
+        <span style="font-size:12px;color:var(--muted);" id="kpiOcupacaoHojeDetail">0 de 18 aptos</span>
       </div>
-      <div class="alert-panel" id="alertPanel">
+      <div class="box" style="background:#f0fdf4;border-color:#86efac;">
+        <small>✅ Aptos livres agora</small>
+        <strong id="kpiAptosLivres">0</strong>
+        <span style="font-size:12px;color:var(--muted);">disponíveis hoje</span>
+      </div>
+      <div class="box" style="background:#fff7ed;border-color:#fed7aa;">
+        <small>🧹 Limpezas pendentes</small>
+        <strong id="kpiLimpezasPendentes">0</strong>
+        <span style="font-size:12px;color:var(--muted);">para hoje</span>
+      </div>
+      <div class="box" style="background:#fdf4ff;border-color:#e9d5ff;">
+        <small>📋 Check-ins esta semana</small>
+        <strong id="kpiCheckinsSemana">0</strong>
+        <span style="font-size:12px;color:var(--muted);" id="kpiCheckinsSemanaDetail">próximos 7 dias</span>
+      </div>
+    </div>
+
+    <!-- ── TERMÔMETRO DE META ── -->
+    <div id="metaBox" style="background:linear-gradient(135deg,#eff6ff,#f0fdf4);border:2px solid #bfdbfe;border-radius:16px;padding:20px;margin-bottom:18px;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:14px;">
+        <div>
+          <div style="font-size:16px;font-weight:bold;margin-bottom:4px;">🎯 Meta de Receita — <span id="metaMesLabel"></span></div>
+          <div style="font-size:13px;color:var(--muted);">Acompanhe seu progresso em tempo real</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+          <input type="number" id="metaInput" min="0" step="100"
+            placeholder="Ex: 30000"
+            style="width:160px;padding:9px 12px;border:1px solid var(--border);border-radius:10px;font-size:14px;" />
+          <button type="button" id="metaSaveBtn"
+            style="width:auto;padding:10px 16px;border-radius:10px;background:#2563eb;color:white;border:none;font-weight:bold;font-size:13px;cursor:pointer;">
+            💾 Salvar meta
+          </button>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px;">
+        <div style="text-align:center;">
+          <div style="font-size:12px;color:var(--muted);margin-bottom:4px;">🎯 Meta</div>
+          <div style="font-size:20px;font-weight:bold;color:#2563eb;" id="metaValor">R$ 0,00</div>
+        </div>
+        <div style="text-align:center;">
+          <div style="font-size:12px;color:var(--muted);margin-bottom:4px;">📈 Faturado</div>
+          <div style="font-size:20px;font-weight:bold;color:#16a34a;" id="metaFaturado">R$ 0,00</div>
+        </div>
+        <div style="text-align:center;">
+          <div style="font-size:12px;color:var(--muted);margin-bottom:4px;">⏳ Falta</div>
+          <div style="font-size:20px;font-weight:bold;" id="metaFalta">R$ 0,00</div>
+        </div>
+      </div>
+
+      <!-- Barra de progresso -->
+      <div style="background:#e5e7eb;border-radius:999px;height:28px;width:100%;overflow:hidden;position:relative;">
+        <div id="metaProgressBar"
+          style="height:100%;border-radius:999px;background:linear-gradient(90deg,#22c55e,#16a34a);transition:width .6s ease;display:flex;align-items:center;justify-content:flex-end;padding-right:10px;min-width:40px;">
+          <span id="metaProgressPct" style="color:white;font-size:13px;font-weight:bold;">0%</span>
+        </div>
+      </div>
+
+      <!-- Milestones -->
+      <div style="display:flex;justify-content:space-between;margin-top:8px;padding:0 2px;">
+        <span style="font-size:11px;color:var(--muted);">0%</span>
+        <span id="meta50Label" style="font-size:11px;color:var(--muted);">50%</span>
+        <span id="meta80Label" style="font-size:11px;color:var(--muted);">80%</span>
+        <span style="font-size:11px;color:var(--muted);">100%</span>
+      </div>
+
+      <!-- Badge de status -->
+      <div style="margin-top:12px;" id="metaStatusBadge"></div>
+    </div>
+
+    <!-- ── GRÁFICO DE OCUPAÇÃO 14 DIAS ── -->
+    <div style="background:#f8fafc;border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:18px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px;">
+        <h3 style="margin:0;font-size:16px;">📊 Ocupação — 7 dias anteriores + hoje + 6 dias futuros</h3>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <span style="display:inline-flex;align-items:center;gap:6px;font-size:12px;">
+            <span style="width:12px;height:12px;border-radius:3px;background:#3b82f6;display:inline-block;"></span>Passado
+          </span>
+          <span style="display:inline-flex;align-items:center;gap:6px;font-size:12px;">
+            <span style="width:12px;height:12px;border-radius:3px;background:#f59e0b;display:inline-block;"></span>Hoje
+          </span>
+          <span style="display:inline-flex;align-items:center;gap:6px;font-size:12px;">
+            <span style="width:12px;height:12px;border-radius:3px;background:#22c55e;display:inline-block;"></span>Futuro
+          </span>
+        </div>
+      </div>
+      <canvas id="dashOcupacaoChart" height="110"></canvas>
+    </div>
+
+    <!-- ── TOP 3 APTOS + ALERTAS ── -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px;">
+
+      <!-- TOP 3 APTOS -->
+      <div style="background:#f8fafc;border:1px solid var(--border);border-radius:14px;padding:18px;">
+        <h3 style="margin:0 0 14px 0;font-size:16px;">🏆 Top aptos do mês</h3>
+        <div id="topAptosRanking"></div>
+      </div>
+
+      <!-- ALERTAS DE HOJE -->
+      <div class="alert-panel" id="alertPanel" style="margin-bottom:0;">
         <h3>⚠️ Próximos 3 dias — Check-ins e Check-outs</h3>
         <div class="alert-grid" id="alertGrid"></div>
       </div>
-      <div class="mini-panels">
-        <div class="mini"><h3>✈️ Check-ins de hoje</h3><ul id="todayCheckins"><li class="muted">Nenhum check-in hoje.</li></ul></div>
-        <div class="mini"><h3>🚪 Check-outs de hoje</h3><ul id="todayCheckouts" class="cleaning-list"><li class="muted">Nenhum check-out hoje.</li></ul></div>
-        <div class="mini"><h3>🧹 Faxinas semanais de hoje</h3><ul id="todayWeeklyCleanings" class="cleaning-list"><li class="muted">Nenhuma faxina semanal hoje.</li></ul></div>
-      </div>
-      <div class="map-wrapper">
-        <div class="map-header">
-          <div class="apt-map-nav">
-            <button type="button" class="btn-secondary" onclick="changeAptMapDate(-1)">← Anterior</button>
-            <span id="aptMapDateLabel"></span>
-            <button type="button" class="btn-secondary" onclick="changeAptMapDate(1)">Próximo →</button>
-            <button type="button" class="btn-primary" onclick="changeAptMapDate(0)">Hoje</button>
-          </div>
-          <span class="muted">Clique em um apartamento para ver detalhes.</span>
-        </div>
-        <div class="map-legend">
-          <span class="legend-item"><span class="legend-dot" style="background:#22c55e;"></span>Livre</span>
-          <span class="legend-item"><span class="legend-dot" style="background:#3b82f6;"></span>Ocupado</span>
-          <span class="legend-item"><span class="legend-dot" style="background:#f59e0b;"></span>Check-in</span>
-          <span class="legend-item"><span class="legend-dot" style="background:#ef4444;"></span>Check-out</span>
-          <span class="legend-item"><span class="legend-dot" style="background:#14b8a6;"></span>Faxina semanal</span>
-          <span class="legend-item"><span class="legend-dot" style="background:#fb923c;"></span>Aguardando limpeza</span>
-        </div>
-        <div id="apartmentsMap" class="apt-grid"></div>
-      </div>
-      <div class="map-wrapper">
-        <div class="map-header">
-          <h2 style="margin:0;">Mapa da Garagem</h2>
-          <span class="muted">Status das vagas considerando o dia de hoje.</span>
-        </div>
-        <div id="parkingMap" class="parking-grid"></div>
-      </div>
+
     </div>
+
+    <!-- ── MINI PAINÉIS ── -->
+    <div class="mini-panels">
+      <div class="mini"><h3>✈️ Check-ins de hoje</h3><ul id="todayCheckins"><li class="muted">Nenhum check-in hoje.</li></ul></div>
+      <div class="mini"><h3>🚪 Check-outs de hoje</h3><ul id="todayCheckouts" class="cleaning-list"><li class="muted">Nenhum check-out hoje.</li></ul></div>
+      <div class="mini"><h3>🧹 Faxinas semanais de hoje</h3><ul id="todayWeeklyCleanings" class="cleaning-list"><li class="muted">Nenhuma faxina semanal hoje.</li></ul></div>
+    </div>
+
+    <!-- ── MAPA DE APTOS ── -->
+    <div class="map-wrapper">
+      <div class="map-header">
+        <div class="apt-map-nav">
+          <button type="button" class="btn-secondary" onclick="changeAptMapDate(-1)">← Anterior</button>
+          <span id="aptMapDateLabel"></span>
+          <button type="button" class="btn-secondary" onclick="changeAptMapDate(1)">Próximo →</button>
+          <button type="button" class="btn-primary" onclick="changeAptMapDate(0)">Hoje</button>
+        </div>
+        <span class="muted">Clique em um apartamento para ver detalhes.</span>
+      </div>
+      <div class="map-legend">
+        <span class="legend-item"><span class="legend-dot" style="background:#22c55e;"></span>Livre</span>
+        <span class="legend-item"><span class="legend-dot" style="background:#3b82f6;"></span>Ocupado</span>
+        <span class="legend-item"><span class="legend-dot" style="background:#f59e0b;"></span>Check-in</span>
+        <span class="legend-item"><span class="legend-dot" style="background:#ef4444;"></span>Check-out</span>
+        <span class="legend-item"><span class="legend-dot" style="background:#14b8a6;"></span>Faxina semanal</span>
+        <span class="legend-item"><span class="legend-dot" style="background:#fb923c;"></span>Aguardando limpeza</span>
+      </div>
+      <div id="apartmentsMap" class="apt-grid"></div>
+    </div>
+
+    <!-- ── MAPA DA GARAGEM ── -->
+    <div class="map-wrapper">
+      <div class="map-header">
+        <h2 style="margin:0;">Mapa da Garagem</h2>
+        <span class="muted">Status das vagas considerando o dia de hoje.</span>
+      </div>
+      <div id="parkingMap" class="parking-grid"></div>
+    </div>
+
   </div>
+</div>
 
   <!-- MAPA MENSAL -->
   <div id="tab-mapamensal" class="tab-panel">
