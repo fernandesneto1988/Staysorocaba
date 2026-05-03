@@ -516,6 +516,61 @@
 
       <!-- Badge de status -->
       <div style="margin-top:12px;" id="metaStatusBadge"></div>
+      <!-- PROJEÇÃO DE RECEITA -->
+<div id="metaProjecaoBox" style="
+  margin-top:14px;
+  background:white;
+  border:1px solid #bfdbfe;
+  border-radius:12px;
+  padding:14px 16px;
+  display:none;
+">
+  <div style="font-size:13px;color:var(--muted);margin-bottom:8px;">
+    💡 <strong>Projeção até fim do mês</strong>
+    <span style="font-size:11px;margin-left:6px;">(reservas já cadastradas)</span>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
+    <div style="text-align:center;">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:3px;">📅 Reservas futuras</div>
+      <div style="font-size:17px;font-weight:bold;color:#2563eb;" id="metaProjecaoFuturo">R$ 0,00</div>
+    </div>
+    <div style="text-align:center;">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:3px;">📈 Total projetado</div>
+      <div style="font-size:17px;font-weight:bold;color:#7c3aed;" id="metaProjecaoTotal">R$ 0,00</div>
+    </div>
+    <div style="text-align:center;">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:3px;">🎯 % da meta</div>
+      <div style="font-size:17px;font-weight:bold;" id="metaProjecaoPct">0%</div>
+    </div>
+  </div>
+  <div style="margin-top:10px;">
+    <!-- barra projeção -->
+    <div style="background:#e5e7eb;border-radius:999px;height:10px;width:100%;overflow:hidden;position:relative;">
+      <!-- faturado (sólido) -->
+      <div id="metaProjecaoBarFat"
+        style="position:absolute;left:0;top:0;height:100%;border-radius:999px;background:#22c55e;transition:width .6s;"></div>
+      <!-- projetado (listrado) -->
+      <div id="metaProjecaoBarProj"
+        style="position:absolute;top:0;height:100%;border-radius:999px;
+               background:repeating-linear-gradient(
+                 90deg,#a78bfa 0px,#a78bfa 6px,#c4b5fd 6px,#c4b5fd 12px
+               );
+               transition:width .6s left .6s;opacity:0.85;"></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;margin-top:5px;">
+      <span style="font-size:11px;color:var(--muted);">
+        <span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#22c55e;margin-right:4px;"></span>
+        Faturado
+      </span>
+      <span style="font-size:11px;color:var(--muted);">
+        <span style="display:inline-block;width:10px;height:10px;border-radius:2px;background:#a78bfa;margin-right:4px;"></span>
+        Projetado (futuras)
+      </span>
+    </div>
+  </div>
+  <div id="metaProjecaoMsg" style="margin-top:10px;font-size:13px;"></div>
+</div>
+
     </div>
 
     <!-- ── GRÁFICO DE OCUPAÇÃO 14 DIAS ── -->
@@ -2576,7 +2631,13 @@ document.getElementById('finExportCSVBtn').addEventListener('click', () => {
         else if(stayBooks.length){cellClass='mc-stay';cellText=stayBooks[0].guestName.split(' ')[0];cellTitle=`Hóspede: ${stayBooks[0].guestName}`;}
         else if(wc.waiting){cellClass='mc-waiting';cellText='🧹';cellTitle=`Aguardando limpeza (saída de ${wc.booking.guestName} em ${formatDateBR(wc.booking.checkout)})`;}
         else{cellClass='mc-vacant';cellTitle='Disponível';}
-        tbody+=`<td class="${isToday}" title="${cellTitle}"><div class="map-cell ${cellClass}">${cellText}</div></td>`;
+        const hasBooking = checkinBooks.length || checkoutBooks.length || stayBooks.length;
+const clickAttr  = hasBooking
+  ? `onclick="openApartmentModal('${apt}')" style="cursor:pointer;"`
+  : `style="cursor:default;"`;
+tbody+=`<td class="${isToday}" title="${cellTitle}" ${clickAttr}>
+  <div class="map-cell ${cellClass}">${cellText}</div>
+</td>`;
       });
       tbody+='</tr>';
     });
@@ -3322,7 +3383,62 @@ function renderKpiExtras() {
   document.getElementById('kpiCheckinsSemanaDetail').textContent = `próximos 7 dias`;
 }
 
-function renderMeta() {
+function renderMeta()   // ── PROJEÇÃO ──
+  const hoje      = todayStr();
+  const dimMes    = new Date(y, m + 1, 0).getDate();
+  const fimMes    = `${y}-${String(m+1).padStart(2,'0')}-${String(dimMes).padStart(2,'0')}`;
+
+  // Reservas futuras do mês (check-in ainda não chegou)
+  const futuras = bookings.filter(b => {
+    if (b.cancelled) return false;
+    const d = new Date(b.checkin + 'T00:00:00');
+    return d.getMonth() === m && d.getFullYear() === y && b.checkin > hoje;
+  });
+  const receitaFutura = futuras.reduce((s, b) => s + Number(b.totalValue || 0), 0);
+
+  const totalProjetado = faturado + receitaFutura;
+  const pctProjetado   = meta > 0 ? Math.min((totalProjetado / meta) * 100, 100) : 0;
+  const pctFaturadoBar = meta > 0 ? Math.min((faturado / meta) * 100, 100) : 0;
+  const pctFuturoBar   = meta > 0 ? Math.min((receitaFutura / meta) * 100, 100) : 0;
+
+  const projecaoBox = document.getElementById('metaProjecaoBox');
+
+  // só mostra se tiver meta definida
+  if (meta > 0) {
+    projecaoBox.style.display = 'block';
+
+    document.getElementById('metaProjecaoFuturo').textContent = formatCurrency(receitaFutura);
+    document.getElementById('metaProjecaoTotal').textContent  = formatCurrency(totalProjetado);
+
+    const pctEl = document.getElementById('metaProjecaoPct');
+    pctEl.textContent  = `${pctProjetado.toFixed(0)}%`;
+    pctEl.style.color  = pctProjetado >= 100 ? '#16a34a' : pctProjetado >= 80 ? '#7c3aed' : '#d97706';
+
+    // barras empilhadas
+    document.getElementById('metaProjecaoBarFat').style.width  = `${pctFaturadoBar}%`;
+    document.getElementById('metaProjecaoBarProj').style.left  = `${pctFaturadoBar}%`;
+    document.getElementById('metaProjecaoBarProj').style.width = `${Math.min(pctFuturoBar, 100 - pctFaturadoBar)}%`;
+
+    // mensagem dinâmica
+    const msgEl   = document.getElementById('metaProjecaoMsg');
+    const faltaMeta = Math.max(0, meta - totalProjetado);
+
+    if (pctProjetado >= 100) {
+      msgEl.innerHTML = `<span style="color:#16a34a;font-weight:bold;">
+        🎉 Com as reservas atuais você <u>bate a meta</u>!
+        Sobram ${formatCurrency(totalProjetado - meta)}.
+      </span>`;
+    } else if (faltaMeta > 0) {
+      msgEl.innerHTML = `<span style="color:#7c3aed;">
+        📌 Faltam <strong>${formatCurrency(faltaMeta)}</strong> em novas reservas para bater a meta.
+      </span>`;
+    } else {
+      msgEl.innerHTML = '';
+    }
+  } else {
+    projecaoBox.style.display = 'none';
+  }
+ {
   const now = new Date();
   const m   = now.getMonth();
   const y   = now.getFullYear();
