@@ -3383,19 +3383,83 @@ function renderKpiExtras() {
   document.getElementById('kpiCheckinsSemanaDetail').textContent = `próximos 7 dias`;
 }
 
-function renderMeta()   // ── PROJEÇÃO ──
-  const hoje      = todayStr();
-  const dimMes    = new Date(y, m + 1, 0).getDate();
-  const fimMes    = `${y}-${String(m+1).padStart(2,'0')}-${String(dimMes).padStart(2,'0')}`;
+function renderMeta() {
+  const now = new Date();
+  const m   = now.getMonth();
+  const y   = now.getFullYear();
+  const cfg = getMetaConfig();
 
-  // Reservas futuras do mês (check-in ainda não chegou)
+  document.getElementById('metaMesLabel').textContent = `${MONTH_NAMES[m]} / ${y}`;
+
+  if (cfg.valor > 0) {
+    document.getElementById('metaInput').value = cfg.valor;
+  }
+
+  const faturado = bookings
+    .filter(b => {
+      if (b.cancelled) return false;
+      const d = new Date(b.checkin + 'T00:00:00');
+      return d.getMonth() === m && d.getFullYear() === y;
+    })
+    .reduce((s, b) => s + Number(b.totalValue || 0), 0);
+
+  const meta  = cfg.valor || 0;
+  const falta = Math.max(0, meta - faturado);
+  const pct   = meta > 0 ? Math.min((faturado / meta) * 100, 100) : 0;
+
+  document.getElementById('metaValor').textContent    = formatCurrency(meta);
+  document.getElementById('metaFaturado').textContent = formatCurrency(faturado);
+  document.getElementById('metaFalta').textContent    = formatCurrency(falta);
+  document.getElementById('metaFalta').style.color    = falta === 0 ? '#16a34a' : '#d97706';
+
+  document.getElementById('meta50Label').textContent =
+    meta > 0 ? formatCurrency(meta * 0.5) : '50%';
+  document.getElementById('meta80Label').textContent =
+    meta > 0 ? formatCurrency(meta * 0.8) : '80%';
+
+  const bar = document.getElementById('metaProgressBar');
+  bar.style.width = `${Math.max(pct, 4)}%`;
+
+  if (pct >= 100)     bar.style.background = 'linear-gradient(90deg,#16a34a,#15803d)';
+  else if (pct >= 80) bar.style.background = 'linear-gradient(90deg,#22c55e,#16a34a)';
+  else if (pct >= 50) bar.style.background = 'linear-gradient(90deg,#f59e0b,#d97706)';
+  else                bar.style.background = 'linear-gradient(90deg,#ef4444,#dc2626)';
+
+  document.getElementById('metaProgressPct').textContent = `${pct.toFixed(0)}%`;
+
+  const badgeEl = document.getElementById('metaStatusBadge');
+  if (meta <= 0) {
+    badgeEl.innerHTML = `<span style="font-size:13px;color:var(--muted);">
+      💡 Defina sua meta mensal acima para acompanhar o progresso.
+    </span>`;
+  } else if (pct >= 100) {
+    badgeEl.innerHTML = `<span class="badge badge-paid" style="font-size:13px;padding:8px 14px;">
+      🎉 Meta atingida! Parabéns, Eliseu!
+    </span>`;
+  } else if (pct >= 80) {
+    badgeEl.innerHTML = `<span class="badge badge-active" style="font-size:13px;padding:8px 14px;">
+      💪 Quase lá! Faltam apenas ${formatCurrency(falta)}.
+    </span>`;
+  } else if (pct >= 50) {
+    badgeEl.innerHTML = `<span class="badge badge-partial" style="font-size:13px;padding:8px 14px;">
+      📈 Na metade! Continue assim. Faltam ${formatCurrency(falta)}.
+    </span>`;
+  } else {
+    badgeEl.innerHTML = `<span class="badge badge-pending" style="font-size:13px;padding:8px 14px;">
+      🚀 Início de mês — faturado ${pct.toFixed(0)}% da meta.
+    </span>`;
+  }
+
+  // ── PROJEÇÃO ──
+  const hoje   = todayStr();
+  const dimMes = new Date(y, m + 1, 0).getDate();
+
   const futuras = bookings.filter(b => {
     if (b.cancelled) return false;
     const d = new Date(b.checkin + 'T00:00:00');
     return d.getMonth() === m && d.getFullYear() === y && b.checkin > hoje;
   });
-  const receitaFutura = futuras.reduce((s, b) => s + Number(b.totalValue || 0), 0);
-
+  const receitaFutura  = futuras.reduce((s, b) => s + Number(b.totalValue || 0), 0);
   const totalProjetado = faturado + receitaFutura;
   const pctProjetado   = meta > 0 ? Math.min((totalProjetado / meta) * 100, 100) : 0;
   const pctFaturadoBar = meta > 0 ? Math.min((faturado / meta) * 100, 100) : 0;
@@ -3403,7 +3467,6 @@ function renderMeta()   // ── PROJEÇÃO ──
 
   const projecaoBox = document.getElementById('metaProjecaoBox');
 
-  // só mostra se tiver meta definida
   if (meta > 0) {
     projecaoBox.style.display = 'block';
 
@@ -3411,16 +3474,15 @@ function renderMeta()   // ── PROJEÇÃO ──
     document.getElementById('metaProjecaoTotal').textContent  = formatCurrency(totalProjetado);
 
     const pctEl = document.getElementById('metaProjecaoPct');
-    pctEl.textContent  = `${pctProjetado.toFixed(0)}%`;
-    pctEl.style.color  = pctProjetado >= 100 ? '#16a34a' : pctProjetado >= 80 ? '#7c3aed' : '#d97706';
+    pctEl.textContent = `${pctProjetado.toFixed(0)}%`;
+    pctEl.style.color = pctProjetado >= 100 ? '#16a34a' : pctProjetado >= 80 ? '#7c3aed' : '#d97706';
 
-    // barras empilhadas
     document.getElementById('metaProjecaoBarFat').style.width  = `${pctFaturadoBar}%`;
     document.getElementById('metaProjecaoBarProj').style.left  = `${pctFaturadoBar}%`;
-    document.getElementById('metaProjecaoBarProj').style.width = `${Math.min(pctFuturoBar, 100 - pctFaturadoBar)}%`;
+    document.getElementById('metaProjecaoBarProj').style.width =
+      `${Math.min(pctFuturoBar, 100 - pctFaturadoBar)}%`;
 
-    // mensagem dinâmica
-    const msgEl   = document.getElementById('metaProjecaoMsg');
+    const msgEl     = document.getElementById('metaProjecaoMsg');
     const faltaMeta = Math.max(0, meta - totalProjetado);
 
     if (pctProjetado >= 100) {
@@ -3438,6 +3500,7 @@ function renderMeta()   // ── PROJEÇÃO ──
   } else {
     projecaoBox.style.display = 'none';
   }
+}
  {
   const now = new Date();
   const m   = now.getMonth();
