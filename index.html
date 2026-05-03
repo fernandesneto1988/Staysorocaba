@@ -3501,18 +3501,7 @@ function renderMeta() {
     projecaoBox.style.display = 'none';
   }
 }
- {
-  const now = new Date();
-  const m   = now.getMonth();
-  const y   = now.getFullYear();
-  const cfg = getMetaConfig();
-
-  document.getElementById('metaMesLabel').textContent = `${MONTH_NAMES[m]} / ${y}`;
-
-  if (cfg.valor > 0) {
-    document.getElementById('metaInput').value = cfg.valor;
-  }
-
+ 
   const faturado = bookings
     .filter(b => {
       if (b.cancelled) return false;
