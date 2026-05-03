@@ -3501,62 +3501,6 @@ function renderMeta() {
     projecaoBox.style.display = 'none';
   }
 }
- 
-  const faturado = bookings
-    .filter(b => {
-      if (b.cancelled) return false;
-      const d = new Date(b.checkin + 'T00:00:00');
-      return d.getMonth() === m && d.getFullYear() === y;
-    })
-    .reduce((s, b) => s + Number(b.totalValue || 0), 0);
-
-  const meta  = cfg.valor || 0;
-  const falta = Math.max(0, meta - faturado);
-  const pct   = meta > 0 ? Math.min((faturado / meta) * 100, 100) : 0;
-
-  document.getElementById('metaValor').textContent    = formatCurrency(meta);
-  document.getElementById('metaFaturado').textContent = formatCurrency(faturado);
-  document.getElementById('metaFalta').textContent    = formatCurrency(falta);
-  document.getElementById('metaFalta').style.color    = falta === 0 ? '#16a34a' : '#d97706';
-
-  document.getElementById('meta50Label').textContent =
-    meta > 0 ? formatCurrency(meta * 0.5) : '50%';
-  document.getElementById('meta80Label').textContent =
-    meta > 0 ? formatCurrency(meta * 0.8) : '80%';
-
-  const bar = document.getElementById('metaProgressBar');
-  bar.style.width = `${Math.max(pct, 4)}%`;
-
-  if (pct >= 100)     bar.style.background = 'linear-gradient(90deg,#16a34a,#15803d)';
-  else if (pct >= 80) bar.style.background = 'linear-gradient(90deg,#22c55e,#16a34a)';
-  else if (pct >= 50) bar.style.background = 'linear-gradient(90deg,#f59e0b,#d97706)';
-  else                bar.style.background = 'linear-gradient(90deg,#ef4444,#dc2626)';
-
-  document.getElementById('metaProgressPct').textContent = `${pct.toFixed(0)}%`;
-
-  const badgeEl = document.getElementById('metaStatusBadge');
-  if (meta <= 0) {
-    badgeEl.innerHTML = `<span style="font-size:13px;color:var(--muted);">
-      💡 Defina sua meta mensal acima para acompanhar o progresso.
-    </span>`;
-  } else if (pct >= 100) {
-    badgeEl.innerHTML = `<span class="badge badge-paid" style="font-size:13px;padding:8px 14px;">
-      🎉 Meta atingida! Parabéns, Eliseu!
-    </span>`;
-  } else if (pct >= 80) {
-    badgeEl.innerHTML = `<span class="badge badge-active" style="font-size:13px;padding:8px 14px;">
-      💪 Quase lá! Faltam apenas ${formatCurrency(falta)}.
-    </span>`;
-  } else if (pct >= 50) {
-    badgeEl.innerHTML = `<span class="badge badge-partial" style="font-size:13px;padding:8px 14px;">
-      📈 Na metade! Continue assim. Faltam ${formatCurrency(falta)}.
-    </span>`;
-  } else {
-    badgeEl.innerHTML = `<span class="badge badge-pending" style="font-size:13px;padding:8px 14px;">
-      🚀 Início de mês — faturado ${pct.toFixed(0)}% da meta.
-    </span>`;
-  }
-}
 
 function renderTopAptos() {
   const now = new Date();
@@ -3639,9 +3583,9 @@ function renderDashOcupacaoChart() {
     ).length;
     dataOcup.push(((ocup / 18) * 100).toFixed(1));
 
-    if (i < 0)       colors.push('#3b82f6');
+    if (i < 0)        colors.push('#3b82f6');
     else if (i === 0) colors.push('#f59e0b');
-    else             colors.push('#22c55e');
+    else              colors.push('#22c55e');
   }
 
   if (dashOcupChart) { dashOcupChart.destroy(); dashOcupChart = null; }
@@ -3703,26 +3647,35 @@ document.getElementById('metaSaveBtn').addEventListener('click', () => {
 // ══════════════════════════════════════════
 // INIT — sempre por último
 // ══════════════════════════════════════════
-async function init(){
-    try{
-      const [bS,cS,aS]=await Promise.all([getDocs(BOOKINGS_COL),getDocs(CLEANINGS_COL),getDocs(APTS_COL)]);
-      bookings=bS.docs.map(d=>d.data());
-      cleaningRecords=cS.docs.map(d=>d.data());
-      aS.docs.forEach(d=>{apartmentData[d.id]=d.data();});
-      document.getElementById('cleanDateFilter').value=todayStr();
-      aptMapDate=todayStr();
-      await compensarPagamentosAutomaticos();
-      clearForm();renderAll();
-      isReady=true;
-      initRealtimeListeners();
-      agendarProximoEnvio();
-      document.getElementById('loadingOverlay').style.display='none';
-      setSyncStatus('saved','✅ Dados sincronizados');
-    }catch(err){
-      console.error(err);
-      document.getElementById('loadingOverlay').innerHTML=`<div style="text-align:center;padding:20px;"><p style="color:#dc2626;font-size:18px;">❌ Erro ao conectar ao Firebase</p><p style="color:#6b7280;">${err.message}</p></div>`;
-    }
+async function init() {
+  try {
+    const [bS, cS, aS] = await Promise.all([
+      getDocs(BOOKINGS_COL),
+      getDocs(CLEANINGS_COL),
+      getDocs(APTS_COL)
+    ]);
+    bookings        = bS.docs.map(d => d.data());
+    cleaningRecords = cS.docs.map(d => d.data());
+    aS.docs.forEach(d => { apartmentData[d.id] = d.data(); });
+    document.getElementById('cleanDateFilter').value = todayStr();
+    aptMapDate = todayStr();
+    await compensarPagamentosAutomaticos();
+    clearForm();
+    renderAll();
+    isReady = true;
+    initRealtimeListeners();
+    agendarProximoEnvio();
+    document.getElementById('loadingOverlay').style.display = 'none';
+    setSyncStatus('saved', '✅ Dados sincronizados');
+  } catch(err) {
+    console.error(err);
+    document.getElementById('loadingOverlay').innerHTML = `
+      <div style="text-align:center;padding:20px;">
+        <p style="color:#dc2626;font-size:18px;">❌ Erro ao conectar ao Firebase</p>
+        <p style="color:#6b7280;">${err.message}</p>
+      </div>`;
   }
+}
 
 init();
 
