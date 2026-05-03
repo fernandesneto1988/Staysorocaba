@@ -2133,15 +2133,26 @@ function renderFinCharts(faturamento, recebido, pendente, despesas, aptRows) {
 }
 
 function renderFinOcupacaoChart() {
-  if (!window.Chart) return;
-  finChartOcup = destroyChart(finChartOcup);
+  if (!window.Chart) {
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js';
+    script.onload = () => renderFinOcupacaoChart(); // ✅ tenta de novo após carregar
+    document.head.appendChild(script);
+    return;
+  }
+
+  // ✅ Destrói corretamente antes de recriar
+  if (finChartOcup) {
+    finChartOcup.destroy();
+    finChartOcup = null;
+  }
 
   // Últimos 6 meses
   const labels = [], dataReceita = [], dataOcupacao = [];
   for (let i = 5; i >= 0; i--) {
     let m = finMonth - i, y = finYear;
     if (m < 0) { m += 12; y--; }
-    const dim = new Date(y, m+1, 0).getDate();
+    const dim = new Date(y, m + 1, 0).getDate();
     const ms  = `${y}-${String(m+1).padStart(2,'0')}-01`;
     const me  = `${y}-${String(m+1).padStart(2,'0')}-${String(dim).padStart(2,'0')}`;
 
@@ -2150,7 +2161,7 @@ function renderFinOcupacaoChart() {
       const d = new Date(b.checkin + 'T00:00:00');
       return d.getMonth() === m && d.getFullYear() === y;
     });
-    const receita = rb.reduce((s,b) => s + Number(b.totalValue||0), 0);
+    const receita = rb.reduce((s, b) => s + Number(b.totalValue || 0), 0);
 
     const ro = bookings.filter(b => !b.cancelled && b.checkin <= me && b.checkout > ms);
     let diasOcup = 0;
@@ -2161,12 +2172,16 @@ function renderFinOcupacaoChart() {
     });
     const taxa = ((diasOcup / (18 * dim)) * 100).toFixed(1);
 
-    labels.push(`${MONTH_NAMES[m].substring(0,3)}/${y}`);
+    labels.push(`${MONTH_NAMES[m].substring(0, 3)}/${y}`);
     dataReceita.push(receita);
     dataOcupacao.push(Number(taxa));
   }
 
-  const ctx3 = document.getElementById('finChartOcupacao').getContext('2d');
+  // ✅ Verifica se o canvas existe antes de renderizar
+  const canvas = document.getElementById('finChartOcupacao');
+  if (!canvas) return;
+
+  const ctx3 = canvas.getContext('2d');
   finChartOcup = new Chart(ctx3, {
     type: 'bar',
     data: {
@@ -2201,7 +2216,7 @@ function renderFinOcupacaoChart() {
           callbacks: {
             label: ctx => {
               if (ctx.dataset.label.includes('Receita'))
-                return ' Receita: ' + Number(ctx.parsed.y).toLocaleString('pt-BR', { style:'currency', currency:'BRL' });
+                return ' Receita: ' + Number(ctx.parsed.y).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
               return ` Ocupação: ${ctx.parsed.y}%`;
             }
           }
@@ -2211,12 +2226,15 @@ function renderFinOcupacaoChart() {
         yReceita: {
           type: 'linear',
           position: 'left',
-          ticks: { callback: v => 'R$ ' + Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 0 }) }
+          ticks: {
+            callback: v => 'R$ ' + Number(v).toLocaleString('pt-BR', { minimumFractionDigits: 0 })
+          }
         },
         yOcupacao: {
           type: 'linear',
           position: 'right',
-          min: 0, max: 100,
+          min: 0,
+          max: 100,
           grid: { drawOnChartArea: false },
           ticks: { callback: v => v + '%' }
         }
@@ -2224,6 +2242,7 @@ function renderFinOcupacaoChart() {
     }
   });
 }
+
 // ── Exportar PDF ──
 document.getElementById('finExportPDFBtn').addEventListener('click', () => {
   window.print();
