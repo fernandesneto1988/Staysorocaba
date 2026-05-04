@@ -3004,6 +3004,9 @@ function updateGarageOptions(){
     const cv = document.getElementById('garageSpot').value || 'Sem vaga';
     const st = document.getElementById('checkin').value; // ✅ usa check-in real
     const en = document.getElementById('checkout').value;
+    console.log('bookingId:', ci);
+    console.log('checkin:', st);
+    console.log('checkout:', en);
 
     let av = getAvailableGarageSpots(st, en, ci); // ✅ exclui a própria reserva do conflito
     const eb = bookings.find(b => b.id === ci);
