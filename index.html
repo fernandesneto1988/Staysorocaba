@@ -3142,8 +3142,16 @@ function updateGarageOptions(){
     const ci=document.getElementById('checkin').value,co=document.getElementById('checkout').value;
     if(ci>=co){alert('Check-out precisa ser maior que check-in.');return;}
     const gs=document.getElementById('garageSpot').value;
-    const av=getAvailableGarageSpots(ci,co,document.getElementById('bookingId').value||null);
-    if(gs&&gs!=='Sem vaga'&&!av.includes(gs)){alert('Vaga não disponível.');updateGarageOptions();return;}
+   const currentId = document.getElementById('bookingId').value || null;
+const eb = bookings.find(b => b.id === currentId);
+const isAtiva = eb && eb.checkin <= todayStr() && eb.checkout > todayStr();
+const avStart = isAtiva ? todayStr() : ci;
+const av = getAvailableGarageSpots(avStart, co, currentId);
+if (gs && gs !== 'Sem vaga' && !av.includes(gs) && gs !== eb?.garageSpot) {
+    alert('Vaga não disponível.');
+    updateGarageOptions();
+    return;
+}
     if(findConflict(document.getElementById('bookingId').value||null)){if(!confirm('Conflito de datas. Salvar mesmo assim?'))return;}
     const wdv=document.getElementById('weeklyDayOfWeek').value;
     const src=document.getElementById('source').value;
