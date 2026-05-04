@@ -2995,11 +2995,12 @@ tbody+=`<td class="${isToday}" title="${cellTitle}" ${clickAttr}>
     document.getElementById('precSugestaoModal').style.display='none';
     if(!apartmentModalOverlay.classList.contains('show')) document.body.style.overflow='';
   }
-function getAvailableGarageSpots(start, end, currentId = null) {
+  function getAvailableGarageSpots(start, end, currentId = null) {
+    const safeId = currentId ? String(currentId) : null;
     if (!start || !end || start >= end) return [...GARAGE_SPOTS];
     return GARAGE_SPOTS.filter(spot =>
         !bookings.some(b =>
-            b.id !== currentId &&
+           String(b.id) !== safeId &&
             !b.cancelled &&
             b.garageSpot &&
             b.garageSpot !== 'Sem vaga' &&
