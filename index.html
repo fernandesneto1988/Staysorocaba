@@ -2995,9 +2995,8 @@ tbody+=`<td class="${isToday}" title="${cellTitle}" ${clickAttr}>
     document.getElementById('precSugestaoModal').style.display='none';
     if(!apartmentModalOverlay.classList.contains('show')) document.body.style.overflow='';
   }
- function getAvailableGarageSpots(start, end, currentId=null){
-    if(!start||!end||start>=end) return [...GARAGE_SPOTS];
-    const today = todayStr();
+function getAvailableGarageSpots(start, end, currentId = null) {
+    if (!start || !end || start >= end) return [...GARAGE_SPOTS];
     return GARAGE_SPOTS.filter(spot =>
         !bookings.some(b =>
             b.id !== currentId &&
@@ -3005,9 +3004,7 @@ tbody+=`<td class="${isToday}" title="${cellTitle}" ${clickAttr}>
             b.garageSpot &&
             b.garageSpot !== 'Sem vaga' &&
             b.garageSpot === spot &&
-            overlaps(start, end,
-                b.checkin < today ? today : b.checkin,
-                b.checkout)
+            overlaps(start, end, b.checkin, b.checkout)
         )
     );
 }
