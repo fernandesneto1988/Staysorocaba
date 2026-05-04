@@ -2965,7 +2965,7 @@ tbody+=`<td class="${isToday}" title="${cellTitle}" ${clickAttr}>
     const total=Number(totalValue||0);
     if(source==='Direto'||source==='WhatsApp') return{paidValue:total,paymentDate:todayStr(),paymentDesc:`Pago hoje (${formatDateBR(todayStr())}) via PIX ou Dinheiro`};
     if(source==='Airbnb'){const pd=addDays(checkin,1);return{paidValue:total,paymentDate:pd,paymentDesc:`Repasse Airbnb em ${formatDateBR(pd)} (check-in + 1 dia)`};}
-    if(source==='Booking'){const d=new Date(checkin+'T00:00:00');const pd=`${d.getMonth()===11?d.getFullYear()+1:d.getFullYear()}-${String((d.getMonth()+2>12?1:d.getMonth()+2)).padStart(2,'0')}-05`;return{paidValue:total,paymentDate:pd,paymentDesc:`Repasse Booking em ${formatDateBR(pd)} (dia 5 do mês seguinte)`};}
+    if(source==='Booking'){const d=new Date(checkin+'T00:00:00');const proximoMes=new Date(d.getFullYear(),d.getMonth()+1,5);const pd=`${proximoMes.getFullYear()}-${String(proximoMes.getMonth()+1).padStart(2,'0')}-05`;return{paidValue:total,paymentDate:pd,paymentDesc:`Repasse Booking em ${formatDateBR(pd)} (dia 5 do mês seguinte)`};}
     return{paidValue:0,paymentDate:null,paymentDesc:null};
   }
   function atualizarBoxPagamentoAutomatico(){
@@ -3355,13 +3355,12 @@ function updateGarageOptions(){
         const dataPagamento = addDays(b.checkin, 1);
         if (hoje >= dataPagamento) deveCompensar = true;
       }
-      if (b.source === 'Booking') {
-        const d = new Date(b.checkin + 'T00:00:00');
-        const mesPag = d.getMonth() === 11 ? 0 : d.getMonth() + 1;
-        const anoPag = d.getMonth() === 11 ? d.getFullYear() + 1 : d.getFullYear();
-        const dataPagamento = `${anoPag}-${String(mesPag + 1).padStart(2, '0')}-05`;
-        if (hoje >= dataPagamento) deveCompensar = true;
-      }
+    if (b.source === 'Booking') {
+  const d = new Date(b.checkin + 'T00:00:00');
+  const proximoMes = new Date(d.getFullYear(), d.getMonth() + 1, 5);
+  const dataPagamento = `${proximoMes.getFullYear()}-${String(proximoMes.getMonth() + 1).padStart(2,'0')}-05`;
+  if (hoje >= dataPagamento) deveCompensar = true;
+}
       if (b.source === 'Direto' || b.source === 'WhatsApp') {
         if (hoje >= b.checkin) deveCompensar = true;
       }
