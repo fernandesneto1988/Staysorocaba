@@ -3,6 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <!-- PWA -->
+<meta name="theme-color" content="#0f766e" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<meta name="apple-mobile-web-app-title" content="Limpeza" />
+<link rel="manifest" href="/manifest-limpeza.json" />
+<link rel="apple-touch-icon" href="/icon-limpeza-192.png" />
+
   <title>Limpeza — Aptos</title>
   <style>
     :root {
@@ -874,5 +883,15 @@
 
   init();
 </script>
+  <script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw-limpeza.js')
+        .then(() => console.log('✅ SW Limpeza registrado'))
+        .catch(err => console.error('❌ SW erro:', err));
+    });
+  }
+</script>
+
 </body>
 </html>
