@@ -1266,6 +1266,8 @@ import {
 
   const app = initializeApp(firebaseConfig);
   const db  = getFirestore(app);
+  if (window.__appInitialized) throw new Error('already initialized');
+  window.__appInitialized = true;
 
   const BOOKINGS_COL  = collection(db, 'reservas');
   const CLEANINGS_COL = collection(db, 'limpezas');
