@@ -3002,20 +3002,26 @@ tbody+=`<td class="${isToday}" title="${cellTitle}" ${clickAttr}>
 function updateGarageOptions(){
     const ci = document.getElementById('bookingId').value || null;
     const cv = document.getElementById('garageSpot').value || 'Sem vaga';
+    const st = document.getElementById('checkin').value; // ✅ usa check-in real
     const en = document.getElementById('checkout').value;
 
-    // Se está editando uma reserva, verifica disponibilidade a partir de HOJE
-    const isEditing = !!ci;
-    const st = isEditing ? todayStr() : document.getElementById('checkin').value;
-
-    let av = getAvailableGarageSpots(st, en, ci);
+    let av = getAvailableGarageSpots(st, en, ci); // ✅ exclui a própria reserva do conflito
     const eb = bookings.find(b => b.id === ci);
-    if(eb?.garageSpot && eb.garageSpot !== 'Sem vaga' && !av.includes(eb.garageSpot)) av.push(eb.garageSpot);
+    
+    // ✅ Garante que a vaga atual do hóspede sempre aparece na lista
+    if(eb?.garageSpot && eb.garageSpot !== 'Sem vaga' && !av.includes(eb.garageSpot)){
+        av.push(eb.garageSpot);
+    }
+    
     av = [...new Set(av)].sort((a, b) => a.localeCompare(b));
     const sel = document.getElementById('garageSpot');
-    sel.innerHTML = `<option value="Sem vaga">Sem vaga</option>` + av.map(s => `<option value="${s}">${s}</option>`).join('');
-    sel.value = [...sel.options].some(o => o.value === cv) ? cv : (eb?.garageSpot && [...sel.options].some(o => o.value === eb.garageSpot) ? eb.garageSpot : 'Sem vaga');
+    sel.innerHTML = `<option value="Sem vaga">Sem vaga</option>` + 
+                    av.map(s => `<option value="${s}">${s}</option>`).join('');
+    sel.value = [...sel.options].some(o => o.value === cv) ? cv 
+              : (eb?.garageSpot && [...sel.options].some(o => o.value === eb.garageSpot) 
+                ? eb.garageSpot : 'Sem vaga');
 }
+
   function findConflict(currentId=null){
     const apt=document.getElementById('apartment').value.trim().toLowerCase();
     const st=document.getElementById('checkin').value;
