@@ -3017,7 +3017,7 @@ function updateGarageOptions(){
     // ✅ Se estiver editando uma reserva em andamento, usa hoje como início
     const stForm = document.getElementById('checkin').value;
     const enForm = document.getElementById('checkout').value;
-    const eb = bookings.find(b => b.id === ci);
+    const eb = bookings.find(b => String(b.id) === String(ci));
     
     const isAtiva = eb && eb.checkin <= today && eb.checkout > today;
     const st = isAtiva ? today : stForm;
