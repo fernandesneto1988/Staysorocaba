@@ -2999,19 +2999,23 @@ tbody+=`<td class="${isToday}" title="${cellTitle}" ${clickAttr}>
     if(!start||!end||start>=end) return[...GARAGE_SPOTS];
     return GARAGE_SPOTS.filter(spot=>!bookings.some(b=>b.id!==currentId&&!b.cancelled&&b.garageSpot&&b.garageSpot!=='Sem vaga'&&b.garageSpot===spot&&overlaps(start,end,b.checkin,b.checkout)));
   }
-  function updateGarageOptions(){
-    const ci=document.getElementById('bookingId').value||null;
-    const cv=document.getElementById('garageSpot').value||'Sem vaga';
-    const st=document.getElementById('checkin').value;
-    const en=document.getElementById('checkout').value;
-    let av=getAvailableGarageSpots(st,en,ci);
-    const eb=bookings.find(b=>b.id===ci);
-    if(eb?.garageSpot&&eb.garageSpot!=='Sem vaga'&&!av.includes(eb.garageSpot)) av.push(eb.garageSpot);
-    av=[...new Set(av)].sort((a,b)=>a.localeCompare(b));
-    const sel=document.getElementById('garageSpot');
-    sel.innerHTML=`<option value="Sem vaga">Sem vaga</option>`+av.map(s=>`<option value="${s}">${s}</option>`).join('');
-    sel.value=[...sel.options].some(o=>o.value===cv)?cv:(eb?.garageSpot&&[...sel.options].some(o=>o.value===eb.garageSpot)?eb.garageSpot:'Sem vaga');
-  }
+function updateGarageOptions(){
+    const ci = document.getElementById('bookingId').value || null;
+    const cv = document.getElementById('garageSpot').value || 'Sem vaga';
+    const en = document.getElementById('checkout').value;
+
+    // Se está editando uma reserva, verifica disponibilidade a partir de HOJE
+    const isEditing = !!ci;
+    const st = isEditing ? todayStr() : document.getElementById('checkin').value;
+
+    let av = getAvailableGarageSpots(st, en, ci);
+    const eb = bookings.find(b => b.id === ci);
+    if(eb?.garageSpot && eb.garageSpot !== 'Sem vaga' && !av.includes(eb.garageSpot)) av.push(eb.garageSpot);
+    av = [...new Set(av)].sort((a, b) => a.localeCompare(b));
+    const sel = document.getElementById('garageSpot');
+    sel.innerHTML = `<option value="Sem vaga">Sem vaga</option>` + av.map(s => `<option value="${s}">${s}</option>`).join('');
+    sel.value = [...sel.options].some(o => o.value === cv) ? cv : (eb?.garageSpot && [...sel.options].some(o => o.value === eb.garageSpot) ? eb.garageSpot : 'Sem vaga');
+}
   function findConflict(currentId=null){
     const apt=document.getElementById('apartment').value.trim().toLowerCase();
     const st=document.getElementById('checkin').value;
