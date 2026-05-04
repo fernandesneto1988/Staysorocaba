@@ -3002,14 +3002,18 @@ tbody+=`<td class="${isToday}" title="${cellTitle}" ${clickAttr}>
 function updateGarageOptions(){
     const ci = document.getElementById('bookingId').value || null;
     const cv = document.getElementById('garageSpot').value || 'Sem vaga';
-    const st = document.getElementById('checkin').value; // ✅ usa check-in real
-    const en = document.getElementById('checkout').value;
-    console.log('bookingId:', ci);
-    console.log('checkin:', st);
-    console.log('checkout:', en);
-
-    let av = getAvailableGarageSpots(st, en, ci); // ✅ exclui a própria reserva do conflito
+    const today = todayStr();
+    
+    // ✅ Se estiver editando uma reserva em andamento, usa hoje como início
+    const stForm = document.getElementById('checkin').value;
+    const enForm = document.getElementById('checkout').value;
     const eb = bookings.find(b => b.id === ci);
+    
+    const isAtiva = eb && eb.checkin <= today && eb.checkout > today;
+    const st = isAtiva ? today : stForm;
+    const en = enForm;
+
+    let av = getAvailableGarageSpots(st, en, ci);
     
     // ✅ Garante que a vaga atual do hóspede sempre aparece na lista
     if(eb?.garageSpot && eb.garageSpot !== 'Sem vaga' && !av.includes(eb.garageSpot)){
