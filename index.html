@@ -2476,7 +2476,7 @@ document.getElementById('finExportCSVBtn').addEventListener('click', () => {
     const btn=document.getElementById('sendMonthlyReportBtn');btn.textContent='⏳ Enviando...';btn.disabled=true;
     const ok=await enviarRelatorioMensal();
     btn.textContent=ok?'✅ Enviado!':'❌ Erro';btn.style.background=ok?'#16a34a':'#dc2626';
-    setTimeout(()=>{btn.textContent='📊 Testar relatório mensal';btn.style.background='#7c3aed';btn.disabled=false;},3500);
+    setTimeout(()=>{btn.textContent='📊 Relatório Mensal';btn.style.background='#7c3aed';btn.disabled=false;},3500);
   });
   function renderAlerts(){
     const today=todayStr();
