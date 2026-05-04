@@ -2652,7 +2652,7 @@ document.getElementById('finExportCSVBtn').addEventListener('click', () => {
         else if(stayBooks.length){cellClass='mc-stay';cellText=stayBooks[0].guestName.split(' ')[0];cellTitle=`Hóspede: ${stayBooks[0].guestName}`;}
         else if(wc.waiting){cellClass='mc-waiting';cellText='🧹';cellTitle=`Aguardando limpeza (saída de ${wc.booking.guestName} em ${formatDateBR(wc.booking.checkout)})`;}
         else{cellClass='mc-vacant';cellTitle='Disponível';}
-        const hasBooking = checkinBooks.length || checkoutBooks.length || stayBooks.length;
+        const hasBooking = checkinBooks.length || checkoutBooks.length || stayBooks.length || wc;
 const clickAttr  = hasBooking
   ? `onclick="openApartmentModal('${apt}')" style="cursor:pointer;"`
   : `style="cursor:default;"`;
