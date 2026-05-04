@@ -187,7 +187,17 @@
     .badge-checkout { background: var(--danger-bg); color: #991b1b; }
     .badge-weekly   { background: var(--teal-bg);   color: #115e59; }
     .badge-overdue  { background: #fff7ed; color: #c2410c; border: 1px solid #fb923c; }
-    .badge-done-lbl { font-size: 13px; font-weight: bold; color: #166534; }
+    .badge-done-lbl {
+      font-size: 12px;
+      font-weight: bold;
+      color: #166534;
+      background: #dcfce7;
+      border: 1px solid #86efac;
+      border-radius: 8px;
+      padding: 4px 8px;
+      line-height: 1.4;
+      text-align: center;
+    }
 
     .clean-notes {
       font-size: 12px;
@@ -200,6 +210,34 @@
       text-align: left;
       line-height: 1.4;
     }
+
+    /* MODAL DE CONFIRMAÇÃO */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.45);
+      z-index: 9000;
+      display: flex; align-items: center; justify-content: center;
+      padding: 20px;
+    }
+    .modal-box {
+      background: white;
+      border-radius: 20px;
+      padding: 28px 24px;
+      max-width: 340px;
+      width: 100%;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+      text-align: center;
+    }
+    .modal-box .modal-icon { font-size: 44px; margin-bottom: 10px; }
+    .modal-box h3 { font-size: 19px; font-weight: bold; margin-bottom: 8px; }
+    .modal-box p  { font-size: 15px; color: var(--muted); margin-bottom: 22px; line-height: 1.5; }
+    .modal-btns   { display: flex; gap: 12px; }
+    .modal-btns button {
+      flex: 1; padding: 13px; border-radius: 12px;
+      font-size: 16px; font-weight: bold; cursor: pointer; border: none;
+    }
+    .btn-cancel  { background: #f1f5f9; color: var(--text); }
+    .btn-confirm { background: var(--danger); color: white; }
 
     /* MAPA */
     .map-section {
@@ -345,6 +383,7 @@
 
 <div id="toast"></div>
 <div id="syncStatus" class="saved">✅ Sincronizado</div>
+<div id="modalContainer"></div>
 
 <div class="header">
   <h1>🧹 Limpeza do Dia</h1>
@@ -409,7 +448,14 @@
     return `${d}/${m}/${y}`;
   }
 
-  // ── getWeeklyDates com suporte a weeklyDayOfWeek ─────────────────────────
+  // ── Formata horário de conclusão ──────────────────────────────────────────
+  function formatTime(isoString) {
+    if (!isoString) return '';
+    const d = new Date(isoString);
+    return d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+  }
+
+  // ── getWeeklyDates ────────────────────────────────────────────────────────
   function getWeeklyDates(b) {
     if (b.cancelled || !b.checkin || !b.checkout) return [];
 
@@ -438,18 +484,22 @@
   }
 
   function cleanKey(bookingId, type, date) { return `${bookingId}__${type}__${date}`; }
+
+  function getRecord(bookingId, type, date) {
+    return cleaningRecords.find(r => r.key === cleanKey(bookingId, type, date)) || null;
+  }
   function isDone(bookingId, type, date) {
-    return cleaningRecords.some(r => r.key === cleanKey(bookingId, type, date) && r.done);
+    const r = getRecord(bookingId, type, date);
+    return r ? r.done : false;
   }
 
-  // ── Status do apto no mapa ────────────────────────────────────────────────
+  // ── FIX: isWaitingClean sem restrição de >= today ─────────────────────────
+  // Agora considera qualquer checkout anterior à refDate, não apenas >= today
   function isWaitingClean(aptName, refDate) {
-    const today = todayStr();
     const pastCheckouts = bookings.filter(b =>
       !b.cancelled &&
       b.apartment === aptName &&
-      b.checkout <= refDate &&
-      b.checkout >= today  // só considera a partir de hoje pra frente no histórico
+      b.checkout <= refDate
     );
     if (!pastCheckouts.length) return { waiting: false };
     pastCheckouts.sort((a, b) => b.checkout.localeCompare(a.checkout));
@@ -459,7 +509,6 @@
   }
 
   function getAptStatus(name, ref) {
-    const today   = todayStr();
     const apts    = bookings.filter(b => b.apartment === name && !b.cancelled);
     const active  = apts.find(b => b.checkin < ref && b.checkout > ref);
     const ciToday = apts.find(b => b.checkin  === ref);
@@ -471,6 +520,7 @@
       return { status: 'waiting', label: '🧹 Aguardando', booking: wc.booking };
     }
 
+    const today  = todayStr();
     const hora   = new Date().getHours() + new Date().getMinutes() / 60;
     const apos12 = (ref === today) && hora >= 12;
 
@@ -490,106 +540,135 @@
   // ── Salvar limpeza ────────────────────────────────────────────────────────
   async function markCleaning(bookingId, type, date, done) {
     setSyncStatus('syncing', '🔄 Salvando...');
-    const key    = cleanKey(bookingId, type, date);
-    const record = { key, bookingId, type, date, done, updatedAt: new Date().toISOString() };
-    const idx    = cleaningRecords.findIndex(r => r.key === key);
+    const key = cleanKey(bookingId, type, date);
+
+    // Mantém doneAt existente se apenas desmarcando
+    const existing = getRecord(bookingId, type, date);
+    const doneAt   = done ? new Date().toISOString() : null;
+
+    const record = {
+      key,
+      bookingId,
+      type,
+      date,
+      done,
+      doneAt,
+      updatedAt: new Date().toISOString()
+    };
+
+    const idx = cleaningRecords.findIndex(r => r.key === key);
     if (idx >= 0) cleaningRecords[idx] = record; else cleaningRecords.push(record);
+
     try {
       await setDoc(doc(db, 'limpezas', key), record);
       setSyncStatus('saved', '✅ Sincronizado');
-      showToast(done ? '✅ Marcado como feito!' : '↩️ Desmarcado');
+      showToast(done ? '✅ Limpeza concluída!' : '↩️ Desmarcado');
     } catch(err) {
       setSyncStatus('error', '❌ Erro ao salvar');
     }
     render();
   }
 
-  window.handleCheck = (id, type, date, wasDone) => markCleaning(id, type, date, !wasDone);
+  // ── handleCheck: confirmação antes de desmarcar ───────────────────────────
+  window.handleCheck = (id, type, date, wasDone) => {
+    if (wasDone) {
+      // Pede confirmação antes de desmarcar
+      showConfirmModal(
+        '↩️ Desmarcar limpeza?',
+        'Tem certeza que deseja desmarcar esta limpeza como pendente?',
+        () => markCleaning(id, type, date, false)
+      );
+    } else {
+      markCleaning(id, type, date, true);
+    }
+  };
 
-  // ── Montar lista de limpezas ──────────────────────────────────────────────
-  // A chave da lógica: além das limpezas DO dia, inclui também
-  // limpezas de dias ANTERIORES que ainda não foram concluídas
+  // ── Modal de confirmação ──────────────────────────────────────────────────
+  function showConfirmModal(title, message, onConfirm) {
+    const container = document.getElementById('modalContainer');
+    container.innerHTML = `
+      <div class="modal-overlay" id="confirmModal">
+        <div class="modal-box">
+          <div class="modal-icon">⚠️</div>
+          <h3>${title}</h3>
+          <p>${message}</p>
+          <div class="modal-btns">
+            <button class="btn-cancel"  onclick="closeModal()">Cancelar</button>
+            <button class="btn-confirm" onclick="confirmModal()">Desmarcar</button>
+          </div>
+        </div>
+      </div>`;
+
+    window._modalConfirmCallback = onConfirm;
+  }
+
+  window.closeModal = () => {
+    document.getElementById('modalContainer').innerHTML = '';
+    window._modalConfirmCallback = null;
+  };
+  window.confirmModal = () => {
+    const cb = window._modalConfirmCallback;
+    window.closeModal();
+    if (cb) cb();
+  };
+
+  // ── FIX: buildCleanItems sem limitação de >= today para atrasados ─────────
+  // Atrasados aparecem sem limite de data mínima
   function buildCleanItems(ref) {
-    const today = todayStr();
     const items = [];
-    const seen  = new Set(); // evita duplicatas
+    const seen  = new Set();
 
     bookings.forEach(b => {
       if (b.cancelled) return;
 
-      // ── Limpezas de checkout ──────────────────────────────────────
-      // 1. Checkout que é exatamente neste dia
+      // ── Checkouts ────────────────────────────────────────────────
       if (b.checkout === ref) {
         const key = `${b.id}__checkout__${b.checkout}`;
         if (!seen.has(key)) {
           seen.add(key);
-          items.push({
-            booking:  b,
-            type:     'checkout',
-            date:     b.checkout,
-            done:     isDone(b.id, 'checkout', b.checkout),
-            overdue:  false
-          });
+          items.push({ booking: b, type: 'checkout', date: b.checkout,
+                       done: isDone(b.id, 'checkout', b.checkout), overdue: false });
         }
       }
 
-      // 2. Checkout PASSADO (antes de ref) e ainda não feito
-      //    → aparece como "atrasado" na lista do dia atual e dos próximos
-      if (b.checkout < ref && b.checkout >= today) {
+      // Checkout atrasado: qualquer checkout ANTES de ref ainda não feito
+      if (b.checkout < ref) {
         if (!isDone(b.id, 'checkout', b.checkout)) {
           const key = `${b.id}__checkout__${b.checkout}`;
           if (!seen.has(key)) {
             seen.add(key);
-            items.push({
-              booking:     b,
-              type:        'checkout',
-              date:        b.checkout,       // data original do checkout
-              done:        false,
-              overdue:     true,
-              overdueFrom: b.checkout
-            });
+            items.push({ booking: b, type: 'checkout', date: b.checkout,
+                         done: false, overdue: true, overdueFrom: b.checkout });
           }
         }
       }
 
       // ── Faxinas semanais ──────────────────────────────────────────
       getWeeklyDates(b).forEach(d => {
-        // 1. Faxina exatamente neste dia
         if (d === ref) {
           const key = `${b.id}__weekly__${d}`;
           if (!seen.has(key)) {
             seen.add(key);
-            items.push({
-              booking: b,
-              type:    'weekly',
-              date:    d,
-              done:    isDone(b.id, 'weekly', d),
-              overdue: false
-            });
+            items.push({ booking: b, type: 'weekly', date: d,
+                         done: isDone(b.id, 'weekly', d), overdue: false });
           }
         }
 
-        // 2. Faxina de dia ANTERIOR ainda não feita
-        if (d < ref && d >= today) {
+        // Faxina atrasada: qualquer data ANTES de ref ainda não feita
+        if (d < ref) {
           if (!isDone(b.id, 'weekly', d)) {
             const key = `${b.id}__weekly__${d}`;
             if (!seen.has(key)) {
               seen.add(key);
-              items.push({
-                booking:     b,
-                type:        'weekly',
-                date:        d,
-                done:        false,
-                overdue:     true,
-                overdueFrom: d
-              });
+              items.push({ booking: b, type: 'weekly', date: d,
+                           done: false, overdue: true, overdueFrom: d });
             }
           }
         }
       });
     });
 
-    // Ordena: atrasados primeiro → depois por apto
+    // Ordena: pendentes → atrasados primeiro → por apto
     return items.sort((a, b) => {
       if (a.done !== b.done) return a.done ? 1 : -1;
       if (a.overdue !== b.overdue) return a.overdue ? -1 : 1;
@@ -628,7 +707,6 @@
       ${overdueCount > 0 ? `<span class="summary-chip chip-overdue">⚠️ ${overdueCount} atrasada${overdueCount !== 1 ? 's' : ''}</span>` : ''}
       <span class="summary-chip chip-total">📋 ${items.length} total</span>`;
 
-    // Separa por tipo e atraso
     const overdueItems  = items.filter(i => i.overdue && !i.done);
     const checkoutItems = items.filter(i => !i.overdue && i.type === 'checkout');
     const weeklyItems   = items.filter(i => !i.overdue && i.type === 'weekly');
@@ -643,57 +721,37 @@
           <p>Sem limpezas para este dia!</p>
         </div>`;
     } else {
-
-      // Atrasadas primeiro — destaque em laranja
       if (overdueItems.length) {
         cleanHtml += `
-          <div class="section-title">
-            ⚠️ Atrasadas — limpar agora!
+          <div class="section-title">⚠️ Atrasadas — limpar agora!
             <span class="section-count">${overdueItems.length}</span>
           </div>
-          <div class="clean-grid">
-            ${overdueItems.map(renderCleanCard).join('')}
-          </div>`;
+          <div class="clean-grid">${overdueItems.map(renderCleanCard).join('')}</div>`;
       }
-
-      // Checkout do dia
       if (checkoutItems.length) {
         cleanHtml += `
-          <div class="section-title">
-            🚪 Limpeza de Saída
+          <div class="section-title">🚪 Limpeza de Saída
             <span class="section-count">${checkoutItems.length}</span>
           </div>
-          <div class="clean-grid">
-            ${checkoutItems.map(renderCleanCard).join('')}
-          </div>`;
+          <div class="clean-grid">${checkoutItems.map(renderCleanCard).join('')}</div>`;
       }
-
-      // Faxina semanal do dia
       if (weeklyItems.length) {
         cleanHtml += `
-          <div class="section-title">
-            🧹 Faxina Semanal
+          <div class="section-title">🧹 Faxina Semanal
             <span class="section-count">${weeklyItems.length}</span>
           </div>
-          <div class="clean-grid">
-            ${weeklyItems.map(renderCleanCard).join('')}
-          </div>`;
+          <div class="clean-grid">${weeklyItems.map(renderCleanCard).join('')}</div>`;
       }
-
-      // Concluídas por último
       if (doneItems.length) {
         cleanHtml += `
-          <div class="section-title">
-            ✅ Concluídas
+          <div class="section-title">✅ Concluídas
             <span class="section-count">${doneItems.length}</span>
           </div>
-          <div class="clean-grid">
-            ${doneItems.map(renderCleanCard).join('')}
-          </div>`;
+          <div class="clean-grid">${doneItems.map(renderCleanCard).join('')}</div>`;
       }
     }
 
-    // Mapa de aptos
+    // Mapa
     const mapCards = FIXED_APARTMENTS.map(name => {
       const { status, label, booking } = getAptStatus(name, ref);
       const guestFirst = booking ? booking.guestName.split(' ')[0] : '';
@@ -722,22 +780,29 @@
     document.getElementById('content').innerHTML = cleanHtml + mapHtml;
   }
 
+  // ── Renderiza card de limpeza ─────────────────────────────────────────────
   function renderCleanCard(item) {
     const b = item.booking;
 
     let cardClass = 'pending-checkout';
-    if (item.done)          cardClass = 'done';
-    else if (item.overdue)  cardClass = 'overdue';
+    if (item.done)                   cardClass = 'done';
+    else if (item.overdue)           cardClass = 'overdue';
     else if (item.type === 'weekly') cardClass = 'pending-weekly';
 
     const notesHtml = b.notes
       ? `<div class="clean-notes">📝 ${b.notes}</div>`
       : '';
 
-    // Etiqueta de status
+    // Badge de status
     let badgeHtml = '';
     if (item.done) {
-      badgeHtml = `<span class="badge-done-lbl">✅ Feito</span>`;
+      // Busca o horário de conclusão
+      const rec   = getRecord(b.id, item.type, item.date);
+      const time  = rec && rec.doneAt ? formatTime(rec.doneAt) : '';
+      badgeHtml = `
+        <span class="badge-done-lbl">
+          ✅ Feito${time ? `<br>🕐 ${time}` : ''}
+        </span>`;
     } else if (item.overdue) {
       badgeHtml = `<span class="clean-type-badge badge-overdue">⚠️ Era ${formatDateBR(item.overdueFrom)}</span>`;
     } else {
