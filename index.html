@@ -3261,9 +3261,9 @@ function updateGarageOptions(){
     renderAlerts();renderApartmentsMap();renderParkingMap();renderTable();
     renderDashboardKpis();
     if(document.getElementById('tab-mapamensal').classList.contains('active')) renderMonthlyMap();
-    if(document.getElementById('tab-financeiro').classList.contains('active')){
-        setTimeout(()=>renderFinanceiro(), 50);
-    }
+   if(document.getElementById('tab-financeiro').classList.contains('active')){
+    renderFinanceiro();
+}
 }
   document.getElementById('phone').addEventListener('input',function(){this.value=formatPhone(this.value);});
   document.getElementById('source').addEventListener('change',atualizarBoxPagamentoAutomatico);
