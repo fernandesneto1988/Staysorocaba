@@ -354,6 +354,238 @@
       .modal{max-height:92vh;border-radius:16px}
       .modal-header,.modal-body{padding:16px}
     }
+/* ── HÓSPEDES FREQUENTES ── */
+.hospede-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+.hospede-card{background:white;border:1px solid var(--border);border-radius:16px;padding:16px;box-shadow:var(--shadow);transition:transform .15s,box-shadow .15s;}
+.hospede-card:hover{transform:translateY(-2px);box-shadow:0 14px 34px rgba(0,0,0,.10);}
+.hospede-card.vip{border-color:#f59e0b;border-width:2px;background:#fffbeb;}
+.hospede-avatar{width:48px;height:48px;border-radius:50%;background:linear-gradient(135deg,#2563eb,#7c3aed);display:flex;align-items:center;justify-content:center;font-size:20px;color:white;font-weight:bold;flex-shrink:0;}
+.hospede-top{display:flex;gap:12px;align-items:flex-start;margin-bottom:12px;}
+.hospede-info{flex:1;min-width:0;}
+.hospede-info h4{margin:0 0 4px 0;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.hospede-tags{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;}
+.hospede-tag{font-size:11px;padding:3px 8px;border-radius:999px;font-weight:bold;border:1px solid transparent;}
+.tag-vip{background:#fef3c7;color:#92400e;border-color:#fde68a;}
+.tag-corporativo{background:#dbeafe;color:#1d4ed8;border-color:#93c5fd;}
+.tag-familia{background:#dcfce7;color:#166534;border-color:#86efac;}
+.tag-problematico{background:#fee2e2;color:#991b1b;border-color:#fca5a5;}
+.tag-fiel{background:#f3e8ff;color:#7e22ce;border-color:#d8b4fe;}
+.tag-novo{background:#ccfbf1;color:#115e59;border-color:#99f6e4;}
+.hospede-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px;}
+.hospede-stat{background:#f8fafc;border:1px solid var(--border);border-radius:10px;padding:8px;text-align:center;}
+.hospede-stat small{display:block;font-size:10px;color:var(--muted);margin-bottom:2px;}
+.hospede-stat strong{font-size:13px;}
+.hospede-actions{display:flex;gap:6px;flex-wrap:wrap;}
+.hospede-actions button,.hospede-actions a{width:auto;padding:6px 10px;font-size:12px;border-radius:8px;font-weight:bold;}
+.hosp-modal{width:min(600px,100%);}
+.hosp-form-tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px;}
+.hosp-form-tags label{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;border:1px solid var(--border);cursor:pointer;font-size:13px;background:#f8fafc;}
+.hosp-form-tags label:hover{background:#eef2ff;}
+.hosp-form-tags input[type=checkbox]{width:auto;cursor:pointer;}
+.hosp-summary-bar{display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;}
+.hosp-filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;align-items:center;}
+.hosp-filters input,.hosp-filters select{width:auto;min-width:180px;}
+.hosp-empty{text-align:center;color:var(--muted);padding:40px;font-size:14px;grid-column:1/-1;}
+@media(max-width:1120px){.hospede-grid{grid-template-columns:1fr 1fr;}}
+@media(max-width:760px){.hospede-grid{grid-template-columns:1fr;}}
+
+    /* ══════════════════════════════════════════
+   HÓSPEDES FREQUENTES
+   ══════════════════════════════════════════ */
+
+/* Summary Bar */
+.hosp-summary-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+/* Filtros */
+.hosp-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 18px;
+  align-items: center;
+}
+.hosp-filters input,
+.hosp-filters select {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  font-size: 13px;
+  background: #fff;
+  flex: 1;
+  min-width: 140px;
+}
+.hosp-filters .btn-secondary {
+  white-space: nowrap;
+}
+
+/* Grid de cards */
+.hospede-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+}
+
+/* Card */
+.hospede-card {
+  background: #fff;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: box-shadow 0.2s;
+}
+.hospede-card:hover {
+  box-shadow: 0 4px 18px rgba(0,0,0,0.09);
+}
+.hospede-card.vip {
+  border-color: #f59e0b;
+  background: linear-gradient(135deg, #fffbeb 0%, #fff 100%);
+}
+
+/* Topo do card */
+.hospede-top {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+.hospede-avatar {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: var(--primary);
+  color: #fff;
+  font-weight: 700;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.hospede-info {
+  flex: 1;
+  min-width: 0;
+}
+.hospede-info h4 {
+  margin: 0 0 2px;
+  font-size: 15px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Tags */
+.hospede-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 5px;
+}
+.hospede-tag {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-weight: 600;
+}
+.tag-vip          { background:#fef3c7; color:#92400e; }
+.tag-corporativo  { background:#dbeafe; color:#1e40af; }
+.tag-familia      { background:#fce7f3; color:#9d174d; }
+.tag-fiel         { background:#ede9fe; color:#5b21b6; }
+.tag-novo         { background:#d1fae5; color:#065f46; }
+.tag-problematico { background:#fee2e2; color:#991b1b; }
+
+/* Stats */
+.hospede-stats {
+  display: flex;
+  gap: 8px;
+  background: #f8fafc;
+  border-radius: 10px;
+  padding: 10px;
+}
+.hospede-stat {
+  flex: 1;
+  text-align: center;
+}
+.hospede-stat small {
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+  margin-bottom: 2px;
+}
+.hospede-stat strong {
+  font-size: 15px;
+  color: var(--text);
+}
+
+/* Ações */
+.hospede-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.hospede-actions .btn-secondary,
+.hospede-actions .btn-primary,
+.hospede-actions .btn-danger {
+  font-size: 12px;
+  padding: 6px 10px;
+}
+.wa-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: #25d366;
+  color: #fff;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.2s;
+}
+.wa-btn:hover { background: #1ebe5d; }
+
+/* Empty state */
+.hosp-empty {
+  grid-column: 1/-1;
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--muted);
+}
+
+/* Modal hóspede */
+.hosp-modal {
+  max-width: 580px;
+}
+.hosp-form-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 6px;
+}
+.hosp-form-tags label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 5px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: #f8fafc;
+  transition: background 0.15s;
+}
+.hosp-form-tags label:hover {
+  background: #e0e7ff;
+}
+    
   </style>
 </head>
 <body>
@@ -416,6 +648,7 @@
     <button class="tab-btn" onclick="switchTab('financeiro');closeMobileMenu()">💰 Financeiro</button>
     <button class="tab-btn" onclick="switchTab('precificacao');closeMobileMenu()">💲 Precificação</button>
     <button class="tab-btn" onclick="switchTab('relatorio');closeMobileMenu()">📈 Relatório</button>
+    <button class="tab-btn" onclick="switchTab('hospedes');closeMobileMenu()">👥 Hóspedes</button>
   </div>
 
   <div class="tabs">
@@ -426,6 +659,7 @@
     <button class="tab-btn" onclick="switchTab('financeiro')">💰 Financeiro</button>
     <button class="tab-btn" onclick="switchTab('precificacao')">💲 Precificação</button>
     <button class="tab-btn" onclick="switchTab('relatorio')">📈 Relatório</button>
+    <button class="tab-btn" onclick="switchTab('hospedes')">👥 Hóspedes</button>
   </div>
 
  <!-- DASHBOARD -->
@@ -1082,6 +1316,129 @@
       </div>
     </div>
   </div>
+
+  <!-- HÓSPEDES FREQUENTES -->
+<div id="tab-hospedes" class="tab-panel">
+  <div class="card">
+    <div class="section-title">
+      <h2>👥 Hóspedes Frequentes</h2>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <button type="button" class="btn-teal" id="hospedeAutoImportBtn" style="width:auto;padding:10px 16px;">
+          🔄 Importar das Reservas
+        </button>
+        <button type="button" class="btn-primary" id="openNovoHospedeBtn" style="width:auto;padding:10px 16px;">
+          + Novo Hóspede
+        </button>
+      </div>
+    </div>
+
+    <div class="info-box">
+      📌 Cadastre hóspedes frequentes para acesso rápido. Use <strong>Importar das Reservas</strong> para capturar automaticamente quem já ficou 2+ vezes.
+    </div>
+
+    <!-- FILTROS -->
+    <div class="hosp-filters">
+      <input type="text" id="hospedeSearch" placeholder="🔍 Buscar por nome, telefone..." style="min-width:240px;" />
+      <select id="hospedeTagFilter">
+        <option value="">Todas as tags</option>
+        <option value="vip">⭐ VIP</option>
+        <option value="corporativo">💼 Corporativo</option>
+        <option value="familia">👨‍👩‍👧 Família</option>
+        <option value="fiel">💜 Fiel</option>
+        <option value="novo">🆕 Novo</option>
+        <option value="problematico">⚠️ Problemático</option>
+      </select>
+      <select id="hospedeOrderFilter">
+        <option value="estadias">Mais estadias</option>
+        <option value="receita">Maior receita</option>
+        <option value="recente">Mais recente</option>
+        <option value="nome">A–Z</option>
+      </select>
+      <button type="button" class="btn-secondary" style="width:auto;padding:10px 14px;" onclick="resetHospedeFilters()">Limpar</button>
+    </div>
+
+    <!-- SUMMARY BAR -->
+    <div class="hosp-summary-bar" id="hospedeSummaryBar"></div>
+
+    <!-- GRID -->
+    <div class="hospede-grid" id="hospedeGrid"></div>
+  </div>
+</div>
+
+  <!-- MODAL: HÓSPEDE -->
+<div id="hospedeModalOverlay" class="modal-overlay">
+  <div class="modal form-modal hosp-modal" role="dialog" aria-modal="true">
+    <div class="modal-header">
+      <div class="modal-title">
+        <h3 id="hospedeModalTitle">Novo Hóspede</h3>
+        <span class="muted">Cadastro de hóspede frequente</span>
+      </div>
+      <button type="button" class="modal-close" id="closeHospedeModal">×</button>
+    </div>
+    <div class="modal-body">
+      <form id="hospedeForm">
+        <input type="hidden" id="hospedeId" />
+        <div class="row">
+          <div class="form-group">
+            <label>👤 Nome completo</label>
+            <input type="text" id="hospedeNome" required placeholder="Ex: João Silva" />
+          </div>
+          <div class="form-group">
+            <label>📱 WhatsApp</label>
+            <input type="text" id="hospedeTelefone" placeholder="(11) 99999-9999" maxlength="15" />
+          </div>
+        </div>
+        <div class="row">
+          <div class="form-group">
+            <label>📧 E-mail</label>
+            <input type="email" id="hospedeEmail" placeholder="email@exemplo.com" />
+          </div>
+          <div class="form-group">
+            <label>🌍 Cidade / Estado</label>
+            <input type="text" id="hospedeCidade" placeholder="Ex: São Paulo / SP" />
+          </div>
+        </div>
+        <div class="row">
+          <div class="form-group">
+            <label>🏠 Apto preferido</label>
+            <select id="hospedeAptoPref">
+              <option value="">Sem preferência</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>⭐ Classificação</label>
+            <select id="hospedeRating">
+              <option value="5">⭐⭐⭐⭐⭐ Excelente</option>
+              <option value="4">⭐⭐⭐⭐ Ótimo</option>
+              <option value="3">⭐⭐⭐ Bom</option>
+              <option value="2">⭐⭐ Regular</option>
+              <option value="1">⭐ Ruim</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>🏷️ Tags</label>
+          <div class="hosp-form-tags">
+            <label><input type="checkbox" name="hospedeTag" value="vip" /> ⭐ VIP</label>
+            <label><input type="checkbox" name="hospedeTag" value="corporativo" /> 💼 Corporativo</label>
+            <label><input type="checkbox" name="hospedeTag" value="familia" /> 👨‍👩‍👧 Família</label>
+            <label><input type="checkbox" name="hospedeTag" value="fiel" /> 💜 Fiel</label>
+            <label><input type="checkbox" name="hospedeTag" value="novo" /> 🆕 Novo</label>
+            <label><input type="checkbox" name="hospedeTag" value="problematico" /> ⚠️ Problemático</label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>📝 Observações</label>
+          <textarea id="hospedeObs" placeholder="Ex: prefere andar alto, sempre paga em dia, traz cachorro..."></textarea>
+        </div>
+        <div class="actions">
+          <button type="submit" class="btn-primary">💾 Salvar Hóspede</button>
+          <button type="button" class="btn-secondary" id="cancelHospedeBtn">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
 
   <!-- RELATÓRIO -->
   <div id="tab-relatorio" class="tab-panel">
@@ -3731,7 +4088,396 @@ async function init() {
       </div>`;
   }
 }
+// ══════════════════════════════════════════
+// HÓSPEDES FREQUENTES
+// ══════════════════════════════════════════
 
+const HOSPEDES_COL = collection(db, 'hospedes');
+let hospedes = [];
+
+// ── Firestore ──
+async function saveHospedeToFirebase(h) {
+  setSyncStatus('syncing','🔄 Sincronizando...');
+  try {
+    await setDoc(doc(db,'hospedes',h.id), h);
+    setSyncStatus('saved','✅ Dados sincronizados');
+  } catch(e) {
+    console.error(e);
+    setSyncStatus('error','❌ Erro ao salvar hóspede');
+  }
+}
+
+async function deleteHospedeFromFirebase(id) {
+  setSyncStatus('syncing','🔄 Sincronizando...');
+  try {
+    await deleteDoc(doc(db,'hospedes',id));
+    setSyncStatus('saved','✅ Dados sincronizados');
+  } catch(e) {
+    console.error(e);
+    setSyncStatus('error','❌ Erro ao excluir hóspede');
+  }
+}
+
+// ── Listener realtime para hospedes ──
+function initHospedesListener() {
+  onSnapshot(HOSPEDES_COL, snap => {
+    hospedes = snap.docs.map(d => d.data());
+    if (isReady && document.getElementById('tab-hospedes').classList.contains('active')) {
+      renderHospedes();
+    }
+  }, e => console.error(e));
+}
+
+// ── Calcular estatísticas de um hóspede a partir das reservas ──
+function getHospedeStats(h) {
+  const norm = (s) => (s||'').toLowerCase().replace(/\D/g,'');
+  const reservasH = bookings.filter(b => {
+    if (b.cancelled) return false;
+    const nomeMatch = b.guestName?.toLowerCase().trim() === h.nome?.toLowerCase().trim();
+    const telMatch  = h.telefone && norm(b.phone) === norm(h.telefone) && norm(h.telefone).length >= 8;
+    return nomeMatch || telMatch;
+  });
+
+  const totalEstadias = reservasH.length;
+  const totalNoites   = reservasH.reduce((s,b) => s + Number(b.nights || calculateNights(b.checkin,b.checkout)), 0);
+  const totalReceita  = reservasH.reduce((s,b) => s + Number(b.totalValue||0), 0);
+  const ultimaEstadia = reservasH.map(b => b.checkout).sort().pop() || null;
+  const aptosMaisUsados = [...new Set(reservasH.map(b => b.apartment))];
+
+  return { totalEstadias, totalNoites, totalReceita, ultimaEstadia, aptosMaisUsados, reservasH };
+}
+
+// ── Render principal ──
+function renderHospedes() {
+  // Preenche select de apto preferido
+  const selApto = document.getElementById('hospedeAptoPref');
+  if (selApto.children.length <= 1) {
+    FIXED_APARTMENTS.forEach(a => {
+      const opt = document.createElement('option');
+      opt.value = a; opt.textContent = `Apto ${a}`;
+      selApto.appendChild(opt);
+    });
+  }
+
+  const search  = document.getElementById('hospedeSearch').value.trim().toLowerCase();
+  const tagFilt = document.getElementById('hospedeTagFilter').value;
+  const order   = document.getElementById('hospedeOrderFilter').value;
+
+  // Filtra
+  let lista = hospedes.map(h => ({ ...h, _stats: getHospedeStats(h) }));
+
+  if (search) {
+    lista = lista.filter(h =>
+      h.nome?.toLowerCase().includes(search) ||
+      (h.telefone||'').toLowerCase().includes(search) ||
+      (h.email||'').toLowerCase().includes(search) ||
+      (h.cidade||'').toLowerCase().includes(search)
+    );
+  }
+
+  if (tagFilt) {
+    lista = lista.filter(h => (h.tags||[]).includes(tagFilt));
+  }
+
+  // Ordena
+  if (order === 'estadias') lista.sort((a,b) => b._stats.totalEstadias - a._stats.totalEstadias);
+  if (order === 'receita')  lista.sort((a,b) => b._stats.totalReceita  - a._stats.totalReceita);
+  if (order === 'recente')  lista.sort((a,b) => (b._stats.ultimaEstadia||'').localeCompare(a._stats.ultimaEstadia||''));
+  if (order === 'nome')     lista.sort((a,b) => (a.nome||'').localeCompare(b.nome||''));
+
+  // Summary bar
+  const totalH    = hospedes.length;
+  const vips      = hospedes.filter(h => (h.tags||[]).includes('vip')).length;
+  const fieis     = hospedes.filter(h => h._stats ? h._stats.totalEstadias >= 3 : getHospedeStats(h).totalEstadias >= 3).length;
+  const receitaT  = hospedes.reduce((s,h) => s + getHospedeStats(h).totalReceita, 0);
+
+  document.getElementById('hospedeSummaryBar').innerHTML = `
+    <span class="badge badge-future">👥 ${totalH} cadastrado(s)</span>
+    <span class="badge badge-paid">⭐ ${vips} VIP(s)</span>
+    <span class="badge badge-active">💜 ${fieis} com 3+ estadias</span>
+    <span class="badge badge-active" style="background:#f0fdf4;color:#166534;">
+      💰 ${formatCurrency(receitaT)} em receita total
+    </span>
+  `;
+
+  // Grid
+  if (!lista.length) {
+    document.getElementById('hospedeGrid').innerHTML = `
+      <div class="hosp-empty">
+        <div style="font-size:48px;margin-bottom:12px;">👥</div>
+        <strong>Nenhum hóspede cadastrado ainda.</strong><br>
+        <span style="font-size:13px;">Use o botão <strong>+ Novo Hóspede</strong> ou <strong>Importar das Reservas</strong>.</span>
+      </div>`;
+    return;
+  }
+
+  const TAG_CONFIG = {
+    vip:          { label:'⭐ VIP',         cls:'tag-vip'         },
+    corporativo:  { label:'💼 Corporativo', cls:'tag-corporativo' },
+    familia:      { label:'👨‍👩‍👧 Família',    cls:'tag-familia'     },
+    fiel:         { label:'💜 Fiel',        cls:'tag-fiel'        },
+    novo:         { label:'🆕 Novo',        cls:'tag-novo'        },
+    problematico: { label:'⚠️ Problemático',cls:'tag-problematico'},
+  };
+
+  const STARS = (n) => '⭐'.repeat(Number(n||5));
+
+  document.getElementById('hospedeGrid').innerHTML = lista.map(h => {
+    const s    = h._stats;
+    const tags = (h.tags||[]).map(t =>
+      TAG_CONFIG[t]
+        ? `<span class="hospede-tag ${TAG_CONFIG[t].cls}">${TAG_CONFIG[t].label}</span>`
+        : ''
+    ).join('');
+    const initials = (h.nome||'?').split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
+    const waLink   = getWhatsAppLink(h.telefone||'');
+    const isVip    = (h.tags||[]).includes('vip');
+    const aptPref  = h.aptoPref ? `🏠 Prefere Apto ${h.aptoPref}` : '';
+
+    return `
+      <div class="hospede-card ${isVip ? 'vip' : ''}">
+        <div class="hospede-top">
+          <div class="hospede-avatar">${initials}</div>
+          <div class="hospede-info">
+            <h4 title="${h.nome}">${h.nome}</h4>
+            <div style="font-size:12px;color:var(--muted);">
+              ${h.telefone ? `📱 ${h.telefone}` : ''}
+              ${h.cidade   ? ` · 📍 ${h.cidade}` : ''}
+            </div>
+            <div style="font-size:12px;color:var(--muted);margin-top:2px;">
+              ${STARS(h.rating)} ${aptPref ? '· ' + aptPref : ''}
+            </div>
+            <div class="hospede-tags">${tags}</div>
+          </div>
+        </div>
+
+        <div class="hospede-stats">
+          <div class="hospede-stat">
+            <small>Estadias</small>
+            <strong>${s.totalEstadias}</strong>
+          </div>
+          <div class="hospede-stat">
+            <small>Noites</small>
+            <strong>${s.totalNoites}</strong>
+          </div>
+          <div class="hospede-stat">
+            <small>Receita</small>
+            <strong style="font-size:11px;">${formatCurrency(s.totalReceita)}</strong>
+          </div>
+        </div>
+
+        ${s.ultimaEstadia ? `
+          <div style="font-size:12px;color:var(--muted);margin-bottom:10px;">
+            📅 Última estadia: <strong>${formatDateBR(s.ultimaEstadia)}</strong>
+            ${s.aptosMaisUsados.length ? ` · Aptos: ${s.aptosMaisUsados.map(a=>'<strong>'+a+'</strong>').join(', ')}` : ''}
+          </div>` : ''
+        }
+
+        ${h.obs ? `<div style="font-size:12px;color:var(--muted);margin-bottom:10px;padding:8px;background:#f8fafc;border-radius:8px;border-left:3px solid var(--primary);">📝 ${h.obs}</div>` : ''}
+
+        <div class="hospede-actions">
+          <button class="btn-secondary" onclick="editHospede('${h.id}')">✏️ Editar</button>
+          <button class="btn-primary" onclick="novaReservaHospede('${h.id}')" title="Nova reserva para este hóspede">📋 Reservar</button>
+          ${waLink ? `
+            <a class="wa-btn" href="${waLink}" target="_blank" rel="noopener">
+              <svg viewBox="0 0 32 32" width="13" height="13" fill="currentColor">
+                <path d="M19.11 17.23c-.29-.15-1.69-.83-1.95-.92-.26-.1-.45-.15-.64.15-.19.29-.74.92-.91 1.11-.17.19-.34.22-.63.08-.29-.15-1.21-.45-2.31-1.43-.86-.77-1.43-1.72-1.6-2.01-.17-.29-.02-.45.13-.6.13-.13.29-.34.43-.51.14-.17.19-.29.29-.48.1-.19.05-.36-.02-.51-.08-.15-.64-1.54-.88-2.11-.23-.56-.47-.48-.64-.49h-.55c-.19 0-.48.07-.74.36-.26.29-1 1-.99 2.43 0 1.43 1.03 2.81 1.18 3 .14.19 2.02 3.08 4.89 4.32.68.29 1.21.46 1.62.59.68.22 1.29.19 1.77.12.54-.08 1.69-.69 1.93-1.36.24-.67.24-1.24.17-1.36-.07-.12-.26-.19-.55-.34z"></path>
+                <path d="M16.03 3.2c-7.07 0-12.8 5.73-12.8 12.8 0 2.26.59 4.47 1.72 6.41L3.2 28.8l6.56-1.72a12.74 12.74 0 0 0 6.27 1.6h.01c7.06 0 12.79-5.73 12.79-12.8S23.1 3.2 16.03 3.2zm0 23.33h-.01a10.5 10.5 0 0 1-5.35-1.47l-.38-.22-3.89 1.02 1.04-3.79-.25-.39a10.54 10.54 0 1 1 8.84 4.85z"></path>
+              </svg> WhatsApp
+            </a>` : ''
+          }
+          <button class="btn-danger" onclick="deleteHospede('${h.id}')" style="padding:6px 8px;">🗑️</button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+// ── Modal abrir/fechar ──
+function openHospedeModal(editMode = false) {
+  document.getElementById('hospedeModalTitle').textContent = editMode ? 'Editar Hóspede' : 'Novo Hóspede';
+  document.getElementById('hospedeModalOverlay').classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeHospedeModal() {
+  document.getElementById('hospedeModalOverlay').classList.remove('show');
+  document.getElementById('hospedeForm').reset();
+  document.getElementById('hospedeId').value = '';
+  if (!bookingModalOverlay.classList.contains('show') &&
+      !apartmentModalOverlay.classList.contains('show')) {
+    document.body.style.overflow = '';
+  }
+}
+
+// ── CRUD ──
+document.getElementById('hospedeForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const id   = document.getElementById('hospedeId').value || crypto.randomUUID();
+  const tags = [...document.querySelectorAll('input[name="hospedeTag"]:checked')].map(el => el.value);
+
+  const h = {
+    id,
+    nome:     document.getElementById('hospedeNome').value.trim(),
+    telefone: document.getElementById('hospedeTelefone').value.trim(),
+    email:    document.getElementById('hospedeEmail').value.trim(),
+    cidade:   document.getElementById('hospedeCidade').value.trim(),
+    aptoPref: document.getElementById('hospedeAptoPref').value,
+    rating:   Number(document.getElementById('hospedeRating').value || 5),
+    tags,
+    obs:      document.getElementById('hospedeObs').value.trim(),
+    criadoEm: new Date().toISOString(),
+  };
+
+  const idx = hospedes.findIndex(x => x.id === id);
+  if (idx >= 0) hospedes[idx] = h; else hospedes.push(h);
+
+  await saveHospedeToFirebase(h);
+  closeHospedeModal();
+  renderHospedes();
+});
+
+window.editHospede = (id) => {
+  const h = hospedes.find(x => x.id === id);
+  if (!h) return;
+  document.getElementById('hospedeId').value       = h.id;
+  document.getElementById('hospedeNome').value     = h.nome || '';
+  document.getElementById('hospedeTelefone').value = h.telefone || '';
+  document.getElementById('hospedeEmail').value    = h.email || '';
+  document.getElementById('hospedeCidade').value   = h.cidade || '';
+  document.getElementById('hospedeAptoPref').value = h.aptoPref || '';
+  document.getElementById('hospedeRating').value   = h.rating || 5;
+  document.getElementById('hospedeObs').value      = h.obs || '';
+
+  // Preenche select de aptos se vazio
+  const selApto = document.getElementById('hospedeAptoPref');
+  if (selApto.children.length <= 1) {
+    FIXED_APARTMENTS.forEach(a => {
+      const opt = document.createElement('option');
+      opt.value = a; opt.textContent = `Apto ${a}`;
+      selApto.appendChild(opt);
+    });
+  }
+  selApto.value = h.aptoPref || '';
+
+  // Tags
+  document.querySelectorAll('input[name="hospedeTag"]').forEach(cb => {
+    cb.checked = (h.tags||[]).includes(cb.value);
+  });
+
+  openHospedeModal(true);
+};
+
+window.deleteHospede = async (id) => {
+  const h = hospedes.find(x => x.id === id);
+  if (!h || !confirm(`Excluir ${h.nome} dos hóspedes frequentes?`)) return;
+  hospedes = hospedes.filter(x => x.id !== id);
+  await deleteHospedeFromFirebase(id);
+  renderHospedes();
+};
+
+// ── Botão Reservar: pré-preenche modal de reserva ──
+window.novaReservaHospede = (id) => {
+  const h = hospedes.find(x => x.id === id);
+  if (!h) return;
+  clearForm();
+  document.getElementById('guestName').value = h.nome || '';
+  document.getElementById('phone').value     = h.telefone || '';
+  if (h.aptoPref) {
+    document.getElementById('apartment').value = h.aptoPref;
+  }
+  openBookingModal(false);
+  switchTab('reservas');
+};
+
+// ── Importar automaticamente das reservas (2+ estadias) ──
+document.getElementById('hospedeAutoImportBtn').addEventListener('click', async () => {
+  const contagem = {};
+  bookings.forEach(b => {
+    if (b.cancelled) return;
+    const key = b.guestName?.trim().toLowerCase();
+    if (!key) return;
+    if (!contagem[key]) contagem[key] = { nome: b.guestName.trim(), telefone: b.phone||'', estadias: 0, ultima: '' };
+    contagem[key].estadias++;
+    if (!contagem[key].telefone && b.phone) contagem[key].telefone = b.phone;
+    if (b.checkout > contagem[key].ultima) contagem[key].ultima = b.checkout;
+  });
+
+  const candidatos = Object.values(contagem).filter(x => x.estadias >= 2);
+  if (!candidatos.length) {
+    alert('Nenhum hóspede com 2 ou mais estadias encontrado.');
+    return;
+  }
+
+  const jaExistem = new Set(hospedes.map(h => h.nome?.trim().toLowerCase()));
+  const novos = candidatos.filter(c => !jaExistem.has(c.nome.toLowerCase()));
+
+  if (!novos.length) {
+    alert('✅ Todos os hóspedes frequentes já estão cadastrados!');
+    return;
+  }
+
+  if (!confirm(`Importar ${novos.length} hóspede(s) com 2+ estadias?\n\n${novos.map(n=>`• ${n.nome} (${n.estadias} estadias)`).join('\n')}`)) return;
+
+  for (const c of novos) {
+    const h = {
+      id:       crypto.randomUUID(),
+      nome:     c.nome,
+      telefone: formatPhone(c.telefone),
+      email:    '',
+      cidade:   '',
+      aptoPref: '',
+      rating:   5,
+      tags:     c.estadias >= 3 ? ['fiel'] : ['novo'],
+      obs:      `Importado automaticamente. ${c.estadias} estadia(s) registradas.`,
+      criadoEm: new Date().toISOString(),
+    };
+    hospedes.push(h);
+    await saveHospedeToFirebase(h);
+  }
+
+  alert(`✅ ${novos.length} hóspede(s) importado(s) com sucesso!`);
+  renderHospedes();
+});
+
+// ── Reset filtros ──
+window.resetHospedeFilters = () => {
+  document.getElementById('hospedeSearch').value     = '';
+  document.getElementById('hospedeTagFilter').value  = '';
+  document.getElementById('hospedeOrderFilter').value = 'estadias';
+  renderHospedes();
+};
+
+// ── Event listeners ──
+document.getElementById('openNovoHospedeBtn').addEventListener('click', () => {
+  document.getElementById('hospedeForm').reset();
+  document.getElementById('hospedeId').value = '';
+  // Preenche aptos no select
+  const selApto = document.getElementById('hospedeAptoPref');
+  if (selApto.children.length <= 1) {
+    FIXED_APARTMENTS.forEach(a => {
+      const opt = document.createElement('option');
+      opt.value = a; opt.textContent = `Apto ${a}`;
+      selApto.appendChild(opt);
+    });
+  }
+  openHospedeModal(false);
+});
+
+document.getElementById('closeHospedeModal').addEventListener('click', closeHospedeModal);
+document.getElementById('cancelHospedeBtn').addEventListener('click', closeHospedeModal);
+document.getElementById('hospedeModalOverlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('hospedeModalOverlay')) closeHospedeModal();
+});
+
+document.getElementById('hospedeTelefone').addEventListener('input', function() {
+  this.value = formatPhone(this.value);
+});
+
+['hospedeSearch','hospedeTagFilter','hospedeOrderFilter'].forEach(id => {
+  document.getElementById(id).addEventListener('input',  renderHospedes);
+  document.getElementById(id).addEventListener('change', renderHospedes);
+});
+  
 init();
 
 </script>
