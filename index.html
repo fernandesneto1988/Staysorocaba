@@ -4444,21 +4444,29 @@ document.getElementById('hospedeAutoImportBtn').addEventListener('click', async 
   if (!confirm(`Importar ${novos.length} hóspede(s) com 2+ estadias?\n\n${novos.map(n=>`• ${n.nome} (${n.estadias} estadias)`).join('\n')}`)) return;
 
   for (const c of novos) {
-    const h = {
-      id:       crypto.randomUUID(),
-      nome:     c.nome,
-      telefone: formatPhone(c.telefone),
-      email:    '',
-      cidade:   '',
-      aptoPref: '',
-      rating:   5,
-      tags:     c.estadias >= 3 ? ['fiel'] : ['novo'],
-      obs:      `Importado automaticamente. ${c.estadias} estadia(s) registradas.`,
-      criadoEm: new Date().toISOString(),
-    };
-    hospedes.push(h);
-    await saveHospedeToFirebase(h);
-  }
+  const h = {
+    id:         crypto.randomUUID(),
+    nome:       c.nome,
+    telefone:   formatPhone(c.telefone),
+    email:      '',
+    cidade:     '',
+    aptoPref:   '',
+    rating:     5,
+    tags:       c.estadias >= 3 ? ['fiel'] : ['novo'],
+    obs:        `Importado automaticamente. ${c.estadias} estadia(s) registradas.`,
+    criadoEm:   new Date().toISOString(),
+  };
+
+  // ✅ Verifica duplicata ANTES de salvar (pelo nome, ignorando maiúsculas)
+  const jaExisteAgora = hospedes.some(
+    x => x.nome?.trim().toLowerCase() === h.nome.trim().toLowerCase()
+  );
+
+  if (jaExisteAgora) continue; // pula se já foi adicionado neste loop ou já existia
+
+  hospedes.push(h);             // atualiza array local
+  await saveHospedeToFirebase(h);
+}
 
   alert(`✅ ${novos.length} hóspede(s) importado(s) com sucesso!`);
   renderHospedes();
