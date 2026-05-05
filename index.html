@@ -3116,12 +3116,12 @@ tbody+=`<td class="${isToday}" title="${cellTitle}" ${clickAttr}>
       `📶 *Wi-Fi:*\n• Rede: *Ed. Eliseu Fernandes*\n• Senha: *Distrit@l2024*\n\n`+
       `📅 *Sua estadia:*\n• Check-in: *${formatDateBR(b.checkin)}* a partir das *15:00h*\n• Check-out: *${formatDateBR(b.checkout)}* até as *11:00h*\n• 🛏️ ${b.nights||calculateNights(b.checkin,b.checkout)} noite(s)${gar}\n\n`+
       `━━━━━━━━━━━━━━━━━━━━\n`+
-      `🚪 *Como acessar:*\n\n`+
+      `━━━━ 🚪 *Como acessar:* ━━━━\n\n`+
       `1️⃣ *Portão de ferro preto* — apenas encostado, empurre e entre.\n\n`+
       `2️⃣ *Porta de alumínio branco* — passe a mão na fechadura, digite *${sp}* e confirme.\n\n`+
       `3️⃣ *Apartamento ${b.apartment}* — digite *${sa}* na fechadura.\n\n`+
       `━━━━━━━━━━━━━━━━━━━━\n`+
-      `🚭 *Proibido fumar* em qualquer área do edifício.${obs}\n\n`+
+      `━━━━ 🚭 *Proibido fumar* ━━━━`
       `Boas-vindas e aproveite sua estadia! 🙏`;
   }
   window.copiarMensagemCheckin=async(id)=>{
