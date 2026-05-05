@@ -369,6 +369,7 @@
 .tag-corporativo{background:#dbeafe;color:#1d4ed8;border-color:#93c5fd;}
 .tag-familia{background:#dcfce7;color:#166534;border-color:#86efac;}
 .tag-problematico{background:#fee2e2;color:#991b1b;border-color:#fca5a5;}
+.tag-atencao_especial{background:#fee2e2;color:#991b1b;border-color:#fca5a5;}
 .tag-fiel{background:#f3e8ff;color:#7e22ce;border-color:#d8b4fe;}
 .tag-novo{background:#ccfbf1;color:#115e59;border-color:#99f6e4;}
 .hospede-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px;}
@@ -1419,13 +1420,25 @@
         <div class="form-group">
           <label>🏷️ Tags</label>
           <div class="hosp-form-tags">
-            <label><input type="checkbox" name="hospedeTag" value="vip" /> ⭐ VIP</label>
-            <label><input type="checkbox" name="hospedeTag" value="corporativo" /> 💼 Corporativo</label>
-            <label><input type="checkbox" name="hospedeTag" value="familia" /> 👨‍👩‍👧 Família</label>
-            <label><input type="checkbox" name="hospedeTag" value="fiel" /> 💜 Fiel</label>
-            <label><input type="checkbox" name="hospedeTag" value="novo" /> 🆕 Novo</label>
-            <label><input type="checkbox" name="hospedeTag" value="problematico" /> ⚠️ Problemático</label>
-          </div>
+  <label><input type="checkbox" name="hospedeTag" value="vip" /> ⭐ VIP</label>
+  <label><input type="checkbox" name="hospedeTag" value="corporativo" /> 🏢 Corporativo</label>
+  <label><input type="checkbox" name="hospedeTag" value="familia" /> 👨‍👩‍👧 Família</label>
+  <label><input type="checkbox" name="hospedeTag" value="fiel" /> 💜 Fiel</label>
+  <label><input type="checkbox" name="hospedeTag" value="novo" /> 🆕 Novo</label>
+  <label><input type="checkbox" name="hospedeTag" value="problematico" /> ⚠️ Problemático</label>
+  <label><input type="checkbox" name="hospedeTag" value="atencao_especial" /> 🔴 Atenção Especial</label>
+</div>
+<div class="form-group">
+  <label>🚗 Tamanho do Carro / Vaga</label>
+  <select id="hospedeCarro">
+    <option value="">Selecione...</option>
+    <option value="sem_vaga">🚫 Sem vaga</option>
+    <option value="pequeno">🚗 Carro Pequeno</option>
+    <option value="medio">🚙 Carro Médio</option>
+    <option value="grande">🚐 Carro Grande</option>
+  </select>
+</div>
+
         </div>
         <div class="form-group">
           <label>📝 Observações</label>
@@ -4325,6 +4338,7 @@ document.getElementById('hospedeForm').addEventListener('submit', async function
     rating:   Number(document.getElementById('hospedeRating').value || 5),
     tags,
     obs:      document.getElementById('hospedeObs').value.trim(),
+    carro:    document.getElementById('hospedeCarro').value,
     criadoEm: new Date().toISOString(),
   };
 
@@ -4347,6 +4361,8 @@ window.editHospede = (id) => {
   document.getElementById('hospedeAptoPref').value = h.aptoPref || '';
   document.getElementById('hospedeRating').value   = h.rating || 5;
   document.getElementById('hospedeObs').value      = h.obs || '';
+  document.getElementById('hospedeCarro').value    = h.carro || '';
+
 
   // Preenche select de aptos se vazio
   const selApto = document.getElementById('hospedeAptoPref');
