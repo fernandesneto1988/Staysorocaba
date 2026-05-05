@@ -3107,7 +3107,7 @@ tbody+=`<td class="${isToday}" title="${cellTitle}" ${clickAttr}>
   function gerarMensagemCheckin(b){
     const sa=apartmentData[b.apartment]?.senhaApto||'-';
     const sp=b.senhaPortaria||'-';
-    const gar=b.garageSpot&&b.garageSpot!=='Sem vaga'?`\n🚗 *Vaga de garagem:* ${b.garageSpot}\n📦 *Controle da garagem:* Antes de guardar o carro, pegue o controle no *hall de entrada*, dentro da *bomboniere* na bancada.`:'';
+    const gar=b.garageSpot&&b.garageSpot!=='Sem vaga'?`\n🚗 *Vaga de garagem:* Portão ${b.garageSpot.replace(/^P(\d+)([ED]?)$/, (_, n, l) => n + (l === 'E' ? ' — Vaga da Esquerda' : l === 'D' ? ' — Vaga da Direita' : ''))}\n📦 *Controle da garagem:* O controle fica no *hall de entrada*, dentro da *bombonière* sobre o *aparador*. Retire-o ao chegar e estacione respeitando os *limites da vaga*. 🙏`:'';
     const obs=b.notes?`\n\n📝 *Obs:* ${b.notes}`:'';
     return `Olá, *${b.guestName}*! 🏠\n\nSeja bem-vindo(a)!\n\n`+
       `📍 *Endereço:*\nRua Joana Miranda Corrêa, 130 — Jd. Ferreira, Sorocaba/SP\n\n`+
