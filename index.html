@@ -1638,6 +1638,15 @@ import {
   const db  = getFirestore(app);
   if (window.__appInitialized) throw new Error('already initialized');
   window.__appInitialized = true;
+  // — Carregar hóspedes do Firebase em tempo real —
+onSnapshot(collection(db, 'hospedes'), (snapshot) => {
+  hospedes = [];
+  snapshot.forEach((docSnap) => {
+    hospedes.push(docSnap.data());
+  });
+  renderHospedes();
+});
+
 
   const BOOKINGS_COL  = collection(db, 'reservas');
   const CLEANINGS_COL = collection(db, 'limpezas');
