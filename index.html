@@ -586,6 +586,15 @@
 .hosp-form-tags label:hover {
   background: #e0e7ff;
 }
+    /* ── RECIBO DE IMPRESSÃO ── */
+.recibo-print {
+  display: none;
+}
+@media print {
+  body > *:not(#recibo-print-frame) {
+    display: none !important;
+  }
+}
     
   </style>
 </head>
@@ -3141,6 +3150,267 @@ tbody+=`<td class="${isToday}" title="${cellTitle}" ${clickAttr}>
       `Boas-vindas e aproveite sua estadia! 🙏`;
 
   }
+// ══════════════════════════════════════════
+// IMPRIMIR RECIBO
+// ══════════════════════════════════════════
+window.imprimirRecibo = (id) => {
+  const b = bookings.find(x => x.id === id);
+  if (!b) return;
+
+  const sa  = apartmentData[b.apartment]?.senhaApto || '-';
+  const sp  = b.senhaPortaria || '-';
+  const bal = getBalance(b);
+  const ps  = getPaymentStatus(b);
+  const nights = b.nights || calculateNights(b.checkin, b.checkout);
+
+  const now = new Date();
+  const dataEmissao = `${String(now.getDate()).padStart(2,'0')}/${String(now.getMonth()+1).padStart(2,'0')}/${now.getFullYear()} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+
+  const garagem = b.garageSpot && b.garageSpot !== 'Sem vaga'
+    ? `<tr><td style="padding:7px 10px;border-bottom:1px solid #e5e7eb;color:#6b7280;font-size:13px;">🚗 Vaga de Garagem</td><td style="padding:7px 10px;border-bottom:1px solid #e5e7eb;font-size:13px;font-weight:bold;">${b.garageSpot}</td></tr>`
+    : '';
+
+  const obs = b.notes
+    ? `<div style="margin-top:18px;padding:12px 14px;background:#fffbeb;border:1px solid #fde68a;border-radius:10px;font-size:13px;"><strong>📝 Observações:</strong> ${b.notes}</div>`
+    : '';
+
+  const statusColor = ps.className.includes('paid') ? '#16a34a' : ps.className.includes('partial') ? '#d97706' : '#dc2626';
+
+  const html = `<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Recibo — ${b.guestName}</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f4f7fb;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      padding: 30px 20px;
+    }
+    .recibo {
+      background: white;
+      border-radius: 18px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.12);
+      width: 100%;
+      max-width: 600px;
+      overflow: hidden;
+    }
+    .recibo-header {
+      background: linear-gradient(135deg, #1e3a5f, #2563eb);
+      color: white;
+      padding: 28px 30px;
+      text-align: center;
+    }
+    .recibo-header h1 {
+      font-size: 22px;
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+    .recibo-header p {
+      font-size: 13px;
+      opacity: 0.85;
+    }
+    .recibo-body {
+      padding: 24px 30px;
+    }
+    .recibo-section {
+      margin-bottom: 20px;
+    }
+    .recibo-section h3 {
+      font-size: 13px;
+      font-weight: bold;
+      color: #6b7280;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 10px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    table.recibo-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    table.recibo-table td {
+      padding: 7px 10px;
+      border-bottom: 1px solid #e5e7eb;
+      font-size: 13px;
+    }
+    table.recibo-table td:first-child {
+      color: #6b7280;
+      width: 45%;
+    }
+    table.recibo-table td:last-child {
+      font-weight: bold;
+    }
+    .recibo-total-box {
+      background: linear-gradient(135deg, #eff6ff, #f0fdf4);
+      border: 2px solid #2563eb;
+      border-radius: 14px;
+      padding: 18px 20px;
+      margin-top: 20px;
+    }
+    .recibo-total-box .linha {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+    .recibo-total-box .linha:last-child { margin-bottom: 0; }
+    .recibo-total-box .total-label {
+      font-size: 16px;
+      font-weight: bold;
+      color: #1e3a5f;
+    }
+    .recibo-total-box .total-valor {
+      font-size: 24px;
+      font-weight: bold;
+      color: #2563eb;
+    }
+    .recibo-status {
+      display: inline-block;
+      padding: 5px 14px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: bold;
+      color: white;
+      background: ${statusColor};
+    }
+    .recibo-footer {
+      background: #f8fafc;
+      border-top: 1px solid #e5e7eb;
+      padding: 16px 30px;
+      text-align: center;
+      font-size: 12px;
+      color: #9ca3af;
+    }
+    .recibo-footer strong {
+      color: #6b7280;
+    }
+    @media print {
+      body { background: white; padding: 0; }
+      .recibo { box-shadow: none; border-radius: 0; max-width: 100%; }
+      .no-print { display: none !important; }
+    }
+  </style>
+</head>
+<body>
+<div class="recibo">
+
+  <!-- CABEÇALHO -->
+  <div class="recibo-header">
+    <h1>🏨 Recibo de Hospedagem</h1>
+    <p>Stay Sorocaba — Rua Joana Miranda Corrêa, 130, Sorocaba/SP</p>
+    <p style="margin-top:6px;font-size:12px;opacity:0.7;">Emitido em: ${dataEmissao}</p>
+  </div>
+
+  <!-- CORPO -->
+  <div class="recibo-body">
+
+    <!-- HÓSPEDE -->
+    <div class="recibo-section">
+      <h3>👤 Dados do Hóspede</h3>
+      <table class="recibo-table">
+        <tr><td>Nome</td><td>${b.guestName}</td></tr>
+        <tr><td>Telefone</td><td>${b.phone || '-'}</td></tr>
+        <tr><td>Origem da reserva</td><td>${b.source || '-'}</td></tr>
+        <tr><td>Qtd. hóspedes</td><td>${b.guests || 1} pessoa(s)</td></tr>
+      </table>
+    </div>
+
+    <!-- ESTADIA -->
+    <div class="recibo-section">
+      <h3>🏠 Detalhes da Estadia</h3>
+      <table class="recibo-table">
+        <tr><td>Apartamento</td><td>Apto ${b.apartment}</td></tr>
+        <tr><td>🔐 Senha da Portaria</td><td>${sp}</td></tr>
+        <tr><td>🔒 Senha do Apartamento</td><td>${sa}</td></tr>
+        <tr><td>Check-in</td><td>${formatDateBR(b.checkin)} a partir das 15h00</td></tr>
+        <tr><td>Check-out</td><td>${formatDateBR(b.checkout)} até as 11h00</td></tr>
+        <tr><td>Total de noites</td><td>${nights} noite(s)</td></tr>
+        ${garagem}
+      </table>
+    </div>
+
+    <!-- FINANCEIRO -->
+    <div class="recibo-section">
+      <h3>💰 Financeiro</h3>
+      <div class="recibo-total-box">
+        <div class="linha">
+          <span>🛏️ Diária</span>
+          <span>${formatCurrency(b.dailyRate || 0)}</span>
+        </div>
+        <div class="linha">
+          <span>📅 Noites</span>
+          <span>${nights}</span>
+        </div>
+        <div class="linha" style="border-top:1px solid #bfdbfe;padding-top:10px;margin-top:4px;">
+          <span class="total-label">💰 Total</span>
+          <span class="total-valor">${formatCurrency(b.totalValue)}</span>
+        </div>
+        <div class="linha">
+          <span>✅ Valor pago</span>
+          <span style="color:#16a34a;font-weight:bold;">${formatCurrency(b.paidValue)}</span>
+        </div>
+        ${bal > 0 ? `
+        <div class="linha">
+          <span>⏳ Saldo restante</span>
+          <span style="color:#dc2626;font-weight:bold;">${formatCurrency(bal)}</span>
+        </div>` : ''}
+        <div class="linha" style="margin-top:8px;">
+          <span>Status</span>
+          <span class="recibo-status">${ps.label}</span>
+        </div>
+        ${b.paymentDate ? `
+        <div class="linha">
+          <span>📅 Data do pagamento</span>
+          <span>${formatDateBR(b.paymentDate)}</span>
+        </div>` : ''}
+      </div>
+    </div>
+
+    ${obs}
+
+  </div>
+
+  <!-- RODAPÉ -->
+  <div class="recibo-footer">
+    <strong>Stay Sorocaba</strong> · (15) 98181-3354 · Sorocaba / SP<br>
+    📶 Wi-Fi: <strong>Ed. Eliseu Fernandes</strong> · Senha: <strong>Distrit@l2024</strong><br><br>
+    <em>Obrigado pela preferência! Até a próxima. 🙏</em>
+  </div>
+
+</div>
+
+<!-- BOTÃO IMPRIMIR (some na impressão) -->
+<div class="no-print" style="text-align:center;margin-top:20px;">
+  <button onclick="window.print()"
+    style="padding:12px 28px;border-radius:12px;border:none;background:#2563eb;color:white;font-size:15px;font-weight:bold;cursor:pointer;">
+    🖨️ Imprimir / Salvar PDF
+  </button>
+  <button onclick="window.close()"
+    style="margin-left:12px;padding:12px 20px;border-radius:12px;border:1px solid #e5e7eb;background:white;font-size:15px;cursor:pointer;">
+    ✖ Fechar
+  </button>
+</div>
+
+</body>
+</html>`;
+
+  const win = window.open('', '_blank', 'width=680,height=820');
+  if (!win) {
+    alert('❌ Pop-up bloqueado! Permita pop-ups para este site e tente novamente.');
+    return;
+  }
+  win.document.write(html);
+  win.document.close();
+};
+  
   window.copiarMensagemCheckin=async(id)=>{
     const b=bookings.find(x=>x.id===id); if(!b) return;
     const msg=gerarMensagemCheckin(b);
@@ -3291,6 +3561,7 @@ tbody+=`<td class="${isToday}" title="${cellTitle}" ${clickAttr}>
             <button class="btn-secondary" onclick="editBooking('${item.id}')">Editar</button>
             <button class="${item.cancelled?'btn-success':'btn-purple'}" onclick="toggleCancelled('${item.id}')">${item.cancelled?'Reativar':'Cancelar'}</button>
             <button class="btn-danger" onclick="deleteBooking('${item.id}')">Excluir</button>
+            <button class="btn-teal" onclick="imprimirRecibo('${item.id}')">🖨️ Recibo</button>
             ${waLink?`<a class="wa-btn" href="${waLink}" target="_blank" rel="noopener"><svg viewBox="0 0 32 32" width="14" height="14" fill="currentColor"><path d="M19.11 17.23c-.29-.15-1.69-.83-1.95-.92-.26-.1-.45-.15-.64.15-.19.29-.74.92-.91 1.11-.17.19-.34.22-.63.08-.29-.15-1.21-.45-2.31-1.43-.86-.77-1.43-1.72-1.6-2.01-.17-.29-.02-.45.13-.6.13-.13.29-.34.43-.51.14-.17.19-.29.29-.48.1-.19.05-.36-.02-.51-.08-.15-.64-1.54-.88-2.11-.23-.56-.47-.48-.64-.49h-.55c-.19 0-.48.07-.74.36-.26.29-1 1-.99 2.43 0 1.43 1.03 2.81 1.18 3 .14.19 2.02 3.08 4.89 4.32.68.29 1.21.46 1.62.59.68.22 1.29.19 1.77.12.54-.08 1.69-.69 1.93-1.36.24-.67.24-1.24.17-1.36-.07-.12-.26-.19-.55-.34z"></path><path d="M16.03 3.2c-7.07 0-12.8 5.73-12.8 12.8 0 2.26.59 4.47 1.72 6.41L3.2 28.8l6.56-1.72a12.74 12.74 0 0 0 6.27 1.6h.01c7.06 0 12.79-5.73 12.79-12.8S23.1 3.2 16.03 3.2zm0 23.33h-.01a10.5 10.5 0 0 1-5.35-1.47l-.38-.22-3.89 1.02 1.04-3.79-.25-.39a10.54 10.54 0 1 1 8.84 4.85z"></path></svg>WhatsApp</a>`:''}
           </div>
         </td>
