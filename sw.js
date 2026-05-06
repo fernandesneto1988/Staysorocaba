@@ -25,6 +25,16 @@ self.addEventListener('activate', event => {
 
 self.addEventListener('fetch', event => {
   event.respondWith(
-    caches.match(event.request).then(r => r || fetch(event.request))
+    fetch(event.request)
+      .then(response => {
+        // Atualiza o cache com a versão mais recente
+        const clone = response.clone();
+        caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+        return response;
+      })
+      .catch(() => {
+        // Só usa cache se estiver offline
+        return caches.match(event.request);
+      })
   );
 });
