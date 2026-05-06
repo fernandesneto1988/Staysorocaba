@@ -1250,29 +1250,41 @@
       </div>
 
       <!-- SIMULADOR -->
-      <div class="prec-simulador">
-        <h3>🔮 Simulador de Preço</h3>
-        <div class="prec-sim-grid">
-          <div class="form-group" style="margin:0;">
-            <label style="display:block;font-size:13px;color:var(--muted);margin-bottom:4px;">Check-in</label>
-            <input type="date" id="precSimCheckin" />
-          </div>
-          <div class="form-group" style="margin:0;">
-            <label style="display:block;font-size:13px;color:var(--muted);margin-bottom:4px;">Check-out</label>
-            <input type="date" id="precSimCheckout" />
-          </div>
-          <div class="form-group" style="margin:0;">
-            <label style="display:block;font-size:13px;color:var(--muted);margin-bottom:4px;">Origem</label>
-            <select id="precSimSource">
-              <option value="">Selecione</option>
-              <option>Direto</option><option>WhatsApp</option>
-              <option>Airbnb</option><option>Booking</option><option>Outro</option>
-            </select>
-          </div>
-          <div>
-            <button type="button" class="btn-primary" id="precSimularBtn" style="height:44px;">🔮 Simular</button>
-          </div>
-        </div>
+<div class="prec-simulador">
+  <h3>🔮 Simulador de Preço</h3>
+  <div class="prec-sim-grid">
+    <div class="form-group" style="margin:0;">
+      <label style="display:block;font-size:13px;color:var(--muted);margin-bottom:4px;">Check-in</label>
+      <input type="date" id="precSimCheckin" />
+    </div>
+    <div class="form-group" style="margin:0;">
+      <label style="display:block;font-size:13px;color:var(--muted);margin-bottom:4px;">Check-out</label>
+      <input type="date" id="precSimCheckout" />
+    </div>
+    <div class="form-group" style="margin:0;">
+      <label style="display:block;font-size:13px;color:var(--muted);margin-bottom:4px;">Origem</label>
+      <select id="precSimSource">
+        <option value="">Selecione</option>
+        <option>Direto</option><option>WhatsApp</option>
+        <option>Airbnb</option><option>Booking</option><option>Outro</option>
+      </select>
+    </div>
+
+    <!-- ✅ NOVO: Seletor de hóspede -->
+    <div class="form-group" style="margin:0;">
+      <label style="display:block;font-size:13px;color:var(--muted);margin-bottom:4px;">Hóspede (opcional)</label>
+      <select id="precSimHospede">
+        <option value="">— Sem hóspede definido —</option>
+      </select>
+    </div>
+
+    <div>
+      <button type="button" class="btn-primary" id="precSimularBtn" style="height:44px;">🔮 Simular</button>
+    </div>
+  </div>
+
+  <!-- ✅ NOVO: Badge de alerta de risco -->
+  <div id="precRiscoAlert" style="display:none;margin-top:10px;padding:10px 14px;border-radius:10px;font-size:13px;font-weight:600;"></div>
 
         <!-- RESULTADO -->
         <div class="prec-resultado" id="precResultado">
@@ -1951,16 +1963,20 @@ onSnapshot(collection(db, 'hospedes'), (snapshot) => {
     document.getElementById('precUsarPrecoBtn').dataset.checkin  = checkin;
     document.getElementById('precUsarPrecoBtn').dataset.checkout = checkout;
   }
-
   // Botão Simular
-  document.getElementById('precSimularBtn').addEventListener('click', () => {
-    const ci = document.getElementById('precSimCheckin').value;
-    const co = document.getElementById('precSimCheckout').value;
-    if (!ci || !co || ci >= co) { alert('Informe check-in e check-out válidos.'); return; }
-    const resultado = calcularDiariaSugerida(ci, co);
-    if (!resultado) return;
-    mostrarResultadoSimulacao(resultado, ci, co);
-  });
+document.getElementById('precSimularBtn').addEventListener('click', () => {
+  const ci = document.getElementById('precSimCheckin').value;
+  const co = document.getElementById('precSimCheckout').value;
+  if (!ci || !co || ci >= co) { alert('Informe check-in e check-out válidos.'); return; }
+
+  const hospedeId = document.getElementById('precSimHospede')?.value || '';
+  const fatorRisco = hospedeId ? (precGetRiscoHospede(hospedeId) || 1) : 1;
+
+  const resultado = calcularDiariaSugerida(ci, co, fatorRisco);
+  if (!resultado) return;
+
+  mostrarResultadoSimulacao(resultado, ci, co);
+});
 
   // Botão "Usar este preço" — abre modal de nova reserva preenchido
   document.getElementById('precUsarPrecoBtn').addEventListener('click', () => {
