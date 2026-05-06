@@ -3121,8 +3121,9 @@ tbody+=`<td class="${isToday}" title="${cellTitle}" ${clickAttr}>
       `2️⃣ *Porta de alumínio branco* — passe a mão na fechadura, digite *${sp}* e confirme.\n\n`+
       `3️⃣ *Apartamento ${b.apartment}* — digite *${sa}* na fechadura.\n\n`+
       `━━━━━━━━━━━━━━━━━━━━\n`+
-      `━━━━ 🚭 *Proibido fumar* ━━━━`
+      `—— 🚭 *Proibido fumar* ——\n` +
       `Boas-vindas e aproveite sua estadia! 🙏`;
+
   }
   window.copiarMensagemCheckin=async(id)=>{
     const b=bookings.find(x=>x.id===id); if(!b) return;
