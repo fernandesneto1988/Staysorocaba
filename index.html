@@ -2194,11 +2194,42 @@ document.getElementById('precSimularBtn').addEventListener('click', () => {
     if(item.checkout<=t) return{label:'Finalizada', className:'badge-finished' };
     return                     {label:'Em andamento',className:'badge-active'  };
   }
-  function getPaymentStatus(item){
-    const total=Number(item.totalValue||0),paid=Number(item.paidValue||0);
-    if(paid>=total&&total>0) return{label:'Pago',   className:'badge-paid'   };
-    if(paid>0&&paid<total)   return{label:'Parcial',className:'badge-partial'};
-    return                         {label:'Pendente',className:'badge-pending'};
+function getPaymentStatus(item) {
+  const total  = Number(item.totalValue || 0);
+  const paid   = Number(item.paidValue  || 0);
+  const today  = todayStr();
+  const isDireta = item.source === 'Direto' || item.source === 'WhatsApp';
+
+  if (paid >= total && total > 0)
+    return { label: 'Pago', className: 'badge-paid' };
+
+  if (paid > 0 && paid < total) {
+    // Reserva direta com sinal dado
+    if (isDireta) {
+      const vencida = today >= item.checkin;
+      return {
+        label    : vencida
+          ? `⚠️ Sinal — vencido (falta ${formatCurrency(total - paid)})`
+          : `💛 Sinal dado (falta ${formatCurrency(total - paid)})`,
+        className: vencida ? 'badge-overdue' : 'badge-partial',
+      };
+    }
+    return { label: 'Parcial', className: 'badge-partial' };
+  }
+
+  // Sem nenhum pagamento
+  if (isDireta && total > 0) {
+    const vencida = today >= item.checkin;
+    return {
+      label    : vencida
+        ? `🔴 Em aberto — VENCIDO`
+        : `🔴 Em aberto (vence ${formatDateBR(item.checkin)})`,
+      className: vencida ? 'badge-overdue' : 'badge-pending',
+    };
+  }
+
+  return { label: 'Pendente', className: 'badge-pending' };
+}
   }
   function getBalance(item){ return Math.max(0,Number(item.totalValue||0)-Number(item.paidValue||0)); }
   function getWeeklyCleaningDates(item){
@@ -4354,6 +4385,158 @@ function renderDashboardKpis() {
   renderMeta();
   renderTopAptos();
   renderDashOcupacaoChart();
+  renderAlertasDiretas();
+}
+
+function renderAlertasDiretas() {
+  const today = todayStr();
+
+  const pendentes = bookings.filter(b => {
+    if (b.cancelled) return false;
+    if (b.source !== 'Direto' && b.source !== 'WhatsApp') return false;
+    const bal = getBalance(b);
+    return bal > 0;
+  });
+
+  // Remove painel anterior se existir
+  const existingAlert = document.getElementById('alertaDiretasBox');
+  if (existingAlert) existingAlert.remove();
+
+  if (!pendentes.length) return;
+
+  const vencidas = pendentes.filter(b => today >= b.checkin);
+  const aVencer  = pendentes.filter(b => today <  b.checkin);
+
+  // Atualiza cor do KPI de saldo pendente
+  const sumPendingEl = document.getElementById('sumPending');
+  if (sumPendingEl && vencidas.length > 0) {
+    sumPendingEl.style.color = '#dc2626';
+    sumPendingEl.title = `⚠️ ${vencidas.length} reserva(s) direta(s) com pagamento vencido!`;
+  }
+
+  const html = `
+  <div id="alertaDiretasBox"
+    style="background:#fff1f2;border:2px solid #fca5a5;border-radius:16px;
+           padding:18px;margin-bottom:18px;">
+
+    <div style="font-size:15px;font-weight:bold;color:#991b1b;margin-bottom:12px;">
+      💳 Reservas Diretas — Status de Pagamento
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;">
+      <div style="background:white;border:1px solid #fca5a5;border-radius:12px;padding:12px;text-align:center;">
+        <div style="font-size:11px;color:#6b7280;margin-bottom:4px;">🔴 Vencidas</div>
+        <div style="font-size:22px;font-weight:bold;color:#dc2626;">${vencidas.length}</div>
+        <div style="font-size:11px;color:#6b7280;">
+          ${formatCurrency(vencidas.reduce((s,b) => s + getBalance(b), 0))}
+        </div>
+      </div>
+      <div style="background:white;border:1px solid #fde68a;border-radius:12px;padding:12px;text-align:center;">
+        <div style="font-size:11px;color:#6b7280;margin-bottom:4px;">💛 A vencer</div>
+        <div style="font-size:22px;font-weight:bold;color:#d97706;">${aVencer.length}</div>
+        <div style="font-size:11px;color:#6b7280;">
+          ${formatCurrency(aVencer.reduce((s,b) => s + getBalance(b), 0))}
+        </div>
+      </div>
+      <div style="background:white;border:1px solid #86efac;border-radius:12px;padding:12px;text-align:center;">
+        <div style="font-size:11px;color:#6b7280;margin-bottom:4px;">💰 Total em aberto</div>
+        <div style="font-size:22px;font-weight:bold;color:#16a34a;">
+          ${formatCurrency(pendentes.reduce((s,b) => s + getBalance(b), 0))}
+        </div>
+        <div style="font-size:11px;color:#6b7280;">${pendentes.length} reserva(s)</div>
+      </div>
+    </div>
+
+    ${vencidas.length ? `
+    <div style="font-size:13px;font-weight:bold;color:#991b1b;margin-bottom:8px;">
+      ⚠️ Pagamentos vencidos:
+    </div>
+    <div style="display:flex;flex-direction:column;gap:6px;">
+      ${vencidas.map(b => {
+        const waLink = getWhatsAppLink(b.phone || '');
+        return `
+        <div style="background:white;border:1px solid #fca5a5;border-radius:10px;
+                    padding:10px 14px;display:flex;justify-content:space-between;
+                    align-items:center;flex-wrap:wrap;gap:8px;">
+          <div>
+            <strong>${b.guestName}</strong>
+            <span style="font-size:12px;color:#6b7280;">
+              · Apto ${b.apartment}
+              · Check-in ${formatDateBR(b.checkin)}
+              · ${b.source}
+            </span>
+            ${Number(b.paidValue) > 0
+              ? `<span class="badge badge-partial" style="font-size:11px;margin-left:6px;">
+                   💛 Sinal: ${formatCurrency(b.paidValue)}
+                 </span>`
+              : `<span class="badge badge-overdue" style="font-size:11px;margin-left:6px;">
+                   Sem pagamento
+                 </span>`
+            }
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+            <strong style="color:#dc2626;font-size:14px;">
+              Falta: ${formatCurrency(getBalance(b))}
+            </strong>
+            ${waLink
+              ? `<a href="${waLink}" target="_blank" rel="noopener"
+                   class="wa-btn" style="font-size:12px;padding:5px 10px;">
+                   📲 Cobrar
+                 </a>`
+              : ''
+            }
+          </div>
+        </div>`;
+      }).join('')}
+    </div>` : ''}
+
+    ${aVencer.length ? `
+    <div style="font-size:13px;font-weight:bold;color:#92400e;margin-bottom:8px;margin-top:${vencidas.length ? '14px' : '0'};">
+      💛 Pagamentos a vencer:
+    </div>
+    <div style="display:flex;flex-direction:column;gap:6px;">
+      ${aVencer.map(b => {
+        const waLink = getWhatsAppLink(b.phone || '');
+        return `
+        <div style="background:white;border:1px solid #fde68a;border-radius:10px;
+                    padding:10px 14px;display:flex;justify-content:space-between;
+                    align-items:center;flex-wrap:wrap;gap:8px;">
+          <div>
+            <strong>${b.guestName}</strong>
+            <span style="font-size:12px;color:#6b7280;">
+              · Apto ${b.apartment}
+              · Check-in ${formatDateBR(b.checkin)}
+              · ${b.source}
+            </span>
+            ${Number(b.paidValue) > 0
+              ? `<span class="badge badge-partial" style="font-size:11px;margin-left:6px;">
+                   💛 Sinal: ${formatCurrency(b.paidValue)}
+                 </span>`
+              : `<span class="badge badge-pending" style="font-size:11px;margin-left:6px;">
+                   Sem sinal
+                 </span>`
+            }
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+            <strong style="color:#d97706;font-size:14px;">
+              Falta: ${formatCurrency(getBalance(b))}
+            </strong>
+            ${waLink
+              ? `<a href="${waLink}" target="_blank" rel="noopener"
+                   class="wa-btn" style="font-size:12px;padding:5px 10px;">
+                   📲 Lembrar
+                 </a>`
+              : ''
+            }
+          </div>
+        </div>`;
+      }).join('')}
+    </div>` : ''}
+
+  </div>`;
+
+  const metaBox = document.getElementById('metaBox');
+  if (metaBox) metaBox.insertAdjacentHTML('afterend', html);
 }
 
 // Botão salvar meta
