@@ -1459,6 +1459,19 @@
     <option value="grande">🚐 Carro Grande</option>
   </select>
 </div>
+          <div class="row">
+  <div class="form-group">
+    <label>🪪 CPF / CNPJ</label>
+    <input type="text" id="hospedeDoc"
+      placeholder="000.000.000-00 ou 00.000.000/0001-00"
+      maxlength="18" />
+  </div>
+  <div class="form-group">
+    <label>📍 Endereço</label>
+    <input type="text" id="hospedeEndereco"
+      placeholder="Rua, número, bairro, cidade..." />
+  </div>
+</div>
 
         </div>
         <div class="form-group">
@@ -4810,6 +4823,8 @@ document.getElementById('hospedeForm').addEventListener('submit', async function
     tags,
     obs:      document.getElementById('hospedeObs').value.trim(),
     carro:    document.getElementById('hospedeCarro').value,
+    doc:      document.getElementById('hospedeDoc').value.trim(),
+    endereco: document.getElementById('hospedeEndereco').value.trim(),
     criadoEm: new Date().toISOString(),
   };
 
@@ -4833,7 +4848,8 @@ window.editHospede = (id) => {
   document.getElementById('hospedeRating').value   = h.rating || 5;
   document.getElementById('hospedeObs').value      = h.obs || '';
   document.getElementById('hospedeCarro').value    = h.carro || '';
-
+  document.getElementById('hospedeDoc').value      = h.doc      || '';
+  document.getElementById('hospedeEndereco').value = h.endereco || '';
 
   // Preenche select de aptos se vazio
   const selApto = document.getElementById('hospedeAptoPref');
