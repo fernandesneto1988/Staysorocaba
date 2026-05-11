@@ -4989,6 +4989,394 @@ document.getElementById('hospedeTelefone').addEventListener('input', function() 
   document.getElementById(id).addEventListener('change', renderHospedes);
 });
   
+ // ══════════════════════════════════════════
+// IMPRIMIR CONTRATO DE LOCAÇÃO POR TEMPORADA
+// ══════════════════════════════════════════
+window.imprimirContrato = (id) => {
+  const b = bookings.find(x => x.id === id);
+  if (!b) return;
+
+  const nights = b.nights || calculateNights(b.checkin, b.checkout);
+
+  const now = new Date();
+  const dataEmissao = `${String(now.getDate()).padStart(2,'0')}/${String(now.getMonth()+1).padStart(2,'0')}/${now.getFullYear()}`;
+  const horaEmissao = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+
+  // ─── Mês por extenso para o contrato ───
+  const meses = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
+  const dataExtenso = `${String(now.getDate()).padStart(2,'0')} de ${meses[now.getMonth()]} de ${now.getFullYear()}`;
+
+  // ─── Garagem ───
+  const temVaga = b.garageSpot && b.garageSpot !== 'Sem vaga';
+  const vagaTexto = temVaga ? b.garageSpot : null;
+
+  // ─── Bloco de garagem nas cláusulas ───
+  const vagaClausula = temVaga
+    ? `sendo incluída a vaga de garagem de nº <strong>${vagaTexto}</strong>,`
+    : `sem direito a vaga de garagem,`;
+
+  // ─── Dados do locatário: PF ou PJ ───
+  const isPJ = b.guestDoc && (b.guestDoc.replace(/\D/g,'').length === 14);
+
+  let blocoLocatario = '';
+  if (isPJ) {
+    blocoLocatario = `
+      <tr><td>Razão Social</td><td>${b.guestName}</td></tr>
+      <tr><td>CNPJ</td><td>${b.guestDoc || '-'}</td></tr>
+      <tr><td>Representante</td><td>${b.guestRepresentative || '-'}</td></tr>
+      <tr><td>Endereço</td><td>${b.guestAddress || '-'}</td></tr>
+      <tr><td>Telefone</td><td>${b.phone || '-'}</td></tr>
+      <tr><td>E-mail</td><td>${b.email || '-'}</td></tr>
+    `;
+  } else {
+    blocoLocatario = `
+      <tr><td>Nome</td><td>${b.guestName}</td></tr>
+      <tr><td>CPF</td><td>${b.guestDoc || '-'}</td></tr>
+      <tr><td>RG</td><td>${b.guestRG || '-'}</td></tr>
+      <tr><td>Endereço</td><td>${b.guestAddress || '-'}</td></tr>
+      <tr><td>Telefone</td><td>${b.phone || '-'}</td></tr>
+      <tr><td>E-mail</td><td>${b.email || '-'}</td></tr>
+    `;
+  }
+
+  // ─── Observações ───
+  const obs = b.notes
+    ? `<div style="margin:10px 0 0;padding:10px 14px;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;font-size:12px;"><strong>📝 Observações:</strong> ${b.notes}</div>`
+    : '';
+
+  const html = `<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Contrato — ${b.guestName}</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f4f7fb;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      padding: 30px 20px;
+    }
+    .contrato {
+      background: white;
+      border-radius: 18px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.12);
+      width: 100%;
+      max-width: 720px;
+      overflow: hidden;
+    }
+    .contrato-header {
+      background: linear-gradient(135deg, #1e3a5f, #2563eb);
+      color: white;
+      padding: 28px 30px;
+      text-align: center;
+    }
+    .contrato-header h1 { font-size: 20px; font-weight: bold; margin-bottom: 4px; }
+    .contrato-header p  { font-size: 12px; opacity: 0.85; }
+    .contrato-body { padding: 28px 36px; }
+
+    /* ── Seções ── */
+    .secao { margin-bottom: 22px; }
+    .secao h3 {
+      font-size: 11px;
+      font-weight: bold;
+      color: #6b7280;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 10px;
+      padding-bottom: 6px;
+      border-bottom: 2px solid #e5e7eb;
+    }
+
+    /* ── Tabelas de dados ── */
+    table.dados {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    table.dados td {
+      padding: 6px 10px;
+      border-bottom: 1px solid #e5e7eb;
+      font-size: 13px;
+    }
+    table.dados td:first-child {
+      color: #6b7280;
+      width: 38%;
+    }
+    table.dados td:last-child { font-weight: bold; }
+
+    /* ── Cláusulas ── */
+    .clausulas { counter-reset: clausula; }
+    .clausula {
+      margin-bottom: 14px;
+      font-size: 12.5px;
+      line-height: 1.7;
+      color: #1f2937;
+      text-align: justify;
+    }
+    .clausula-titulo {
+      font-weight: bold;
+      color: #1e3a5f;
+      display: block;
+      margin-bottom: 4px;
+      font-size: 12px;
+      text-transform: uppercase;
+    }
+
+    /* ── Box total ── */
+    .box-financeiro {
+      background: linear-gradient(135deg, #eff6ff, #f0fdf4);
+      border: 2px solid #2563eb;
+      border-radius: 12px;
+      padding: 16px 20px;
+    }
+    .box-financeiro .linha {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      margin-bottom: 7px;
+    }
+    .box-financeiro .linha:last-child { margin-bottom: 0; }
+    .total-label { font-size: 15px; font-weight: bold; color: #1e3a5f; }
+    .total-valor { font-size: 22px; font-weight: bold; color: #2563eb; }
+
+    /* ── Assinaturas ── */
+    .assinaturas {
+      display: flex;
+      gap: 40px;
+      margin-top: 30px;
+    }
+    .assinatura-bloco {
+      flex: 1;
+      text-align: center;
+    }
+    .assinatura-linha {
+      border-top: 1px solid #374151;
+      margin-top: 40px;
+      padding-top: 8px;
+      font-size: 12px;
+      color: #374151;
+    }
+
+    /* ── Rodapé ── */
+    .contrato-footer {
+      background: #f8fafc;
+      border-top: 1px solid #e5e7eb;
+      padding: 14px 30px;
+      text-align: center;
+      font-size: 11px;
+      color: #9ca3af;
+    }
+    .contrato-footer strong { color: #6b7280; }
+
+    @media print {
+      body { background: white; padding: 0; }
+      .contrato { box-shadow: none; border-radius: 0; max-width: 100%; }
+      .no-print { display: none !important; }
+      .assinaturas { margin-top: 50px; }
+    }
+  </style>
+</head>
+<body>
+<div class="contrato">
+
+  <!-- CABEÇALHO -->
+  <div class="contrato-header">
+    <h1>📄 Contrato de Locação por Temporada</h1>
+    <p>Stay Sorocaba — Rua Alcidalia dos Santos, Sorocaba/SP</p>
+    <p style="margin-top:6px;font-size:11px;opacity:0.7;">Emitido em: ${dataEmissao} às ${horaEmissao}</p>
+  </div>
+
+  <div class="contrato-body">
+
+    <!-- PARTES -->
+    <div class="secao">
+      <h3>🏢 Locador</h3>
+      <table class="dados">
+        <tr><td>Razão Social</td><td>ALORA ADMINISTRAÇÃO DE IMÓVEIS PRÓPRIOS LTDA</td></tr>
+        <tr><td>CNPJ</td><td>52.369.363/0001-00</td></tr>
+        <tr><td>Representante</td><td>Eliseu Fernandes Neto</td></tr>
+        <tr><td>Endereço</td><td>Rua Alcidalia dos Santos, Sorocaba/SP</td></tr>
+      </table>
+    </div>
+
+    <div class="secao">
+      <h3>👤 Locatário</h3>
+      <table class="dados">
+        ${blocoLocatario}
+      </table>
+    </div>
+
+    <!-- IMÓVEL -->
+    <div class="secao">
+      <h3>🏠 Objeto do Contrato</h3>
+      <table class="dados">
+        <tr><td>Imóvel</td><td>Kitnet mobiliada nº ${b.apartment} — Rua Alcidalia dos Santos, Sorocaba/SP</td></tr>
+        <tr><td>Vaga de Garagem</td><td>${temVaga ? '🚗 ' + vagaTexto : 'Sem vaga'}</td></tr>
+        <tr><td>Check-in</td><td>${formatDateBR(b.checkin)} a partir das 15h00</td></tr>
+        <tr><td>Check-out</td><td>${formatDateBR(b.checkout)} até as 11h00</td></tr>
+        <tr><td>Total de noites</td><td>${nights} noite(s)</td></tr>
+        <tr><td>Qtd. hóspedes</td><td>${b.guests || 1} pessoa(s)</td></tr>
+      </table>
+    </div>
+
+    <!-- FINANCEIRO -->
+    <div class="secao">
+      <h3>💰 Condições de Pagamento</h3>
+      <div class="box-financeiro">
+        <div class="linha">
+          <span>🛏️ Diária</span>
+          <span>${formatCurrency(b.dailyRate || 0)}</span>
+        </div>
+        <div class="linha">
+          <span>📅 Noites</span>
+          <span>${nights}</span>
+        </div>
+        <div class="linha" style="border-top:1px solid #bfdbfe;padding-top:10px;margin-top:4px;">
+          <span class="total-label">💰 Valor Total</span>
+          <span class="total-valor">${formatCurrency(b.totalValue)}</span>
+        </div>
+        <div class="linha" style="font-size:12px;color:#6b7280;margin-top:4px;">
+          <span>Forma de pagamento</span>
+          <span>${b.paymentMethod || 'Conforme acordado'}</span>
+        </div>
+      </div>
+      <p style="font-size:11px;color:#6b7280;margin-top:8px;text-align:center;">
+        * Inclui contas de consumo (água, luz, gás, internet) e limpeza semanal cortesia.
+      </p>
+    </div>
+
+    <!-- CLÁUSULAS -->
+    <div class="secao">
+      <h3>📋 Cláusulas e Condições</h3>
+      <div class="clausulas">
+
+        <div class="clausula">
+          <span class="clausula-titulo">Cláusula 1ª — Do Objeto</span>
+          O presente contrato tem por objeto a locação por temporada da kitnet mobiliada nº ${b.apartment},
+          situada na Rua Alcidalia dos Santos, Sorocaba/SP, ${vagaClausula}
+          conforme descrito acima, para fins exclusivamente residenciais e temporários.
+        </div>
+
+        <div class="clausula">
+          <span class="clausula-titulo">Cláusula 2ª — Do Prazo</span>
+          A locação vigorará pelo período de <strong>${nights} (${nights === 1 ? 'uma noite' : nights + ' noites'})</strong>,
+          com início em <strong>${formatDateBR(b.checkin)}</strong> às 15h00 e término em
+          <strong>${formatDateBR(b.checkout)}</strong> às 11h00, sendo vedada a prorrogação tácita,
+          nos termos do Art. 48 da Lei nº 8.245/91.
+        </div>
+
+        <div class="clausula">
+          <span class="clausula-titulo">Cláusula 3ª — Do Valor e Pagamento</span>
+          O valor total da locação é de <strong>${formatCurrency(b.totalValue)}</strong>,
+          pago antecipadamente pelo locatário antes do check-in, sendo vedada qualquer
+          retenção ou desconto unilateral. O valor inclui contas de consumo
+          (água, energia elétrica, gás e internet) e limpeza semanal cortesia.
+        </div>
+
+        <div class="clausula">
+          <span class="clausula-titulo">Cláusula 4ª — Obrigações do Locatário</span>
+          O locatário se obriga a: (a) utilizar o imóvel exclusivamente para fins
+          residenciais temporários; (b) conservar e restituir o imóvel no estado
+          em que o recebeu; (c) não sublocar, ceder ou emprestar o imóvel a terceiros;
+          (d) não realizar festas, eventos ou atividades que perturbem o sossego dos demais
+          condôminos; (e) respeitar o regulamento interno do condomínio; (f) não fumar
+          no interior do imóvel; (g) não introduzir animais de estimação sem autorização
+          prévia e expressa do locador.
+        </div>
+
+        <div class="clausula">
+          <span class="clausula-titulo">Cláusula 5ª — Obrigações do Locador</span>
+          O locador se obriga a: (a) entregar o imóvel em perfeitas condições de uso e
+          habitabilidade; (b) garantir o acesso do locatário durante todo o período contratado;
+          (c) manter as instalações em funcionamento; (d) prestar suporte em casos de
+          emergência relacionados ao imóvel.
+        </div>
+
+        <div class="clausula">
+          <span class="clausula-titulo">Cláusula 6ª — Da Rescisão e Multa</span>
+          Em caso de rescisão antecipada pelo locatário, será devida multa equivalente
+          a <strong>30% (trinta por cento)</strong> sobre o valor total do contrato, sem prejuízo das
+          demais penalidades legais. Danos causados ao imóvel ou mobiliário serão
+          cobrados separadamente, com base em orçamento. Em caso de inadimplemento,
+          o locador poderá retomar o imóvel imediatamente, sem necessidade de notificação prévia.
+        </div>
+
+        <div class="clausula">
+          <span class="clausula-titulo">Cláusula 7ª — Das Disposições Gerais</span>
+          O presente contrato é regido pela Lei nº 8.245/91. Qualquer alteração somente
+          será válida mediante aditivo escrito e assinado por ambas as partes. O locatário
+          declara ter recebido e lido o regulamento interno do condomínio, comprometendo-se
+          a cumpri-lo integralmente.
+        </div>
+
+        <div class="clausula">
+          <span class="clausula-titulo">Cláusula 8ª — Do Foro</span>
+          As partes elegem o foro da Comarca de <strong>Sorocaba/SP</strong> para dirimir
+          quaisquer dúvidas ou litígios oriundos do presente contrato, com renúncia expressa
+          a qualquer outro, por mais privilegiado que seja.
+        </div>
+
+      </div>
+    </div>
+
+    ${obs}
+
+    <!-- LOCAL E DATA -->
+    <p style="font-size:12px;color:#374151;margin-top:24px;text-align:center;">
+      Sorocaba/SP, ${dataExtenso}.
+    </p>
+
+    <!-- ASSINATURAS -->
+    <div class="assinaturas">
+      <div class="assinatura-bloco">
+        <div class="assinatura-linha">
+          <strong>ALORA ADMINISTRAÇÃO DE IMÓVEIS PRÓPRIOS LTDA</strong><br>
+          CNPJ: 52.369.363/0001-00<br>
+          Eliseu Fernandes Neto — Locador
+        </div>
+      </div>
+      <div class="assinatura-bloco">
+        <div class="assinatura-linha">
+          <strong>${b.guestName}</strong><br>
+          ${isPJ ? 'CNPJ: ' + (b.guestDoc || '-') : 'CPF: ' + (b.guestDoc || '-')}<br>
+          ${isPJ ? (b.guestRepresentative || '') + ' — ' : ''}Locatário
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- RODAPÉ -->
+  <div class="contrato-footer">
+    <strong>Stay Sorocaba</strong> · (15) 98181-3354 · Sorocaba / SP<br>
+    Documento gerado em ${dataEmissao} às ${horaEmissao} · Contrato de Locação por Temporada — Lei nº 8.245/91
+  </div>
+
+</div>
+
+<!-- BOTÕES (some na impressão) -->
+<div class="no-print" style="text-align:center;margin-top:20px;">
+  <button onclick="window.print()"
+    style="padding:12px 28px;border-radius:12px;border:none;background:#2563eb;color:white;font-size:15px;font-weight:bold;cursor:pointer;">
+    🖨️ Imprimir / Salvar PDF
+  </button>
+  <button onclick="window.close()"
+    style="margin-left:12px;padding:12px 20px;border-radius:12px;border:1px solid #e5e7eb;background:white;font-size:15px;cursor:pointer;">
+    ✖ Fechar
+  </button>
+</div>
+
+</body>
+</html>`;
+
+  const win = window.open('', '_blank');
+  win.document.write(html);
+  win.document.close();
+};
+  
 init();
 
 </script>
