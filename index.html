@@ -4991,7 +4991,7 @@ document.getElementById('hospedeTelefone').addEventListener('input', function() 
   document.getElementById(id).addEventListener('change', renderHospedes);
 });
   
- // ══════════════════════════════════════════
+// ══════════════════════════════════════════
 // IMPRIMIR CONTRATO DE LOCAÇÃO POR TEMPORADA
 // ══════════════════════════════════════════
 window.imprimirContrato = (id) => {
@@ -5004,15 +5004,12 @@ window.imprimirContrato = (id) => {
   const dataEmissao = `${String(now.getDate()).padStart(2,'0')}/${String(now.getMonth()+1).padStart(2,'0')}/${now.getFullYear()}`;
   const horaEmissao = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
 
-  // ─── Mês por extenso para o contrato ───
   const meses = ['janeiro','fevereiro','março','abril','maio','junho','julho','agosto','setembro','outubro','novembro','dezembro'];
   const dataExtenso = `${String(now.getDate()).padStart(2,'0')} de ${meses[now.getMonth()]} de ${now.getFullYear()}`;
 
   // ─── Garagem ───
   const temVaga = b.garageSpot && b.garageSpot !== 'Sem vaga';
   const vagaTexto = temVaga ? b.garageSpot : null;
-
-  // ─── Bloco de garagem nas cláusulas ───
   const vagaClausula = temVaga
     ? `sendo incluída a vaga de garagem de nº <strong>${vagaTexto}</strong>,`
     : `sem direito a vaga de garagem,`;
@@ -5045,6 +5042,13 @@ window.imprimirContrato = (id) => {
   const obs = b.notes
     ? `<div style="margin:10px 0 0;padding:10px 14px;background:#fffbeb;border:1px solid #fde68a;border-radius:8px;font-size:12px;"><strong>📝 Observações:</strong> ${b.notes}</div>`
     : '';
+
+  // ─── Valor por extenso (simplificado) ───
+  const valorExtenso = (() => {
+    const v = Math.round(b.totalValue);
+    if (v === 2600) return 'Dois mil e seiscentos reais';
+    return `${v.toLocaleString('pt-BR')} reais`;
+  })();
 
   const html = `<!DOCTYPE html>
 <html lang="pt-BR">
@@ -5080,7 +5084,6 @@ window.imprimirContrato = (id) => {
     .contrato-header p  { font-size: 12px; opacity: 0.85; }
     .contrato-body { padding: 28px 36px; }
 
-    /* ── Seções ── */
     .secao { margin-bottom: 22px; }
     .secao h3 {
       font-size: 11px;
@@ -5093,23 +5096,15 @@ window.imprimirContrato = (id) => {
       border-bottom: 2px solid #e5e7eb;
     }
 
-    /* ── Tabelas de dados ── */
-    table.dados {
-      width: 100%;
-      border-collapse: collapse;
-    }
+    table.dados { width: 100%; border-collapse: collapse; }
     table.dados td {
       padding: 6px 10px;
       border-bottom: 1px solid #e5e7eb;
       font-size: 13px;
     }
-    table.dados td:first-child {
-      color: #6b7280;
-      width: 38%;
-    }
+    table.dados td:first-child { color: #6b7280; width: 38%; }
     table.dados td:last-child { font-weight: bold; }
 
-    /* ── Cláusulas ── */
     .clausulas { counter-reset: clausula; }
     .clausula {
       margin-bottom: 14px;
@@ -5126,8 +5121,14 @@ window.imprimirContrato = (id) => {
       font-size: 12px;
       text-transform: uppercase;
     }
+    .clausula ul {
+      margin: 6px 0 6px 18px;
+      padding: 0;
+    }
+    .clausula ul li {
+      margin-bottom: 4px;
+    }
 
-    /* ── Box total ── */
     .box-financeiro {
       background: linear-gradient(135deg, #eff6ff, #f0fdf4);
       border: 2px solid #2563eb;
@@ -5144,16 +5145,8 @@ window.imprimirContrato = (id) => {
     .total-label { font-size: 15px; font-weight: bold; color: #1e3a5f; }
     .total-valor { font-size: 22px; font-weight: bold; color: #2563eb; }
 
-    /* ── Assinaturas ── */
-    .assinaturas {
-      display: flex;
-      gap: 40px;
-      margin-top: 30px;
-    }
-    .assinatura-bloco {
-      flex: 1;
-      text-align: center;
-    }
+    .assinaturas { display: flex; gap: 40px; margin-top: 30px; }
+    .assinatura-bloco { flex: 1; text-align: center; }
     .assinatura-linha {
       border-top: 1px solid #374151;
       margin-top: 40px;
@@ -5162,7 +5155,6 @@ window.imprimirContrato = (id) => {
       color: #374151;
     }
 
-    /* ── Rodapé ── */
     .contrato-footer {
       background: #f8fafc;
       border-top: 1px solid #e5e7eb;
@@ -5186,8 +5178,8 @@ window.imprimirContrato = (id) => {
 
   <!-- CABEÇALHO -->
   <div class="contrato-header">
-    <h1>📄 Contrato de Locação por Temporada</h1>
-    <p>Stay Sorocaba — Rua Alcidalia dos Santos, Sorocaba/SP</p>
+    <h1>📄 Contrato de Locação Residencial por Temporada</h1>
+    <p>Stay Sorocaba — Rua Alcidalia dos Santos, nº 276, Bairro Jardim Ferreira, Sorocaba/SP, CEP 18080-620</p>
     <p style="margin-top:6px;font-size:11px;opacity:0.7;">Emitido em: ${dataEmissao} às ${horaEmissao}</p>
   </div>
 
@@ -5200,7 +5192,7 @@ window.imprimirContrato = (id) => {
         <tr><td>Razão Social</td><td>ALORA ADMINISTRAÇÃO DE IMÓVEIS PRÓPRIOS LTDA</td></tr>
         <tr><td>CNPJ</td><td>52.369.363/0001-00</td></tr>
         <tr><td>Representante</td><td>Eliseu Fernandes Neto</td></tr>
-        <tr><td>Endereço</td><td>Rua Alcidalia dos Santos, Sorocaba/SP</td></tr>
+        <tr><td>Endereço</td><td>Rua Alcidalia dos Santos, nº 276, Jardim Ferreira, Sorocaba/SP</td></tr>
       </table>
     </div>
 
@@ -5215,7 +5207,7 @@ window.imprimirContrato = (id) => {
     <div class="secao">
       <h3>🏠 Objeto do Contrato</h3>
       <table class="dados">
-        <tr><td>Imóvel</td><td>Kitnet mobiliada nº ${b.apartment} — Rua Alcidalia dos Santos, Sorocaba/SP</td></tr>
+        <tr><td>Imóvel</td><td>Kitnet mobiliada nº ${b.apartment} — Rua Alcidalia dos Santos, nº 276, Sorocaba/SP</td></tr>
         <tr><td>Vaga de Garagem</td><td>${temVaga ? '🚗 ' + vagaTexto : 'Sem vaga'}</td></tr>
         <tr><td>Check-in</td><td>${formatDateBR(b.checkin)} a partir das 15h00</td></tr>
         <tr><td>Check-out</td><td>${formatDateBR(b.checkout)} até as 11h00</td></tr>
@@ -5246,7 +5238,7 @@ window.imprimirContrato = (id) => {
         </div>
       </div>
       <p style="font-size:11px;color:#6b7280;margin-top:8px;text-align:center;">
-        * Inclui contas de consumo (água, luz, gás, internet) e limpeza semanal cortesia.
+        * Inclui contas de consumo (água, luz, gás, condomínio, IPTU proporcional e internet) e 1 faxina semanal cortesia.
       </p>
     </div>
 
@@ -5256,69 +5248,88 @@ window.imprimirContrato = (id) => {
       <div class="clausulas">
 
         <div class="clausula">
-          <span class="clausula-titulo">Cláusula 1ª — Do Objeto</span>
-          O presente contrato tem por objeto a locação por temporada da kitnet mobiliada nº ${b.apartment},
-          situada na Rua Alcidalia dos Santos, Sorocaba/SP, ${vagaClausula}
-          conforme descrito acima, para fins exclusivamente residenciais e temporários.
+          <span class="clausula-titulo">Cláusula Primeira — Do Objeto</span>
+          O LOCADOR(A) aluga ao LOCATÁRIO(A) a kitnet nº <strong>${b.apartment}</strong>, toda mobiliada,
+          ${vagaClausula} localizada à Rua Alcidalia dos Santos, nº 276, Bairro Jardim Ferreira,
+          Sorocaba/SP, CEP 18080-620, para fins de moradia temporária, pelo período de
+          <strong>${formatDateBR(b.checkin)}</strong> a <strong>${formatDateBR(b.checkout)}</strong>,
+          totalizando <strong>${nights} (${nights === 1 ? 'uma' : nights}) ${nights === 1 ? 'dia' : 'dias'}</strong>.
+          O imóvel será entregue em perfeitas condições de uso e habitabilidade.
+          A senha da porta de entrada do prédio será fornecida ao LOCATÁRIO(A) e expirará
+          no dia <strong>${formatDateBR(b.checkout)}</strong> às 11:00, momento em que o acesso ao imóvel deve ser encerrado.
         </div>
 
         <div class="clausula">
-          <span class="clausula-titulo">Cláusula 2ª — Do Prazo</span>
-          A locação vigorará pelo período de <strong>${nights} (${nights === 1 ? 'uma noite' : nights + ' noites'})</strong>,
-          com início em <strong>${formatDateBR(b.checkin)}</strong> às 15h00 e término em
-          <strong>${formatDateBR(b.checkout)}</strong> às 11h00, sendo vedada a prorrogação tácita,
-          nos termos do Art. 48 da Lei nº 8.245/91.
+          <span class="clausula-titulo">Cláusula Segunda — Do Valor e Forma de Pagamento</span>
+          O valor total da locação é de <strong>${formatCurrency(b.totalValue)} (${valorExtenso})</strong>,
+          o qual inclui todas as contas de consumo (água, luz, gás, condomínio, IPTU proporcional e internet)
+          referentes ao período de ocupação, além de 1 (uma) faxina por semana como cortesia do LOCADOR(A).
+          O pagamento será realizado via <strong>${b.paymentMethod || 'forma acordada entre as partes'}</strong>,
+          devendo ser efetuado antes do check-in.
+          <br><br>
+          <strong>Não serão devolvidos valores em nenhuma hipótese</strong>, incluindo cancelamento,
+          interrupção, saída antecipada, rescisão por mal comportamento ou qualquer outro motivo.
+          O LOCATÁRIO(A) deve enviar comprovante de pagamento imediatamente após a transação.
         </div>
 
         <div class="clausula">
-          <span class="clausula-titulo">Cláusula 3ª — Do Valor e Pagamento</span>
-          O valor total da locação é de <strong>${formatCurrency(b.totalValue)}</strong>,
-          pago antecipadamente pelo locatário antes do check-in, sendo vedada qualquer
-          retenção ou desconto unilateral. O valor inclui contas de consumo
-          (água, energia elétrica, gás e internet) e limpeza semanal cortesia.
+          <span class="clausula-titulo">Cláusula Terceira — Das Obrigações do Locatário</span>
+          <ul>
+            <li>a) Utilizar o imóvel exclusivamente para moradia temporária, vedada a sublocação, cessão ou uso por terceiros sem autorização;</li>
+            <li>b) Zelar pela conservação do imóvel, respondendo por danos, perdas ou extravios causados pelo LOCATÁRIO(A), seus funcionários ou visitantes;</li>
+            <li>c) Devolver o imóvel ao final do período nas mesmas condições em que o recebeu, limpo e sem pendências, com vistoria conjunta até às 11:00 do dia <strong>${formatDateBR(b.checkout)}</strong>;</li>
+            <li>d) Cumprir as normas do condomínio/edifício e respeitar o sossego alheio;</li>
+            <li>e) Não realizar reformas ou alterações sem aprovação prévia por escrito do LOCADOR(A);</li>
+            <li>f) Agendar as faxinas semanais com antecedência, respeitando o cronograma do LOCADOR(A).</li>
+          </ul>
         </div>
 
         <div class="clausula">
-          <span class="clausula-titulo">Cláusula 4ª — Obrigações do Locatário</span>
-          O locatário se obriga a: (a) utilizar o imóvel exclusivamente para fins
-          residenciais temporários; (b) conservar e restituir o imóvel no estado
-          em que o recebeu; (c) não sublocar, ceder ou emprestar o imóvel a terceiros;
-          (d) não realizar festas, eventos ou atividades que perturbem o sossego dos demais
-          condôminos; (e) respeitar o regulamento interno do condomínio; (f) não fumar
-          no interior do imóvel; (g) não introduzir animais de estimação sem autorização
-          prévia e expressa do locador.
+          <span class="clausula-titulo">Cláusula Quarta — Das Obrigações do Locador</span>
+          <ul>
+            <li>a) Entregar o imóvel em bom estado, com todos os itens listados no anexo (ex.: mobília, eletrodomésticos) e fornecer a senha da porta de entrada do prédio;</li>
+            <li>b) Garantir a posse pacífica durante o período contratado;</li>
+            <li>c) Realizar manutenções estruturais não causadas pelo LOCATÁRIO(A);</li>
+            <li>d) Cobrir todas as contas de consumo e fornecer 1 (uma) faxina por semana como cortesia.</li>
+          </ul>
         </div>
 
         <div class="clausula">
-          <span class="clausula-titulo">Cláusula 5ª — Obrigações do Locador</span>
-          O locador se obriga a: (a) entregar o imóvel em perfeitas condições de uso e
-          habitabilidade; (b) garantir o acesso do locatário durante todo o período contratado;
-          (c) manter as instalações em funcionamento; (d) prestar suporte em casos de
-          emergência relacionados ao imóvel.
+          <span class="clausula-titulo">Cláusula Quinta — Da Rescisão e Multas</span>
+          <ul>
+            <li>a) Rescisão por descumprimento: notificação por escrito com 2 (dois) dias para correção;</li>
+            <li>b) <strong>Não haverá devolução de valores pagos em nenhuma hipótese</strong>, independentemente do motivo da rescisão, incluindo desistência, saída antecipada ou qualquer outra situação;</li>
+            <li>c) Força maior, como calamidade pública (ex.: pandemias ou desastres naturais declarados oficialmente), permite rescisão sem multa, porém <strong>sem devolução de valores</strong>, salvo disposição legal expressa e irrenunciável.</li>
+          </ul>
         </div>
 
         <div class="clausula">
-          <span class="clausula-titulo">Cláusula 6ª — Da Rescisão e Multa</span>
-          Em caso de rescisão antecipada pelo locatário, será devida multa equivalente
-          a <strong>30% (trinta por cento)</strong> sobre o valor total do contrato, sem prejuízo das
-          demais penalidades legais. Danos causados ao imóvel ou mobiliário serão
-          cobrados separadamente, com base em orçamento. Em caso de inadimplemento,
-          o locador poderá retomar o imóvel imediatamente, sem necessidade de notificação prévia.
+          <span class="clausula-titulo">Cláusula Sexta — Da Rescisão por Mal Comportamento</span>
+          O LOCADOR(A) poderá rescindir este contrato de forma <strong>unilateral e imediata</strong>,
+          sem devolução de qualquer valor pago, nos seguintes casos:
+          <ul>
+            <li>a) Realização de <strong>festas ou reuniões</strong> que perturbem o sossego dos demais condôminos;</li>
+            <li>b) <strong>Barulho excessivo</strong> em qualquer horário, especialmente entre 22:00 e 08:00;</li>
+            <li>c) <strong>Uso de cigarro</strong> dentro do apartamento ou áreas comuns do edifício;</li>
+            <li>d) <strong>Uso, porte ou tráfico de drogas</strong> ilícitas nas dependências do imóvel ou condomínio;</li>
+            <li>e) <strong>Danos ao patrimônio</strong> do imóvel ou áreas comuns;</li>
+            <li>f) Qualquer conduta que <strong>viole o regulamento interno</strong> do condomínio ou cause constrangimento aos demais moradores.</li>
+          </ul>
+          Em caso de rescisão por qualquer das situações acima, o LOCATÁRIO(A) terá
+          <strong>prazo de 2 (duas) horas</strong> para desocupar o imóvel, ficando sujeito ainda
+          à responsabilização civil e/ou criminal pelos danos causados.
+          <strong>Nenhum valor pago será devolvido.</strong>
         </div>
 
         <div class="clausula">
-          <span class="clausula-titulo">Cláusula 7ª — Das Disposições Gerais</span>
-          O presente contrato é regido pela Lei nº 8.245/91. Qualquer alteração somente
-          será válida mediante aditivo escrito e assinado por ambas as partes. O locatário
-          declara ter recebido e lido o regulamento interno do condomínio, comprometendo-se
-          a cumpri-lo integralmente.
-        </div>
-
-        <div class="clausula">
-          <span class="clausula-titulo">Cláusula 8ª — Do Foro</span>
-          As partes elegem o foro da Comarca de <strong>Sorocaba/SP</strong> para dirimir
-          quaisquer dúvidas ou litígios oriundos do presente contrato, com renúncia expressa
-          a qualquer outro, por mais privilegiado que seja.
+          <span class="clausula-titulo">Cláusula Sétima — Disposições Gerais</span>
+          <ul>
+            <li>a) Regido pela Lei nº 8.245/1991 (Lei do Inquilinato), com adaptações para locação por temporada;</li>
+            <li>b) Comunicações via WhatsApp (15) 98181-3354;</li>
+            <li>c) Foro eleito: Comarca de Sorocaba/SP, com renúncia a qualquer outro;</li>
+            <li>d) O LOCATÁRIO(A) declara ter inspecionado o imóvel e aceitado suas condições;</li>
+            <li>e) Este contrato prevalece sobre acordos verbais anteriores.</li>
+          </ul>
         </div>
 
       </div>
@@ -5345,6 +5356,22 @@ window.imprimirContrato = (id) => {
           <strong>${b.guestName}</strong><br>
           ${isPJ ? 'CNPJ: ' + (b.guestDoc || '-') : 'CPF: ' + (b.guestDoc || '-')}<br>
           ${isPJ ? (b.guestRepresentative || '') + ' — ' : ''}Locatário
+        </div>
+      </div>
+    </div>
+
+    <!-- TESTEMUNHAS -->
+    <div class="assinaturas" style="margin-top:20px;">
+      <div class="assinatura-bloco">
+        <div class="assinatura-linha">
+          Testemunha 1<br>
+          CPF: ___________________
+        </div>
+      </div>
+      <div class="assinatura-bloco">
+        <div class="assinatura-linha">
+          Testemunha 2<br>
+          CPF: ___________________
         </div>
       </div>
     </div>
@@ -5378,6 +5405,7 @@ window.imprimirContrato = (id) => {
   win.document.write(html);
   win.document.close();
 };
+
   
 init();
 
