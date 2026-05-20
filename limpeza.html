@@ -690,52 +690,47 @@
     });
   }
 
-  // ── buildOptionalItems ────────────────────────────────────────────────────
-  // Faxinas semanais FUTURAS (data > ref) que ainda não foram feitas
-  // Ordenadas por quem está há mais tempo sem faxina (último evento de limpeza mais antigo)
-  function buildOptionalItems(ref) {
-    const items = [];
-    const seen  = new Set();
+// ── buildOptionalItems ────────────────────────────────────────────────────
+// Faxinas semanais FUTURAS (data > ref) que ainda não foram feitas
+// Ordenadas por quem está há mais tempo sem faxina (último evento de limpeza mais antigo)
+function buildOptionalItems(ref) {
+  const items = [];
 
-    bookings.forEach(b => {
-      if (b.cancelled) return;
+  bookings.forEach(b => {
+    if (b.cancelled) return;
 
-      // Apto precisa estar ocupado na data ref (hóspede ainda está lá)
-      const isActive = b.checkin <= ref && b.checkout > ref;
-      if (!isActive) return;
+    // Apto precisa estar ocupado na data ref (hóspede ainda está lá)
+    const isActive = b.checkin <= ref && b.checkout > ref;
+    if (!isActive) return;
 
-      const weeklyDates = getWeeklyDates(b);
+    const weeklyDates = getWeeklyDates(b);
 
-      weeklyDates.forEach(d => {
-        // Só datas FUTURAS (após ref)
-        if (d <= ref) return;
-        // Já foi feita? Some do opcional
-        if (isDone(b.id, 'weekly', d)) return;
+    // Pega só a PRÓXIMA faxina futura ainda não feita (uma por hóspede)
+    const nextDate = weeklyDates
+      .filter(d => d > ref && !isDone(b.id, 'weekly', d))
+      .sort()[0];
 
-        const key = `${b.id}__weekly__${d}`;
-        if (seen.has(key)) return;
-        seen.add(key);
+    if (!nextDate) return;
 
-        // Calcula "dias sem faxina" — desde última faxina feita ou desde checkin
-        const lastClean = getLastCleanDate(b, d, ref);
-        const daysSince = diffDays(lastClean, ref);
+    // Calcula "dias sem faxina" – desde última faxina feita ou desde checkin
+    const lastClean = getLastCleanDate(b, nextDate, ref);
+    const daysSince = diffDays(lastClean, ref);
 
-        items.push({
-          booking: b,
-          type: 'weekly',
-          date: d,           // data original agendada
-          done: false,
-          optional: true,
-          scheduledFor: d,   // quando estava prevista
-          daysSince,         // dias desde última faxina
-          lastClean
-        });
-      });
+    items.push({
+      booking: b,
+      type: 'weekly',
+      date: nextDate,        // data original agendada
+      done: false,
+      optional: true,
+      scheduledFor: nextDate, // quando estava prevista
+      daysSince,              // dias desde última faxina
+      lastClean
     });
+  });
 
-    // Ordena: mais dias sem faxina primeiro
-    return items.sort((a, b) => b.daysSince - a.daysSince);
-  }
+  // Ordena: mais dias sem faxina primeiro
+  return items.sort((a, b) => b.daysSince - a.daysSince);
+}
 
   // Retorna a data da última faxina feita antes de scheduledDate,
   // ou o checkin se nenhuma foi feita
