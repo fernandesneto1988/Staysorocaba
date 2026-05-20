@@ -3588,6 +3588,7 @@ window.imprimirRecibo = (id) => {
           ${item.checkin===today?`<div style="margin-top:6px;"><span class="badge badge-today-checkin">Check-in hoje</span></div>`:''}
           ${item.checkout===today?`<div style="margin-top:6px;"><span class="badge badge-checkout-clean">Check-out hoje</span></div>`:''}
           ${bloqTag}
+          ${item.cancelledEarly?`<div style="margin-top:4px;"><span class="badge" style="background:#fdf4ff;color:#7e22ce;border:1px solid #d8b4fe;font-size:11px;">✂️ Saída antecipada</span></div>`:''}
         </td>
         <td><strong>Total:</strong> ${formatCurrency(item.totalValue)}<br><strong>Pago:</strong> ${formatCurrency(item.paidValue)}${pdLabel}<br><strong>Saldo:</strong> ${formatCurrency(bal)}<br><strong>Diária:</strong> ${formatCurrency(item.dailyRate||0)}</td>
         <td><span style="font-size:12px;">🔐 Portaria:<br><strong>${sp}</strong></span><br><br><span style="font-size:12px;">🔒 Apto:<br><strong>${sa}</strong></span></td>
@@ -3918,10 +3919,140 @@ if (gs && gs !== 'Sem vaga' && !av.includes(gs) && gs !== eb?.garageSpot) {
     bookings=bookings.filter(x=>x.id!==id);
     await deleteBookingFromFirebase(id);clearForm();renderAll();
   };
-  window.toggleCancelled=async(id)=>{
-    const b=bookings.find(x=>x.id===id); if(!b) return;
-    b.cancelled=!b.cancelled;await saveBookingToFirebase(b);renderAll();
-  };
+ window.toggleCancelled = async (id) => {
+  const b = bookings.find(x => x.id === id);
+  if (!b) return;
+
+  // ── REATIVAR ──
+  if (b.cancelled) {
+    b.cancelled = false;
+    await saveBookingToFirebase(b);
+    renderAll();
+    return;
+  }
+
+  const today = todayStr();
+  const duranteEstadia = !b.cancelled && b.checkin <= today && b.checkout > today;
+
+  // ══════════════════════════════════════
+  // CANCELAMENTO ANTES DO CHECK-IN
+  // ══════════════════════════════════════
+  if (!duranteEstadia) {
+    if (!confirm(`Cancelar reserva de ${b.guestName} (Apto ${b.apartment})?\n\nComo o hóspede ainda não fez check-in, a reserva será completamente cancelada e o apartamento liberado.`)) return;
+    b.cancelled = true;
+    await saveBookingToFirebase(b);
+    renderAll();
+    return;
+  }
+
+  // ══════════════════════════════════════
+  // CANCELAMENTO DURANTE A ESTADIA
+  // ══════════════════════════════════════
+
+  // Pede a data de saída antecipada
+  const novoCheckout = prompt(
+    `🚪 Cancelamento durante estadia — ${b.guestName} (Apto ${b.apartment})\n\n` +
+    `Check-in original: ${formatDateBR(b.checkin)}\n` +
+    `Check-out original: ${formatDateBR(b.checkout)}\n` +
+    `Hoje: ${formatDateBR(today)}\n\n` +
+    `Digite a data de saída antecipada (AAAA-MM-DD):\n` +
+    `(mínimo: hoje — ${today})`,
+    today
+  );
+
+  if (!novoCheckout) return; // cancelou o prompt
+
+  // Validações
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(novoCheckout)) {
+    alert('❌ Formato inválido. Use AAAA-MM-DD.');
+    return;
+  }
+  if (novoCheckout < today) {
+    alert('❌ A data de saída não pode ser anterior a hoje.');
+    return;
+  }
+  if (novoCheckout >= b.checkout) {
+    alert('❌ A data de saída antecipada deve ser anterior ao checkout original.');
+    return;
+  }
+  if (novoCheckout <= b.checkin) {
+    alert('❌ A data de saída deve ser posterior ao check-in.');
+    return;
+  }
+
+  // Cálculo proporcional
+  const nightsOriginais  = calculateNights(b.checkin, b.checkout);
+  const nightsReais      = calculateNights(b.checkin, novoCheckout);
+  const nightsCanceladas = nightsOriginais - nightsReais;
+  const valorDiaria      = Number(b.dailyRate || (b.totalValue / nightsOriginais) || 0);
+  const valorPago        = Number(b.paidValue || 0);
+  const valorDevido      = valorDiaria * nightsReais;
+  const reembolso        = Math.max(0, valorPago - valorDevido);
+
+  const confirmar = confirm(
+    `📊 Resumo do cancelamento antecipado:\n\n` +
+    `📅 Novo checkout: ${formatDateBR(novoCheckout)}\n` +
+    `🛏️ Noites utilizadas: ${nightsReais} de ${nightsOriginais}\n` +
+    `❌ Noites canceladas: ${nightsCanceladas}\n\n` +
+    `💰 Diária: ${formatCurrency(valorDiaria)}\n` +
+    `💵 Valor devido (${nightsReais} noites): ${formatCurrency(valorDevido)}\n` +
+    `✅ Já pago: ${formatCurrency(valorPago)}\n` +
+    `💚 Reembolso ao hóspede: ${formatCurrency(reembolso)}\n\n` +
+    `Uma limpeza de saída será gerada para ${formatDateBR(novoCheckout)}.\n\n` +
+    `Confirmar cancelamento antecipado?`
+  );
+
+  if (!confirmar) return;
+
+  // Atualiza a reserva (NÃO cancela — apenas ajusta o checkout)
+  const checkoutAntigo = b.checkout;
+  b.checkout           = novoCheckout;
+  b.nights             = nightsReais;
+  b.totalValue         = valorDevido;
+  b.cancelledEarly     = true;
+  b.cancelledEarlyDate = today;
+  b.cancelledEarlyFrom = checkoutAntigo;
+  b.reembolso          = reembolso;
+
+  // Se o valor já pago for maior que o valor devido,
+  // ajusta o paidValue para não exceder o novo total
+  if (valorPago > valorDevido) {
+    b.paidValue = valorDevido;
+  }
+
+  await saveBookingToFirebase(b);
+
+  // Gera a limpeza de saída para o novo checkout
+  const cleanKey = getCleaningKey(b.id, 'checkout', novoCheckout);
+  const jaExiste = cleaningRecords.find(r => r.key === cleanKey);
+  if (!jaExiste) {
+    const cleanRecord = {
+      key:       cleanKey,
+      bookingId: b.id,
+      type:      'checkout',
+      date:      novoCheckout,
+      done:      false,
+      responsavel: null,
+      updatedAt: new Date().toISOString(),
+      obs:       `Gerada por cancelamento antecipado (checkout original: ${formatDateBR(checkoutAntigo)})`,
+    };
+    cleaningRecords.push(cleanRecord);
+    await saveCleaningToFirebase(cleanRecord);
+  }
+
+  renderAll();
+
+  // Exibe resumo final
+  alert(
+    `✅ Cancelamento antecipado registrado!\n\n` +
+    `🏠 Apto ${b.apartment} — ${b.guestName}\n` +
+    `📅 Novo checkout: ${formatDateBR(novoCheckout)}\n` +
+    `🛏️ ${nightsReais} noite(s) cobradas\n` +
+    `💚 Reembolso: ${formatCurrency(reembolso)}\n` +
+    `🧹 Limpeza de saída agendada para ${formatDateBR(novoCheckout)}`
+  );
+};
+  
   window.setQuickFilter=(f)=>{quickFilter=f;renderTable();};
   window.openApartmentModal=(name)=>{
     currentModalApt=name;
