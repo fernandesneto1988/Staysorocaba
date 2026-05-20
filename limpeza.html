@@ -4,13 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
   <!-- PWA -->
-<meta name="theme-color" content="#0f766e" />
-<meta name="mobile-web-app-capable" content="yes" />
-<meta name="apple-mobile-web-app-capable" content="yes" />
-<meta name="apple-mobile-web-app-status-bar-style" content="default" />
-<meta name="apple-mobile-web-app-title" content="Limpeza" />
-<link rel="manifest" href="/manifest-limpeza.json" />
-<link rel="apple-touch-icon" href="/icon-limpeza-192.png" />
+  <meta name="theme-color" content="#0f766e" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Limpeza" />
+  <link rel="manifest" href="/manifest-limpeza.json" />
+  <link rel="apple-touch-icon" href="/icon-limpeza-192.png" />
 
   <title>Limpeza — Aptos</title>
   <style>
@@ -38,6 +38,9 @@
       --occupied-border: #93c5fd;
       --waiting-bg: #fff7ed;
       --waiting-border: #fb923c;
+      --optional-bg: #f5f3ff;
+      --optional-border: #c4b5fd;
+      --optional-text: #5b21b6;
       --shadow: 0 4px 16px rgba(0,0,0,0.08);
       --radius: 18px;
     }
@@ -162,6 +165,8 @@
     .clean-card.pending-checkout { background: var(--danger-bg);  border-color: var(--danger-border); }
     .clean-card.pending-weekly   { background: var(--teal-bg);    border-color: var(--teal-border); }
     .clean-card.overdue          { background: #fff7ed; border-color: #fb923c; border-width: 3px; }
+    .clean-card.optional         { background: var(--optional-bg); border-color: var(--optional-border); }
+    .clean-card.optional-done    { background: var(--success-bg); border-color: var(--success-border); }
 
     .check-circle {
       width: 50px; height: 50px;
@@ -176,12 +181,16 @@
       transition: all .15s;
     }
     .clean-card.done .check-circle             { background: var(--success); border-color: var(--success); color: white; }
+    .clean-card.optional-done .check-circle    { background: var(--success); border-color: var(--success); color: white; }
     .clean-card.pending-checkout .check-circle { border-color: var(--danger); }
     .clean-card.pending-weekly   .check-circle { border-color: var(--teal); }
     .clean-card.overdue          .check-circle { border-color: #fb923c; }
+    .clean-card.optional         .check-circle { border-color: #7c3aed; }
 
     .clean-apt-num { font-size: 26px; font-weight: bold; line-height: 1; }
-    .clean-card.done .clean-apt-num { color: #166534; }
+    .clean-card.done .clean-apt-num          { color: #166534; }
+    .clean-card.optional-done .clean-apt-num { color: #166534; }
+    .clean-card.optional .clean-apt-num      { color: var(--optional-text); }
 
     .clean-guest { font-size: 13px; color: var(--muted); line-height: 1.3; }
     .clean-guest strong { color: var(--text); font-size: 14px; display: block; }
@@ -193,9 +202,10 @@
       border-radius: 999px;
       text-transform: uppercase;
     }
-    .badge-checkout { background: var(--danger-bg); color: #991b1b; }
-    .badge-weekly   { background: var(--teal-bg);   color: #115e59; }
-    .badge-overdue  { background: #fff7ed; color: #c2410c; border: 1px solid #fb923c; }
+    .badge-checkout  { background: var(--danger-bg);   color: #991b1b; }
+    .badge-weekly    { background: var(--teal-bg);      color: #115e59; }
+    .badge-overdue   { background: #fff7ed; color: #c2410c; border: 1px solid #fb923c; }
+    .badge-optional  { background: var(--optional-bg); color: var(--optional-text); border: 1px solid var(--optional-border); }
     .badge-done-lbl {
       font-size: 12px;
       font-weight: bold;
@@ -219,6 +229,18 @@
       text-align: left;
       line-height: 1.4;
     }
+
+    /* DIAS SEM FAXINA */
+    .days-badge {
+      font-size: 11px;
+      font-weight: bold;
+      padding: 3px 9px;
+      border-radius: 999px;
+      background: #ede9fe;
+      color: #5b21b6;
+      border: 1px solid #c4b5fd;
+    }
+    .days-badge.urgent { background: #fff7ed; color: #c2410c; border-color: #fb923c; }
 
     /* MODAL DE CONFIRMAÇÃO */
     .modal-overlay {
@@ -456,8 +478,9 @@
     const [y,m,d] = s.split('-');
     return `${d}/${m}/${y}`;
   }
-
-  // ── Formata horário de conclusão ──────────────────────────────────────────
+  function diffDays(a, b) {
+    return Math.round((new Date(b + 'T00:00:00') - new Date(a + 'T00:00:00')) / 86400000);
+  }
   function formatTime(isoString) {
     if (!isoString) return '';
     const d = new Date(isoString);
@@ -502,8 +525,6 @@
     return r ? r.done : false;
   }
 
-  // ── FIX: isWaitingClean sem restrição de >= today ─────────────────────────
-  // Agora considera qualquer checkout anterior à refDate, não apenas >= today
   function isWaitingClean(aptName, refDate) {
     const pastCheckouts = bookings.filter(b =>
       !b.cancelled &&
@@ -549,19 +570,11 @@
   // ── Salvar limpeza ────────────────────────────────────────────────────────
   async function markCleaning(bookingId, type, date, done) {
     setSyncStatus('syncing', '🔄 Salvando...');
-    const key = cleanKey(bookingId, type, date);
-
-    // Mantém doneAt existente se apenas desmarcando
-    const existing = getRecord(bookingId, type, date);
-    const doneAt   = done ? new Date().toISOString() : null;
+    const key    = cleanKey(bookingId, type, date);
+    const doneAt = done ? new Date().toISOString() : null;
 
     const record = {
-      key,
-      bookingId,
-      type,
-      date,
-      done,
-      doneAt,
+      key, bookingId, type, date, done, doneAt,
       updatedAt: new Date().toISOString()
     };
 
@@ -578,10 +591,9 @@
     render();
   }
 
-  // ── handleCheck: confirmação antes de desmarcar ───────────────────────────
+  // ── handleCheck ───────────────────────────────────────────────────────────
   window.handleCheck = (id, type, date, wasDone) => {
     if (wasDone) {
-      // Pede confirmação antes de desmarcar
       showConfirmModal(
         '↩️ Desmarcar limpeza?',
         'Tem certeza que deseja desmarcar esta limpeza como pendente?',
@@ -607,7 +619,6 @@
           </div>
         </div>
       </div>`;
-
     window._modalConfirmCallback = onConfirm;
   }
 
@@ -621,8 +632,7 @@
     if (cb) cb();
   };
 
-  // ── FIX: buildCleanItems sem limitação de >= today para atrasados ─────────
-  // Atrasados aparecem sem limite de data mínima
+  // ── buildCleanItems ───────────────────────────────────────────────────────
   function buildCleanItems(ref) {
     const items = [];
     const seen  = new Set();
@@ -630,7 +640,7 @@
     bookings.forEach(b => {
       if (b.cancelled) return;
 
-      // ── Checkouts ────────────────────────────────────────────────
+      // Checkouts do dia
       if (b.checkout === ref) {
         const key = `${b.id}__checkout__${b.checkout}`;
         if (!seen.has(key)) {
@@ -640,19 +650,17 @@
         }
       }
 
-      // Checkout atrasado: qualquer checkout ANTES de ref ainda não feito
-      if (b.checkout < ref) {
-        if (!isDone(b.id, 'checkout', b.checkout)) {
-          const key = `${b.id}__checkout__${b.checkout}`;
-          if (!seen.has(key)) {
-            seen.add(key);
-            items.push({ booking: b, type: 'checkout', date: b.checkout,
-                         done: false, overdue: true, overdueFrom: b.checkout });
-          }
+      // Checkouts atrasados
+      if (b.checkout < ref && !isDone(b.id, 'checkout', b.checkout)) {
+        const key = `${b.id}__checkout__${b.checkout}`;
+        if (!seen.has(key)) {
+          seen.add(key);
+          items.push({ booking: b, type: 'checkout', date: b.checkout,
+                       done: false, overdue: true, overdueFrom: b.checkout });
         }
       }
 
-      // ── Faxinas semanais ──────────────────────────────────────────
+      // Faxinas semanais do dia
       getWeeklyDates(b).forEach(d => {
         if (d === ref) {
           const key = `${b.id}__weekly__${d}`;
@@ -663,26 +671,89 @@
           }
         }
 
-        // Faxina atrasada: qualquer data ANTES de ref ainda não feita
-        if (d < ref) {
-          if (!isDone(b.id, 'weekly', d)) {
-            const key = `${b.id}__weekly__${d}`;
-            if (!seen.has(key)) {
-              seen.add(key);
-              items.push({ booking: b, type: 'weekly', date: d,
-                           done: false, overdue: true, overdueFrom: d });
-            }
+        // Faxinas semanais atrasadas
+        if (d < ref && !isDone(b.id, 'weekly', d)) {
+          const key = `${b.id}__weekly__${d}`;
+          if (!seen.has(key)) {
+            seen.add(key);
+            items.push({ booking: b, type: 'weekly', date: d,
+                         done: false, overdue: true, overdueFrom: d });
           }
         }
       });
     });
 
-    // Ordena: pendentes → atrasados primeiro → por apto
     return items.sort((a, b) => {
       if (a.done !== b.done) return a.done ? 1 : -1;
       if (a.overdue !== b.overdue) return a.overdue ? -1 : 1;
       return a.booking.apartment.localeCompare(b.booking.apartment, undefined, { numeric: true });
     });
+  }
+
+  // ── buildOptionalItems ────────────────────────────────────────────────────
+  // Faxinas semanais FUTURAS (data > ref) que ainda não foram feitas
+  // Ordenadas por quem está há mais tempo sem faxina (último evento de limpeza mais antigo)
+  function buildOptionalItems(ref) {
+    const items = [];
+    const seen  = new Set();
+
+    bookings.forEach(b => {
+      if (b.cancelled) return;
+
+      // Apto precisa estar ocupado na data ref (hóspede ainda está lá)
+      const isActive = b.checkin <= ref && b.checkout > ref;
+      if (!isActive) return;
+
+      const weeklyDates = getWeeklyDates(b);
+
+      weeklyDates.forEach(d => {
+        // Só datas FUTURAS (após ref)
+        if (d <= ref) return;
+        // Já foi feita? Some do opcional
+        if (isDone(b.id, 'weekly', d)) return;
+
+        const key = `${b.id}__weekly__${d}`;
+        if (seen.has(key)) return;
+        seen.add(key);
+
+        // Calcula "dias sem faxina" — desde última faxina feita ou desde checkin
+        const lastClean = getLastCleanDate(b, d, ref);
+        const daysSince = diffDays(lastClean, ref);
+
+        items.push({
+          booking: b,
+          type: 'weekly',
+          date: d,           // data original agendada
+          done: false,
+          optional: true,
+          scheduledFor: d,   // quando estava prevista
+          daysSince,         // dias desde última faxina
+          lastClean
+        });
+      });
+    });
+
+    // Ordena: mais dias sem faxina primeiro
+    return items.sort((a, b) => b.daysSince - a.daysSince);
+  }
+
+  // Retorna a data da última faxina feita antes de scheduledDate,
+  // ou o checkin se nenhuma foi feita
+  function getLastCleanDate(booking, scheduledDate, ref) {
+    const weeklyDates = getWeeklyDates(booking);
+
+    // Pega todas as faxinas anteriores a scheduledDate que foram feitas
+    const doneDates = weeklyDates
+      .filter(d => d < scheduledDate && isDone(booking.id, 'weekly', d));
+
+    // Também considera se o checkout anterior foi feito (checkin conta como limpeza)
+    if (doneDates.length > 0) {
+      doneDates.sort();
+      return doneDates[doneDates.length - 1];
+    }
+
+    // Nenhuma faxina semanal feita antes → usa checkin como referência
+    return booking.checkin;
   }
 
   // ── Render ────────────────────────────────────────────────────────────────
@@ -705,7 +776,9 @@
     document.getElementById('dateDisplay').textContent =
       `${dayLabel} — ${DAY_NAMES_FULL[dow]}, ${formatDateBR(ref)}`;
 
-    const items        = buildCleanItems(ref);
+    const items         = buildCleanItems(ref);
+    const optionalItems = buildOptionalItems(ref);
+
     const doneCount    = items.filter(i => i.done).length;
     const overdueCount = items.filter(i => i.overdue && !i.done).length;
     const pendingCount = items.filter(i => !i.done).length;
@@ -723,7 +796,7 @@
 
     let cleanHtml = '';
 
-    if (!items.length) {
+    if (!items.length && !optionalItems.length) {
       cleanHtml = `
         <div class="empty-state">
           <span class="emoji">🎉</span>
@@ -758,6 +831,22 @@
           </div>
           <div class="clean-grid">${doneItems.map(renderCleanCard).join('')}</div>`;
       }
+
+      // ── Seção Opcional ──────────────────────────────────────────────────
+      if (optionalItems.length) {
+        cleanHtml += `
+          <div class="section-title" style="color:#5b21b6;">
+            🗓️ Faxinas Opcionais
+            <span class="section-count" style="background:#ede9fe;color:#5b21b6;">${optionalItems.length}</span>
+          </div>
+          <div style="padding: 0 16px 8px;">
+            <p style="font-size:13px;color:var(--muted);margin-bottom:10px;">
+              Hóspedes com faxina agendada nos próximos dias — você pode adiantar quando quiser.
+              Quando marcada, some da data original automaticamente.
+            </p>
+          </div>
+          <div class="clean-grid">${optionalItems.map(renderOptionalCard).join('')}</div>`;
+      }
     }
 
     // Mapa
@@ -789,7 +878,7 @@
     document.getElementById('content').innerHTML = cleanHtml + mapHtml;
   }
 
-  // ── Renderiza card de limpeza ─────────────────────────────────────────────
+  // ── renderCleanCard ───────────────────────────────────────────────────────
   function renderCleanCard(item) {
     const b = item.booking;
 
@@ -802,12 +891,10 @@
       ? `<div class="clean-notes">📝 ${b.notes}</div>`
       : '';
 
-    // Badge de status
     let badgeHtml = '';
     if (item.done) {
-      // Busca o horário de conclusão
-      const rec   = getRecord(b.id, item.type, item.date);
-      const time  = rec && rec.doneAt ? formatTime(rec.doneAt) : '';
+      const rec  = getRecord(b.id, item.type, item.date);
+      const time = rec && rec.doneAt ? formatTime(rec.doneAt) : '';
       badgeHtml = `
         <span class="badge-done-lbl">
           ✅ Feito${time ? `<br>🕐 ${time}` : ''}
@@ -831,6 +918,40 @@
         </div>
         ${notesHtml}
         ${badgeHtml}
+      </div>`;
+  }
+
+  // ── renderOptionalCard ────────────────────────────────────────────────────
+  function renderOptionalCard(item) {
+    const b = item.booking;
+    const urgent = item.daysSince >= 6;
+
+    const notesHtml = b.notes
+      ? `<div class="clean-notes">📝 ${b.notes}</div>`
+      : '';
+
+    const daysBadge = `
+      <span class="days-badge ${urgent ? 'urgent' : ''}">
+        🕐 ${item.daysSince} dia${item.daysSince !== 1 ? 's' : ''} sem faxina
+      </span>`;
+
+    const scheduledBadge = `
+      <span class="clean-type-badge badge-optional">
+        📅 Prev. ${formatDateBR(item.scheduledFor)}
+      </span>`;
+
+    return `
+      <div class="clean-card optional"
+           onclick="handleCheck('${b.id}','${item.type}','${item.date}',false)">
+        <div class="check-circle">✦</div>
+        <div class="clean-apt-num">Apto ${b.apartment}</div>
+        <div class="clean-guest">
+          <strong>${b.guestName.split(' ')[0]}</strong>
+          ${formatDateBR(b.checkin)} → ${formatDateBR(b.checkout)}
+        </div>
+        ${notesHtml}
+        ${daysBadge}
+        ${scheduledBadge}
       </div>`;
   }
 
@@ -883,7 +1004,8 @@
 
   init();
 </script>
-  <script>
+
+<script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('/sw-limpeza.js')
