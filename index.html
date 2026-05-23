@@ -1466,6 +1466,12 @@
       placeholder="000.000.000-00 ou 00.000.000/0001-00"
       maxlength="18" />
   </div>
+            <div class="form-group">
+    <label>🪪 RG</label>
+    <input type="text" id="hospedeRG"
+        placeholder="00.000.000-0"
+        maxlength="12" />
+</div>
   <div class="form-group">
     <label>📍 Endereço</label>
     <input type="text" id="hospedeEndereco"
@@ -1613,6 +1619,47 @@
         </div>
         <div class="form-group"><button type="button" class="btn-secondary" id="recalculateBtn">Recalcular automático</button></div>
         <div class="form-group"><label>Observações</label><textarea id="notes" placeholder="Ex: chega à noite, pediu garagem, etc."></textarea></div>
+        <!-- DADOS PARA CONTRATO -->
+<div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:14px;margin-bottom:12px;">
+  <div style="font-size:13px;font-weight:bold;color:#1d4ed8;margin-bottom:10px;">
+    📄 Dados para o Contrato (opcional)
+  </div>
+  <div class="row">
+    <div class="form-group">
+      <label>CPF / CNPJ</label>
+      <input type="text" id="guestDoc" placeholder="000.000.000-00" maxlength="18" />
+    </div>
+    <div class="form-group">
+      <label>RG (pessoa física)</label>
+      <input type="text" id="guestRG" placeholder="00.000.000-0" maxlength="14" />
+    </div>
+  </div>
+  <div class="form-group">
+    <label>Endereço do locatário</label>
+    <input type="text" id="guestAddress" placeholder="Rua, número, bairro, cidade/UF" />
+  </div>
+  <div class="row">
+    <div class="form-group">
+      <label>E-mail</label>
+      <input type="email" id="guestEmail" placeholder="email@exemplo.com" />
+    </div>
+    <div class="form-group">
+      <label>Forma de pagamento</label>
+      <select id="paymentMethod">
+        <option value="">Selecione</option>
+        <option value="PIX">PIX</option>
+        <option value="Dinheiro">Dinheiro</option>
+        <option value="Cartão de crédito">Cartão de crédito</option>
+        <option value="Transferência bancária">Transferência bancária</option>
+        <option value="Conforme acordado">Conforme acordado</option>
+      </select>
+    </div>
+  </div>
+  <div class="form-group" id="representativeGroup" style="display:none;">
+    <label>Representante (pessoa jurídica)</label>
+    <input type="text" id="guestRepresentative" placeholder="Nome do representante legal" />
+  </div>
+</div>
         <div class="actions">
           <button type="submit" class="btn-primary">Salvar Reserva</button>
           <button type="button" class="btn-secondary" id="cancelEditBtn">Limpar</button>
@@ -3788,6 +3835,14 @@ function updateGarageOptions(){
     document.getElementById('conflictWarning').style.display='none';
     document.getElementById('autoAptMsg').style.display='none';
     updateApartmentOptions();updateGarageOptions();
+    document.getElementById('guestDoc').value = '';
+    document.getElementById('guestRG').value = '';
+    document.getElementById('guestAddress').value = '';
+    document.getElementById('guestEmail').value = '';
+    document.getElementById('paymentMethod').value = '';
+    document.getElementById('guestRepresentative').value = '';
+    document.getElementById('representativeGroup').style.display = 'none';
+
   }
   function verificarSenhaCheckout(){
     const checkout = document.getElementById('checkout').value;
@@ -3875,6 +3930,12 @@ if (gs && gs !== 'Sem vaga' && !av.includes(gs) && gs !== eb?.garageSpot) {
       garageSpot:gs||'Sem vaga',senhaPortaria:document.getElementById('senhaPortaria').value.trim(),
       notes:document.getElementById('notes').value.trim(),cancelled:false,
       weeklyDayOfWeek:wdv!==''?Number(wdv):null
+      guestDoc:           document.getElementById('guestDoc').value.trim(),
+    guestRG:            document.getElementById('guestRG').value.trim(),
+    guestAddress:       document.getElementById('guestAddress').value.trim(),
+    email:              document.getElementById('guestEmail').value.trim(),
+    paymentMethod:      document.getElementById('paymentMethod').value,
+    guestRepresentative:document.getElementById('guestRepresentative').value.trim(),
     };
     const idx=bookings.findIndex(b=>b.id===bId);
     if(idx>=0) bookings[idx]={...bookings[idx],...item,cancelled:bookings[idx].cancelled||false};
@@ -3898,6 +3959,18 @@ if (gs && gs !== 'Sem vaga' && !av.includes(gs) && gs !== eb?.garageSpot) {
     document.getElementById('totalValue').value=b.totalValue||0;
     document.getElementById('senhaPortaria').value=b.senhaPortaria||'';
     document.getElementById('notes').value=b.notes||'';
+    document.getElementById('guestDoc').value            = b.guestDoc || '';
+    document.getElementById('guestRG').value             = b.guestRG || '';
+    document.getElementById('guestAddress').value        = b.guestAddress || '';
+    document.getElementById('guestEmail').value          = b.email || '';
+    document.getElementById('paymentMethod').value       = b.paymentMethod || '';
+    document.getElementById('guestRepresentative').value = b.guestRepresentative || '';
+
+// Mostra campo representante se for PJ
+const digits = (b.guestDoc || '').replace(/\D/g, '');
+document.getElementById('representativeGroup').style.display =
+  digits.length > 11 ? 'block' : 'none';
+
     const wdv=(b.weeklyDayOfWeek!==null&&b.weeklyDayOfWeek!==undefined)?String(b.weeklyDayOfWeek):'';
     document.getElementById('weeklyDayOfWeek').value=wdv;
     document.getElementById('weeklyDayOfWeek').disabled=true;
