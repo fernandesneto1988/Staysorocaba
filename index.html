@@ -5254,6 +5254,21 @@ window.imprimirContrato = (id) => {
     return `${v.toLocaleString('pt-BR')} reais`;
   })();
 
+  // ─── PIX: linha no box financeiro ───
+  const isPix = (b.paymentMethod || '').toUpperCase().includes('PIX');
+
+  const pixInfo = isPix && b.pixKey
+    ? `<div class="linha" style="font-size:12px;color:#6b7280;">
+         <span>🔑 Chave PIX</span>
+         <span><strong>${b.pixKey}</strong></span>
+       </div>`
+    : '';
+
+  // ─── PIX: complemento na Cláusula Segunda ───
+  const pixClausula = isPix && b.pixKey
+    ? ` A chave PIX para pagamento é: <strong>${b.pixKey}</strong>.`
+    : '';
+
   const html = `<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -5396,7 +5411,7 @@ window.imprimirContrato = (id) => {
         <tr><td>Razão Social</td><td>ALORA ADMINISTRAÇÃO DE IMÓVEIS PRÓPRIOS LTDA</td></tr>
         <tr><td>CNPJ</td><td>52.369.363/0001-00</td></tr>
         <tr><td>Representante</td><td>Eliseu Fernandes Neto</td></tr>
-        <tr><td>Endereço</td><td>Rua Alcidalia dos Santos, nº 276, Jardim Ferreira, Sorocaba/SP</td></tr>
+        <tr><td>Endereço</td><td>Rua Alcidalia dos Santos 276, Jardim Ferreira, Sorocaba/SP</td></tr>
       </table>
     </div>
 
@@ -5440,6 +5455,7 @@ window.imprimirContrato = (id) => {
           <span>Forma de pagamento</span>
           <span>${b.paymentMethod || 'Conforme acordado'}</span>
         </div>
+        ${pixInfo}
       </div>
       <p style="font-size:11px;color:#6b7280;margin-top:8px;text-align:center;">
         * Inclui contas de consumo (água, luz, gás, condomínio, IPTU proporcional e internet) e 1 faxina semanal cortesia.
@@ -5454,8 +5470,8 @@ window.imprimirContrato = (id) => {
         <div class="clausula">
           <span class="clausula-titulo">Cláusula Primeira — Do Objeto</span>
           O LOCADOR(A) aluga ao LOCATÁRIO(A) a kitnet nº <strong>${b.apartment}</strong>, toda mobiliada,
-          ${vagaClausula} localizada à Rua Alcidalia dos Santos, nº 276, Bairro Jardim Ferreira,
-          Sorocaba/SP, CEP 18080-620, para fins de moradia temporária, pelo período de
+          ${vagaClausula} localizada à Rua Joana Miranda Correa 130, Bairro Jardim Ferreira,
+          Sorocaba/SP, CEP 18035-300, para fins de moradia temporária, pelo período de
           <strong>${formatDateBR(b.checkin)}</strong> a <strong>${formatDateBR(b.checkout)}</strong>,
           totalizando <strong>${nights} (${nights === 1 ? 'uma' : nights}) ${nights === 1 ? 'dia' : 'dias'}</strong>.
           O imóvel será entregue em perfeitas condições de uso e habitabilidade.
@@ -5469,7 +5485,7 @@ window.imprimirContrato = (id) => {
           o qual inclui todas as contas de consumo (água, luz, gás, condomínio, IPTU proporcional e internet)
           referentes ao período de ocupação, além de 1 (uma) faxina por semana como cortesia do LOCADOR(A).
           O pagamento será realizado via <strong>${b.paymentMethod || 'forma acordada entre as partes'}</strong>,
-          devendo ser efetuado antes do check-in.
+          devendo ser efetuado antes do check-in.${pixClausula}
           <br><br>
           <strong>Não serão devolvidos valores em nenhuma hipótese</strong>, incluindo cancelamento,
           interrupção, saída antecipada, rescisão por mal comportamento ou qualquer outro motivo.
@@ -5609,6 +5625,7 @@ window.imprimirContrato = (id) => {
   win.document.write(html);
   win.document.close();
 };
+
 
   
 init();
