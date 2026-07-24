@@ -1545,9 +1545,23 @@
         💳 Pagamento lançado automaticamente conforme origem. &nbsp;|&nbsp; 🧹 Apto bloqueado após check-out até limpeza confirmada.
       </div>
       <div id="conflictWarning" class="warning-box"></div>
-      <div id="paymentAutoBox" style="display:none;background:#f0fdf4;border:1px solid #86efac;border-radius:12px;padding:12px;margin-bottom:12px;">
+    <div id="paymentAutoBox" style="display:none;background:#f0fdf4;border:1px solid #86efac;border-radius:12px;padding:12px;margin-bottom:12px;">
         <strong style="color:#166534;">💳 Pagamento automático:</strong>
         <span id="paymentAutoDesc" style="color:#166534;font-size:14px;"></span>
+      </div>
+      <div id="pagamentoManualBox" style="display:none;background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:12px;margin-bottom:12px;">
+        <strong style="color:#1d4ed8;">💰 Pagamento (reserva fora do app):</strong>
+        <div class="row" style="margin-top:8px;">
+          <div class="form-group" style="margin:0;">
+            <label style="font-size:13px;">Valor já recebido (R$)</label>
+            <input type="number" id="valorPagoManual" min="0" step="0.01" value="0">
+          </div>
+          <div class="form-group" style="margin:0;">
+            <label style="font-size:13px;">Data do recebimento</label>
+            <input type="date" id="dataPagamentoManual">
+          </div>
+        </div>
+        <div style="font-size:12px;color:#1d4ed8;margin-top:6px;">Deixe em R$ 0,00 se ainda não recebeu nada. Se recebeu só parte, informe o valor — o resto fica pendente.</div>
       </div>
       <!-- SUGESTÃO DE PREÇO NO MODAL -->
       <div id="precSugestaoModal" class="prec-suggestion-box">
@@ -3736,6 +3750,13 @@ ${waLink?`<a class="wa-btn" href="${waLink}" target="_blank" rel="noopener"><svg
     const checkin=document.getElementById('checkin').value;
     const totalValue=document.getElementById('totalValue').value;
     const box=document.getElementById('paymentAutoBox');
+    const manualBox=document.getElementById('pagamentoManualBox');
+    if(source==='Direto'||source==='WhatsApp'){
+      box.style.display='none';
+      manualBox.style.display='block';
+      return;
+    }
+    manualBox.style.display='none';
     if(!source||!checkin||!totalValue||Number(totalValue)<=0){box.style.display='none';return;}
     const r=calcularPagamentoAutomatico(source,checkin,totalValue);
     if(r.paymentDesc){document.getElementById('paymentAutoDesc').textContent=' '+r.paymentDesc;box.style.display='block';}
@@ -3928,7 +3949,17 @@ if (gs && gs !== 'Sem vaga' && !av.includes(gs) && gs !== eb?.garageSpot) {
     const wdv=document.getElementById('weeklyDayOfWeek').value;
     const src=document.getElementById('source').value;
     const tv=Number(document.getElementById('totalValue').value||0);
-    const pag=calcularPagamentoAutomatico(src,ci,tv);
+    function obterPagamentoManual(tv){
+    const valorPago=Number(document.getElementById('valorPagoManual').value)||0;
+    const dataPagto=document.getElementById('dataPagamentoManual').value||null;
+    const total=Number(tv||0);
+    let desc;
+    if(valorPago<=0) desc='Pendente de pagamento';
+    else if(valorPago<total) desc=`Pago parcialmente: ${formatCurrency(valorPago)} de ${formatCurrency(total)}`;
+    else desc=`Pago em ${formatDateBR(dataPagto||todayStr())}`;
+    return {paidValue:valorPago,paymentDate:valorPago>0?(dataPagto||todayStr()):null,paymentDesc:desc};
+  }
+  const pag=(src==='Direto'||src==='WhatsApp')?obterPagamentoManual(tv):calcularPagamentoAutomatico(src,ci,tv);
     const item={
       id:bId,guestName:document.getElementById('guestName').value.trim(),
       phone:document.getElementById('phone').value.trim(),source:src,
