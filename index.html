@@ -2870,8 +2870,14 @@ document.getElementById('finExportCSVBtn').addEventListener('click', () => {
     const me=`${ano}-${String(mes+1).padStart(2,'0')}-${String(dim).padStart(2,'0')}`;
     const rdm=bookings.filter(b=>{if(b.cancelled)return false;const d=new Date(b.checkin+'T00:00:00');return d.getMonth()===mes&&d.getFullYear()===ano;});
     const fat=rdm.reduce((s,b)=>s+Number(b.totalValue||0),0);
-    const rec=rdm.reduce((s,b)=>s+Number(b.paidValue||0),0);
-    const pen=fat-rec;
+    const rec = bookings.filter(b => {
+      if (b.cancelled || !b.paymentDate) return false;
+      const pd = new Date(b.paymentDate + 'T00:00:00');
+      return pd.getMonth() === mes && pd.getFullYear() === ano;
+    }).reduce((s,b) => s + Number(b.paidValue||0), 0);
+    const hoje = todayStr();
+    const pen = rdm.filter(b => !b.paymentDate || b.paymentDate > hoje)
+      .reduce((s,b) => s + Number(b.totalValue||0), 0);
     const ra=bookings.filter(b=>!b.cancelled&&b.checkin<=me&&b.checkout>ms);
     let dOc=0;
     ra.forEach(b=>{const i=b.checkin>ms?b.checkin:ms,f=b.checkout<addDays(me,1)?b.checkout:addDays(me,1);dOc+=calculateNights(i,f);});
