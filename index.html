@@ -3212,7 +3212,8 @@ tbody+=`<td class="${isToday}" title="${cellTitle}" ${clickAttr}>
     let mr=0,mp=0,tp=0,mn=0;
     bookings.forEach(b=>{
       const d=new Date(b.checkin+'T00:00:00');
-      if(d.getMonth()===m&&d.getFullYear()===y&&!b.cancelled){mr+=Number(b.totalValue||0);mp+=Number(b.paidValue||0);mn+=Number(b.nights||calculateNights(b.checkin,b.checkout));}
+      if(d.getMonth()===m&&d.getFullYear()===y&&!b.cancelled){mr+=Number(b.totalValue||0);mn+=Number(b.nights||calculateNights(b.checkin,b.checkout));}
+      if(b.paymentDate&&!b.cancelled){const pd=new Date(b.paymentDate+'T00:00:00');if(pd.getMonth()===m&&pd.getFullYear()===y){mp+=Number(b.paidValue||0);}}
       if(!b.cancelled) tp+=getBalance(b);
     });
     document.getElementById('sumBookings').textContent=bookings.length;
