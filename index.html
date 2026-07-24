@@ -2392,8 +2392,11 @@ function getPaymentStatus(item) {
   const reservasOcupam = bookings.filter(b => !b.cancelled && b.checkin <= me && b.checkout > ms);
 
   const faturamento = reservasMes.reduce((s,b) => s + Number(b.totalValue||0), 0);
-  const recebido    = reservasMes.reduce((s,b) => s + Number(b.paidValue||0), 0);
-  const pendente    = faturamento - recebido;
+  const recebido = bookings.filter(b => !b.cancelled && b.paymentDate && b.paymentDate >= ms && b.paymentDate <= me)
+      .reduce((s,b) => s + Number(b.paidValue||0), 0);
+  const hoje = todayStr();
+  const pendente = reservasMes.filter(b => !b.paymentDate || b.paymentDate > hoje)
+      .reduce((s,b) => s + Number(b.totalValue||0), 0);
   const totalNoites = reservasMes.reduce((s,b) => s + Number(b.nights||calculateNights(b.checkin,b.checkout)), 0);
   const diariaMedia = totalNoites > 0 ? faturamento / totalNoites : 0;
   const pendenteCount = reservasMes.filter(b => Number(b.totalValue||0) > Number(b.paidValue||0)).length;
@@ -2915,7 +2918,8 @@ document.getElementById('finExportCSVBtn').addEventListener('click', () => {
     const cb=bookings.filter(b=>{if(b.cancelled)return false;const d=new Date(b.checkin+'T00:00:00');return d.getMonth()===mr&&d.getFullYear()===ar;});
     const mb=bookings.filter(b=>!b.cancelled&&b.checkin<=me&&b.checkout>ms);
     const tv=cb.reduce((s,b)=>s+Number(b.totalValue||0),0);
-    const tp=cb.reduce((s,b)=>s+Number(b.paidValue||0),0);
+    const tp = bookings.filter(b => !b.cancelled && b.paymentDate && b.paymentDate >= ms && b.paymentDate <= me)
+      .reduce((s,b) => s + Number(b.paidValue||0), 0);
     const tn=cb.reduce((s,b)=>s+Number(b.nights||calculateNights(b.checkin,b.checkout)),0);
     const ad=tn>0?tv/tn:0;
     let od=0;const oa=new Set();
